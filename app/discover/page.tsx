@@ -89,6 +89,11 @@ export default function DiscoverPage() {
     const initialPacks: PackStatus[] = approvedLeads.map((l) => ({
       company: l.company,
       status: 'pending',
+      recipientName: l.recipientName || l.contactName,
+      contactTitle: l.contactTitle,
+      erpScore: l.erpScore,
+      website: l.website,
+      location: l.location,
     }))
     setPacks(initialPacks)
     setPhase('generating')
@@ -168,6 +173,7 @@ export default function DiscoverPage() {
                 Single letter
               </Link>
               <span className="text-gray-900 font-medium">Discover leads</span>
+              <Link href="/history" className="text-gray-400 hover:text-gray-700">History</Link>
             </nav>
           </div>
           <span className="text-xs text-gray-400 uppercase tracking-widest">Internal · Confidential</span>

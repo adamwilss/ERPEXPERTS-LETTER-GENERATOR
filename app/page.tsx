@@ -36,9 +36,8 @@ export default function Home() {
             </div>
             <nav className="flex items-center gap-4 text-sm">
               <span className="text-gray-900 font-medium">Single letter</span>
-              <Link href="/discover" className="text-gray-400 hover:text-gray-700">
-                Discover leads
-              </Link>
+              <Link href="/discover" className="text-gray-400 hover:text-gray-700">Discover leads</Link>
+              <Link href="/history" className="text-gray-400 hover:text-gray-700">History</Link>
             </nav>
           </div>
           <span className="text-xs text-gray-400 uppercase tracking-widest">Internal · Confidential</span>
