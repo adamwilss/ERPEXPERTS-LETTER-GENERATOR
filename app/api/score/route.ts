@@ -224,9 +224,9 @@ Score all ${usable.length} companies. contactTitle = most likely NetSuite decisi
     }
   })
 
-  // Drop leads that are still empty after enrichment — no description AND no employees
+  // Only keep leads with a named contact AND some real company data
   const qualityLeads = leads
-    .filter((l) => l.description || l.employees !== 'Unknown')
+    .filter((l) => l.contactName && (l.description || l.employees !== 'Unknown'))
     .slice(0, 10)
     .map((l, i) => ({ ...l, rank: i + 1 }))
 
