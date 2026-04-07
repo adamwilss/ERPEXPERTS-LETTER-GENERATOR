@@ -11,6 +11,7 @@ export interface Lead {
   employees: string
   description: string
   erpScore: number
+  dataScore: number
   rationale: string
   contactTitle: string
   contactName?: string
@@ -36,18 +37,37 @@ interface Props {
   onGenerate: (leads: ReviewedLead[]) => void
 }
 
-function ScoreDisplay({ score }: { score: number }) {
-  const color = score >= 80
+function ScoreDisplay({ erpScore, dataScore }: { erpScore: number; dataScore: number }) {
+  const erpColor = erpScore >= 75
     ? 'text-emerald-400'
-    : score >= 60
+    : erpScore >= 50
     ? 'text-amber-400'
     : 'text-[#555]'
-  const label = score >= 80 ? 'Strong fit' : score >= 60 ? 'Good fit' : 'Possible'
+  const erpLabel = erpScore >= 75 ? 'Complex ops' : erpScore >= 50 ? 'Moderate fit' : 'Low signals'
+
+  const dataColor = dataScore >= 70
+    ? 'bg-emerald-500'
+    : dataScore >= 40
+    ? 'bg-amber-500'
+    : 'bg-[#333]'
+  const dataLabel = dataScore >= 70
+    ? 'Good data'
+    : dataScore >= 40
+    ? 'Partial data'
+    : 'Sparse data'
 
   return (
-    <div className="flex flex-col items-end flex-shrink-0">
-      <span className={`text-2xl font-bold tabular-nums leading-none ${color}`}>{score}</span>
-      <span className="text-[10px] text-[#444] mt-1 uppercase tracking-[0.08em]">{label}</span>
+    <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+      <div className="flex flex-col items-end">
+        <span className={`text-2xl font-bold tabular-nums leading-none ${erpColor}`}>{erpScore}</span>
+        <span className="text-[10px] text-[#444] mt-0.5 uppercase tracking-[0.07em]">{erpLabel}</span>
+      </div>
+      <div className="flex items-center gap-1.5" title={`Data quality: ${dataScore}/100 — ${dataLabel}`}>
+        <div className="w-12 h-1 bg-[#1a1a1a] rounded-full overflow-hidden">
+          <div className={`h-full rounded-full ${dataColor}`} style={{ width: `${dataScore}%` }} />
+        </div>
+        <span className="text-[10px] text-[#333]">{dataLabel}</span>
+      </div>
     </div>
   )
 }
@@ -136,7 +156,7 @@ export default function LeadReview({ leads: initialLeads, totalSearched, onGener
                     </div>
 
                     <div className="flex items-center gap-3 flex-shrink-0">
-                      <ScoreDisplay score={lead.erpScore} />
+                      <ScoreDisplay erpScore={lead.erpScore} dataScore={lead.dataScore} />
                       <button
                         onClick={() => removeLead(lead.rank)}
                         className="text-[#333] hover:text-red-400 transition-colors p-0.5"

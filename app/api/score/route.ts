@@ -34,7 +34,8 @@ export interface Lead {
   industry: string
   employees: string
   description: string
-  erpScore: number
+  erpScore: number      // GPT: operational complexity/ERP pain signals
+  dataScore: number     // Computed: how complete and actionable this lead's data is
   rationale: string
   contactTitle: string
   contactName?: string
@@ -90,12 +91,18 @@ async function apolloPeopleSearch(apolloKey: string, body: Record<string, unknow
     }
     const data = await res.json()
     const people: ApolloPerson[] = data.contacts ?? data.people ?? data.results ?? []
-    console.log(`Apollo people search (${JSON.stringify(Object.keys(body))}) → ${people.length} results`)
+    console.log(`People search → ${people.length} results (keys: ${Object.keys(data).join(', ')})`)
     return people
   } catch (err) {
     console.error('People search error:', err)
     return []
   }
+}
+
+function pickBestContact(people: ApolloPerson[]): ApolloPerson {
+  return people.sort((a, b) =>
+    (SENIORITY_RANK[b.seniority ?? ''] ?? 0) - (SENIORITY_RANK[a.seniority ?? ''] ?? 0)
+  )[0]
 }
 
 function buildByOrgMap(people: ApolloPerson[]): Record<string, ApolloPerson> {
@@ -110,84 +117,59 @@ function buildByOrgMap(people: ApolloPerson[]): Record<string, ApolloPerson> {
   return byOrg
 }
 
-// Batch search by org IDs
 async function batchSearchByIds(apolloKey: string, orgIds: string[]): Promise<Record<string, ApolloPerson>> {
   if (orgIds.length === 0) return {}
+  const seniority = ['c_suite', 'owner', 'founder', 'partner', 'vp', 'director']
 
-  // Try with organization_ids first
   const people = await apolloPeopleSearch(apolloKey, {
     organization_ids: orgIds,
-    person_seniority: ['c_suite', 'owner', 'founder', 'partner', 'vp', 'director'],
+    person_seniority: seniority,
     page: 1,
     per_page: 50,
   })
   if (people.length > 0) return buildByOrgMap(people)
 
-  // Try q_organization_ids fallback
   const fallback = await apolloPeopleSearch(apolloKey, {
     q_organization_ids: orgIds,
-    person_seniority: ['c_suite', 'owner', 'founder', 'partner', 'vp', 'director'],
+    person_seniority: seniority,
     page: 1,
     per_page: 50,
   })
   return buildByOrgMap(fallback)
 }
 
-// Per-company search by domain — used when batch search misses a company
 async function searchByDomain(apolloKey: string, domain: string): Promise<ApolloPerson | null> {
+  const seniority = ['c_suite', 'owner', 'founder', 'partner', 'vp', 'director']
+
   const people = await apolloPeopleSearch(apolloKey, {
     organization_domains: [domain],
-    person_seniority: ['c_suite', 'owner', 'founder', 'partner', 'vp', 'director'],
+    person_seniority: seniority,
     page: 1,
     per_page: 5,
   })
+  if (people.length > 0) return pickBestContact(people)
 
-  if (people.length > 0) {
-    // Return highest seniority person
-    return people.sort((a, b) => {
-      const aRank = SENIORITY_RANK[a.seniority ?? ''] ?? 0
-      const bRank = SENIORITY_RANK[b.seniority ?? ''] ?? 0
-      return bRank - aRank
-    })[0]
-  }
-
-  // Broaden to include manager level if nothing found
+  // Broader seniority fallback
   const broader = await apolloPeopleSearch(apolloKey, {
     organization_domains: [domain],
-    person_seniority: ['c_suite', 'owner', 'founder', 'partner', 'vp', 'director', 'manager', 'head'],
+    person_seniority: [...seniority, 'manager', 'head'],
     page: 1,
     per_page: 5,
   })
-
-  if (broader.length > 0) {
-    return broader.sort((a, b) => {
-      const aRank = SENIORITY_RANK[a.seniority ?? ''] ?? 0
-      const bRank = SENIORITY_RANK[b.seniority ?? ''] ?? 0
-      return bRank - aRank
-    })[0]
-  }
+  if (broader.length > 0) return pickBestContact(broader)
 
   return null
 }
 
-// Determine if an address is proper (has a street number / postcode)
 function isDetailedAddress(addr: string): boolean {
-  // Good if contains a digit (street number or postcode), and has more than just city + country
-  return /\d/.test(addr) && addr.split('\n').length + addr.split(',').length > 3
+  // Real postal address if it has digits (postcode or street number) AND some substance
+  return /\d/.test(addr) && (addr.includes('\n') || addr.split(',').length >= 3)
 }
 
 function buildPostalAddress(org: ApolloOrganization, personOrg?: ApolloPerson['organization']): string | undefined {
-  // Prefer org's raw_address if it looks like a complete postal address
-  if (org.raw_address && isDetailedAddress(org.raw_address)) {
-    return org.raw_address
-  }
+  if (org.raw_address && isDetailedAddress(org.raw_address)) return org.raw_address
+  if (personOrg?.raw_address && isDetailedAddress(personOrg.raw_address)) return personOrg.raw_address
 
-  // Try address from person's embedded org data
-  if (personOrg?.raw_address && isDetailedAddress(personOrg.raw_address)) {
-    return personOrg.raw_address
-  }
-
-  // Build from structured fields if we have a street address
   if (org.street_address) {
     const parts = [
       org.street_address,
@@ -199,22 +181,34 @@ function buildPostalAddress(org: ApolloOrganization, personOrg?: ApolloPerson['o
     if (parts.length >= 2) return parts.join('\n')
   }
 
-  // Fall back to city + postcode if at least both present (still useful for large cities)
   if (org.city && org.postal_code) {
-    const parts = [
-      org.city,
-      org.postal_code,
-      org.country !== 'United Kingdom' ? org.country : 'United Kingdom',
-    ].filter(Boolean)
-    return parts.join('\n')
+    return [org.city, org.postal_code, org.country !== 'United Kingdom' ? org.country : 'United Kingdom'].filter(Boolean).join('\n')
   }
 
-  // City + country only — only include if city is specific (not just a county/region)
-  if (org.city && org.country) {
-    return [org.city, org.country].join('\n')
-  }
-
+  if (org.city && org.country) return [org.city, org.country].join('\n')
   return undefined
+}
+
+// Data quality: how complete and actionable is this lead?
+// 0–100 based on what Apollo returned
+function computeDataScore(lead: {
+  contactName?: string
+  contactEmail?: string
+  postalAddress?: string
+  description?: string
+  techStack?: string[]
+  annualRevenue?: string
+  employees: string
+}): number {
+  let score = 0
+  if (lead.contactName) score += 35             // named person is most critical
+  if (lead.contactEmail) score += 20            // can also email them
+  if (lead.postalAddress && /\d/.test(lead.postalAddress)) score += 20  // real street address
+  else if (lead.postalAddress) score += 5       // partial address
+  if (lead.description && lead.description.length > 60) score += 10
+  if (lead.techStack && lead.techStack.length > 0) score += 8
+  if (lead.annualRevenue) score += 7
+  return Math.min(100, score)
 }
 
 export async function POST(req: Request) {
@@ -230,53 +224,50 @@ export async function POST(req: Request) {
   const companySummaries = usable
     .map((o, i) => {
       const emp = o.estimated_num_employees ? `${o.estimated_num_employees} employees` : 'unknown size'
-      const desc = (o.short_description || o.seo_description || 'No description').slice(0, 150)
+      const desc = (o.short_description || o.seo_description || 'No description').slice(0, 200)
       const loc = [o.city, o.country].filter(Boolean).join(', ') || 'UK'
-      const tech = o.technology_names?.slice(0, 5).join(', ') || ''
+      const tech = o.technology_names?.slice(0, 6).join(', ') || ''
       const rev = o.annual_revenue_printed ? ` | Revenue: ${o.annual_revenue_printed}` : ''
       const techLine = tech ? ` | Tech: ${tech}` : ''
-      return `${i + 1}. ${o.name} | ${o.industry ?? industry} | ${emp} | ${loc}${rev}${techLine}\n   ${desc}`
+      return `${i + 1}. ${o.name} | ${emp} | ${loc}${rev}${techLine}\n   ${desc}`
     })
     .join('\n\n')
 
-  const prompt = `You are evaluating UK businesses as NetSuite ERP prospects for ERP Experts, a Manchester-based NetSuite implementation firm. Score 0–100 on ERP-readiness.
+  // IMPORTANT: Industry is already filtered — score on complexity signals within the batch
+  const prompt = `You are ranking companies returned from an Apollo search for a NetSuite implementation firm. The industry filter has already been applied — all companies are in the right sector. Do NOT penalise or reward industry type.
 
-CRITICAL: Use the FULL scoring range — force real differentiation between companies. Do NOT cluster around 55–70.
+Your job: score each company 0–100 on OPERATIONAL COMPLEXITY and ERP PAIN SIGNALS found in their description, employee count, tech stack, and revenue. You are comparing these companies AGAINST EACH OTHER — rank the most complex and multi-system operations highest.
 
-STRONG prospects (score 75–95):
-- Physical goods businesses: manufacturers, distributors, wholesalers with real inventory
-- Multi-site, multi-channel, or international operations
-- 100–500 employees with operational complexity across purchasing, warehouse, fulfilment, finance
-- Mix of ecommerce + trade + B2B sales channels
-- Companies where stock, orders, finance and fulfilment are clearly handled in separate systems
+HIGH score signals (75–100) — look for evidence of:
+- Multiple sales channels running in parallel (ecommerce AND trade AND B2B)
+- International operations, multi-currency, multiple entities
+- Multiple sites, warehouses, showrooms, or field operations
+- Large inventory requirements with high stock value or fast movement
+- Disconnected tech stack visible in their tools (e.g. Shopify + Xero + spreadsheets + 3PL)
+- Revenue or employee scale suggesting they have outgrown basic tools
+- Specific evidence of operational complexity in the description
 
-MODERATE prospects (score 40–70):
-- Services with job/project costing complexity (field services, construction)
-- Single-site product businesses in transition
-- 50–100 employees growing into complexity
-- Businesses where a mid-market ERP would be a clear step-up but urgency is lower
+MID score (40–74) — standard operations for the sector, some complexity but limited:
+- Single-site, single-channel with some growth signals
+- 50–150 employees, manageable with simpler tools
+- No strong evidence of multi-system pain
+- Description is vague or generic
 
-POOR prospects (score 5–35):
-- Pure software/SaaS companies
-- Marketing, media, PR, creative agencies
-- Small consultancies under 50 people
-- Financial services, insurance, law firms
-- Simple single-channel businesses with no inventory
+LOW score (5–39) — limited ERP case within this batch:
+- Small, simple operations regardless of industry label
+- Vague/generic descriptions with no operational substance
+- Very small teams (under 30 people)
+- No discernible operational complexity
 
-EXAMPLES to calibrate:
-- UK manufacturer, 250 employees, multi-site → 88
-- Wholesale distributor, 150 employees, ecommerce + B2B → 83
-- Field services firm, 80 employees, job management → 58
-- IT consultancy, 60 employees → 28
-- Marketing agency, 45 employees → 14
+CRITICAL: You must differentiate. In any batch, there will be some genuinely complex businesses and some straightforward ones. The top-ranked company should score noticeably higher than the bottom-ranked. Do not cluster everything at 55–70.
 
 Companies:
 ${companySummaries}
 
 Return ONLY valid JSON, no markdown:
-{"scores":[{"index":1,"score":85,"rationale":"Two sentences on ERP-readiness specific to this company.","contactTitle":"Exact title of most likely NetSuite decision-maker (MD/CEO/CFO/Finance Director/Operations Director — match to company type)"}]}
+{"scores":[{"index":1,"score":85,"rationale":"Two specific sentences about THIS company's operational complexity and why they likely need ERP.","contactTitle":"Most likely NetSuite decision-maker title for this specific company type (MD/CEO/CFO/Finance Director/Operations Director/Supply Chain Director — be specific)"}]}
 
-Score all ${usable.length} companies. Rationale must reference specific facts about THIS company (size, channels, industry), not generic ERP copy.`
+Score all ${usable.length} companies.`
 
   const { text } = await generateText({
     model: openai('gpt-4o'),
@@ -293,7 +284,6 @@ Score all ${usable.length} companies. Rationale must reference specific facts ab
     parsed = JSON.parse(match[0])
   }
 
-  // Take top 15 by score
   const scored = parsed.scores
     .map(({ index, score, rationale, contactTitle }) => {
       const org = usable[index - 1]
@@ -304,7 +294,7 @@ Score all ${usable.length} companies. Rationale must reference specific facts ab
     .sort((a, b) => b.score - a.score)
     .slice(0, 15)
 
-  // Step 1: Enrich all top companies by domain in parallel
+  // Enrich top companies by domain
   const enrichedResults = await Promise.all(
     scored.map(async (s) => {
       const domain = getDomain(s.org)
@@ -318,17 +308,17 @@ Score all ${usable.length} companies. Rationale must reference specific facts ab
     if (r.id) enrichedMap[r.id] = r.data
   }
 
-  // Step 2: Batch people search by org IDs
+  // Batch people search by org IDs
   const topOrgIds = scored.map((s) => s.org.id).filter((id): id is string => Boolean(id))
   const batchContacts = await batchSearchByIds(apolloKey, topOrgIds)
 
-  // Step 3: Per-domain fallback for any companies that got no contact
+  // Per-domain fallback for misses
   const missedOrgs = scored.filter((s) => s.org.id && !batchContacts[s.org.id])
   const domainFallbacks: Record<string, ApolloPerson> = {}
 
   if (missedOrgs.length > 0) {
-    console.log(`Batch search missed ${missedOrgs.length} companies — trying per-domain fallback`)
-    const domainSearches = await Promise.allSettled(
+    console.log(`Batch missed ${missedOrgs.length} — running per-domain fallback`)
+    const results = await Promise.allSettled(
       missedOrgs.slice(0, 10).map(async (s) => {
         const domain = getDomain(s.org)
         if (!domain) return null
@@ -336,19 +326,18 @@ Score all ${usable.length} companies. Rationale must reference specific facts ab
         return person ? { orgId: s.org.id, person } : null
       })
     )
-    for (const result of domainSearches) {
-      if (result.status === 'fulfilled' && result.value?.orgId && result.value.person) {
-        domainFallbacks[result.value.orgId] = result.value.person
+    for (const r of results) {
+      if (r.status === 'fulfilled' && r.value?.orgId && r.value.person) {
+        domainFallbacks[r.value.orgId] = r.value.person
       }
     }
-    console.log(`Domain fallback found contacts for ${Object.keys(domainFallbacks).length} additional companies`)
+    console.log(`Domain fallback found ${Object.keys(domainFallbacks).length} additional contacts`)
   }
 
-  // Merge contacts: batch results + domain fallbacks
   const contacts: Record<string, ApolloPerson> = { ...batchContacts, ...domainFallbacks }
 
-  // Build leads
-  const leads: Lead[] = scored.map(({ org, score, rationale, contactTitle }) => {
+  // Build lead objects
+  const rawLeads = scored.map(({ org, score, rationale, contactTitle }) => {
     const enriched = (org.id ? enrichedMap[org.id] : {}) ?? {}
     const merged: ApolloOrganization = {
       ...org,
@@ -357,10 +346,9 @@ Score all ${usable.length} companies. Rationale must reference specific facts ab
 
     const contact = org.id ? contacts[org.id] : undefined
     const loc = [merged.city, merged.state, merged.country].filter(Boolean).join(', ') || undefined
-
     const postalAddress = buildPostalAddress(merged, contact?.organization)
 
-    return {
+    const partial = {
       rank: 0,
       company: merged.name ?? org.name ?? 'Unknown',
       website: merged.website_url ?? merged.primary_domain ?? org.website_url ?? '',
@@ -368,6 +356,7 @@ Score all ${usable.length} companies. Rationale must reference specific facts ab
       employees: merged.estimated_num_employees ? `~${merged.estimated_num_employees}` : 'Unknown',
       description: merged.short_description || merged.seo_description || org.short_description || org.seo_description || '',
       erpScore: score,
+      dataScore: 0,
       rationale,
       contactTitle: contact?.title ?? contactTitle,
       contactName: contact?.name,
@@ -382,23 +371,20 @@ Score all ${usable.length} companies. Rationale must reference specific facts ab
       linkedinUrl: merged.linkedin_url,
       postalAddress,
     }
+
+    return { ...partial, dataScore: computeDataScore(partial) }
   })
 
-  // Quality filter: needs named contact AND (description or known size)
-  const withContact = leads
-    .filter((l) => l.contactName && (l.description || l.employees !== 'Unknown'))
+  // Sort by combined score: 60% ERP fit + 40% data quality
+  // This surfaces leads that are both good prospects AND have actionable data
+  const sortedLeads = rawLeads
+    .sort((a, b) => {
+      const aScore = a.erpScore * 0.6 + a.dataScore * 0.4
+      const bScore = b.erpScore * 0.6 + b.dataScore * 0.4
+      return bScore - aScore
+    })
     .slice(0, 10)
     .map((l, i) => ({ ...l, rank: i + 1 }))
 
-  if (withContact.length >= 3) {
-    return Response.json({ leads: withContact, totalSearched: orgs.length })
-  }
-
-  // Fallback: return best leads even without named contacts
-  const fallback = leads
-    .filter((l) => l.description || l.employees !== 'Unknown')
-    .slice(0, 10)
-    .map((l, i) => ({ ...l, rank: i + 1 }))
-
-  return Response.json({ leads: fallback, totalSearched: orgs.length })
+  return Response.json({ leads: sortedLeads, totalSearched: orgs.length })
 }
