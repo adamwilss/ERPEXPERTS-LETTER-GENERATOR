@@ -60,7 +60,7 @@ async function searchApollo(
   }
 
   try {
-    const res = await fetch('https://api.apollo.io/api/v1/accounts/search', {
+    const res = await fetch('https://api.apollo.io/api/v1/mixed_companies/search', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -80,7 +80,7 @@ async function searchApollo(
     }
 
     const data = JSON.parse(responseText) as ApolloResponse
-    return data.accounts ?? data.organizations ?? []
+    return data.organizations ?? data.accounts ?? []
   } catch (err) {
     console.error('Apollo search error:', err)
     throw err
