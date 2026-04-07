@@ -27,6 +27,8 @@ type Phase = 'form' | 'reviewing' | 'generating' | 'done'
 export default function DiscoverPage() {
   const [phase, setPhase] = useState<Phase>('form')
   const [isSearching, setIsSearching] = useState(false)
+  const [searchStep, setSearchStep] = useState<'apollo' | 'scoring' | null>(null)
+  const [foundCount, setFoundCount] = useState(0)
   const [searchError, setSearchError] = useState<string | null>(null)
   const [leads, setLeads] = useState<Lead[]>([])
   const [totalSearched, setTotalSearched] = useState(0)
@@ -41,24 +43,36 @@ export default function DiscoverPage() {
   const handleSearch = async () => {
     setIsSearching(true)
     setSearchError(null)
+    setSearchStep('apollo')
+
     try {
-      const res = await fetch('/api/discover', {
+      // Step 1: fetch companies from Apollo
+      const searchRes = await fetch('/api/discover', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ industry, employeeRange, location, keywords }),
       })
-      if (!res.ok) {
-        let errMsg = `Search failed (HTTP ${res.status})`
-        try {
-          const body = await res.json()
-          errMsg = body.error ?? errMsg
-        } catch {
-          const text = await res.text().catch(() => '')
-          if (text) errMsg = text
-        }
+      if (!searchRes.ok) {
+        let errMsg = `Apollo search failed (HTTP ${searchRes.status})`
+        try { const b = await searchRes.json(); errMsg = b.error ?? errMsg } catch { /* ignore */ }
         throw new Error(errMsg)
       }
-      const data = await res.json() as { leads: Lead[]; totalSearched: number }
+      const { orgs, totalFound } = await searchRes.json()
+      setFoundCount(totalFound)
+
+      // Step 2: score with GPT-4o
+      setSearchStep('scoring')
+      const scoreRes = await fetch('/api/score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orgs, industry }),
+      })
+      if (!scoreRes.ok) {
+        let errMsg = `Scoring failed (HTTP ${scoreRes.status})`
+        try { const b = await scoreRes.json(); errMsg = b.error ?? errMsg } catch { /* ignore */ }
+        throw new Error(errMsg)
+      }
+      const data = await scoreRes.json() as { leads: Lead[]; totalSearched: number }
       setLeads(data.leads)
       setTotalSearched(data.totalSearched)
       setPhase('reviewing')
@@ -66,6 +80,7 @@ export default function DiscoverPage() {
       setSearchError(err instanceof Error ? err.message : 'Something went wrong')
     } finally {
       setIsSearching(false)
+      setSearchStep(null)
     }
   }
 
@@ -234,7 +249,7 @@ export default function DiscoverPage() {
                 {isSearching ? (
                   <span className="flex items-center justify-center gap-2">
                     <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Searching and scoring leads…
+                    {searchStep === 'apollo' ? 'Searching Apollo…' : `Scoring ${foundCount} companies…`}
                   </span>
                 ) : (
                   'Find and score leads'
@@ -242,9 +257,20 @@ export default function DiscoverPage() {
               </button>
 
               {isSearching && (
-                <p className="text-xs text-gray-400 text-center">
-                  Searching Apollo and scoring with Claude — this takes 30–60 seconds.
-                </p>
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${searchStep === 'apollo' ? 'bg-gray-900 animate-pulse' : 'bg-emerald-500'}`} />
+                    <span className={searchStep !== 'apollo' ? 'text-gray-400 line-through' : ''}>
+                      Step 1: Searching Apollo for matching UK companies
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${searchStep === 'scoring' ? 'bg-gray-900 animate-pulse' : 'bg-gray-200'}`} />
+                    <span className={searchStep === 'scoring' ? '' : 'text-gray-300'}>
+                      Step 2: Scoring{foundCount > 0 ? ` ${foundCount}` : ''} companies with AI
+                    </span>
+                  </div>
+                </div>
               )}
             </div>
           </div>
