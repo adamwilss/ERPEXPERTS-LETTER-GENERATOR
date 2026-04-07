@@ -25,17 +25,26 @@ export interface ReviewedLead extends Lead {
   recipientName: string
 }
 
-function ScoreBadge({ score }: { score: number }) {
+function ScoreBar({ score }: { score: number }) {
   const color =
     score >= 80
-      ? 'bg-green-100 text-green-800'
+      ? 'bg-emerald-500'
       : score >= 60
-      ? 'bg-yellow-100 text-yellow-800'
-      : 'bg-gray-100 text-gray-600'
+      ? 'bg-amber-400'
+      : 'bg-gray-300'
+  const label =
+    score >= 80 ? 'text-emerald-700' : score >= 60 ? 'text-amber-700' : 'text-gray-500'
+
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${color}`}>
-      {score}
-    </span>
+    <div className="flex items-center gap-2 flex-shrink-0">
+      <span className={`text-xs font-bold tabular-nums ${label}`}>{score}</span>
+      <div className="w-16 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+        <div
+          className={`h-full rounded-full transition-all ${color}`}
+          style={{ width: `${score}%` }}
+        />
+      </div>
+    </div>
   )
 }
 
@@ -60,102 +69,108 @@ export default function LeadReview({ leads: initialLeads, totalSearched, onGener
 
   return (
     <div>
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold text-gray-900">Top {leads.length} prospects</h2>
-        <p className="text-sm text-gray-500 mt-1">
-          Scored from {totalSearched} companies. Remove any you do not want to include. Optionally
-          add a named contact — if left blank the letter will address the job title.
-        </p>
+      <div className="mb-6 flex items-end justify-between">
+        <div>
+          <h2 className="text-xl font-semibold text-gray-900">Top {leads.length} prospects</h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Scored from {totalSearched.toLocaleString()} companies · Remove any you want to skip · Add a named contact to personalise the letter
+          </p>
+        </div>
+        <div className="flex items-center gap-3 text-xs text-gray-400 pb-0.5">
+          <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />Strong fit</span>
+          <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-400 inline-block" />Good fit</span>
+        </div>
       </div>
 
-      <div className="space-y-3 mb-8">
+      <div className="space-y-2.5 mb-8">
         {leads.map((lead, i) => (
           <div
             key={lead.rank}
-            className="bg-white border border-gray-200 rounded-xl p-5 flex gap-4 items-start"
+            className="bg-white border border-gray-200 rounded-xl p-5 hover:border-gray-300 transition-colors"
           >
-            {/* Rank */}
-            <div className="flex-shrink-0 w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-600">
-              {i + 1}
-            </div>
-
-            {/* Main content */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-4 flex-wrap">
-                <div>
-                  <div className="font-semibold text-gray-900 text-sm">{lead.company}</div>
-                  <div className="text-xs text-gray-400 mt-0.5">
-                    {lead.industry} · {lead.employees} employees
-                    {lead.website && (
-                      <>
-                        {' '}
-                        ·{' '}
-                        <span className="text-gray-400">{lead.website.replace(/^https?:\/\//, '')}</span>
-                      </>
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <ScoreBadge score={lead.erpScore} />
-                  <button
-                    onClick={() => removeLead(lead.rank)}
-                    className="text-gray-300 hover:text-red-400 transition-colors"
-                    title="Remove this lead"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
+            <div className="flex gap-4 items-start">
+              {/* Rank */}
+              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500 mt-0.5">
+                {i + 1}
               </div>
 
-              {/* Rationale */}
-              <p className="text-xs text-gray-500 mt-2 leading-relaxed">{lead.rationale}</p>
-
-              {/* Editable fields */}
-              <div className="mt-3 flex flex-wrap gap-4">
-                {/* Contact title */}
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-400">Address to:</span>
-                  {editingTitle === lead.rank ? (
-                    <input
-                      autoFocus
-                      value={lead.contactTitle}
-                      onChange={(e) => updateTitle(lead.rank, e.target.value)}
-                      onBlur={() => setEditingTitle(null)}
-                      onKeyDown={(e) => e.key === 'Enter' && setEditingTitle(null)}
-                      className="text-xs border border-gray-300 rounded px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-gray-400 w-44"
-                    />
-                  ) : (
+              {/* Main content */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <div className="font-semibold text-gray-900 text-sm leading-tight">{lead.company}</div>
+                    <div className="text-xs text-gray-400 mt-0.5 flex flex-wrap gap-x-2">
+                      <span>{lead.industry}</span>
+                      <span>·</span>
+                      <span>{lead.employees} employees</span>
+                      {lead.website && (
+                        <>
+                          <span>·</span>
+                          <span className="truncate max-w-xs">{lead.website.replace(/^https?:\/\//, '')}</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 flex-shrink-0">
+                    <ScoreBar score={lead.erpScore} />
                     <button
-                      onClick={() => setEditingTitle(lead.rank)}
-                      className="text-xs text-gray-700 underline decoration-dotted hover:text-gray-900"
+                      onClick={() => removeLead(lead.rank)}
+                      className="text-gray-300 hover:text-red-400 transition-colors"
+                      title="Remove"
                     >
-                      {lead.contactTitle}
+                      <X className="w-4 h-4" />
                     </button>
-                  )}
+                  </div>
                 </div>
 
-                {/* Recipient name (optional) */}
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-400">Named contact:</span>
-                  {editingName === lead.rank ? (
-                    <input
-                      autoFocus
-                      value={lead.recipientName}
-                      onChange={(e) => updateName(lead.rank, e.target.value)}
-                      onBlur={() => setEditingName(null)}
-                      onKeyDown={(e) => e.key === 'Enter' && setEditingName(null)}
-                      placeholder="e.g. Sarah Jennings"
-                      className="text-xs border border-gray-300 rounded px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-gray-400 w-44 placeholder-gray-300"
-                    />
-                  ) : (
-                    <button
-                      onClick={() => setEditingName(lead.rank)}
-                      className="text-xs underline decoration-dotted hover:text-gray-900"
-                      style={{ color: lead.recipientName ? '#111' : '#9ca3af' }}
-                    >
-                      {lead.recipientName || 'Add name (optional)'}
-                    </button>
-                  )}
+                {/* Rationale */}
+                <p className="text-xs text-gray-500 mt-2.5 leading-relaxed">{lead.rationale}</p>
+
+                {/* Editable fields */}
+                <div className="mt-3 pt-3 border-t border-gray-100 flex flex-wrap gap-5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-400">Address to:</span>
+                    {editingTitle === lead.rank ? (
+                      <input
+                        autoFocus
+                        value={lead.contactTitle}
+                        onChange={(e) => updateTitle(lead.rank, e.target.value)}
+                        onBlur={() => setEditingTitle(null)}
+                        onKeyDown={(e) => e.key === 'Enter' && setEditingTitle(null)}
+                        className="text-xs border border-gray-300 rounded px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-gray-400 w-44"
+                      />
+                    ) : (
+                      <button
+                        onClick={() => setEditingTitle(lead.rank)}
+                        className="text-xs text-gray-700 underline decoration-dotted hover:text-gray-900"
+                      >
+                        {lead.contactTitle}
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-400">Named contact:</span>
+                    {editingName === lead.rank ? (
+                      <input
+                        autoFocus
+                        value={lead.recipientName}
+                        onChange={(e) => updateName(lead.rank, e.target.value)}
+                        onBlur={() => setEditingName(null)}
+                        onKeyDown={(e) => e.key === 'Enter' && setEditingName(null)}
+                        placeholder="e.g. Sarah Jennings"
+                        className="text-xs border border-gray-300 rounded px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-gray-400 w-44 placeholder-gray-300"
+                      />
+                    ) : (
+                      <button
+                        onClick={() => setEditingName(lead.rank)}
+                        className="text-xs underline decoration-dotted hover:text-gray-900"
+                        style={{ color: lead.recipientName ? '#111' : '#9ca3af' }}
+                      >
+                        {lead.recipientName || 'Add name (optional)'}
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -163,13 +178,16 @@ export default function LeadReview({ leads: initialLeads, totalSearched, onGener
         ))}
       </div>
 
-      <button
-        onClick={() => onGenerate(leads)}
-        disabled={leads.length === 0}
-        className="px-5 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-      >
-        Generate {leads.length} letter pack{leads.length !== 1 ? 's' : ''}
-      </button>
+      <div className="flex items-center gap-4">
+        <button
+          onClick={() => onGenerate(leads)}
+          disabled={leads.length === 0}
+          className="px-6 py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        >
+          Generate {leads.length} letter pack{leads.length !== 1 ? 's' : ''}
+        </button>
+        <span className="text-xs text-gray-400">~{leads.length * 45}s total · one at a time</span>
+      </div>
     </div>
   )
 }
