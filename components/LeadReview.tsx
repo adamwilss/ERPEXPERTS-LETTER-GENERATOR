@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useCallback } from 'react'
-import { X, ExternalLink, User, MapPin, Mail, ChevronDown, ChevronUp } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { X, ExternalLink, User, MapPin, Mail, ChevronDown, ChevronUp, Loader2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export interface Lead {
@@ -36,6 +36,9 @@ interface Props {
   leads: Lead[]
   totalSearched: number
   onGenerate: (leads: ReviewedLead[]) => void
+  isStreaming?: boolean
+  streamStatus?: string
+  streamProgress?: { done: number; total: number }
 }
 
 function ScoreDisplay({ erpScore, dataScore }: { erpScore: number; dataScore: number }) {
@@ -270,7 +273,7 @@ function LeadCard({
   )
 }
 
-export default function LeadReview({ leads: allLeads, totalSearched, onGenerate }: Props) {
+export default function LeadReview({ leads: allLeads, totalSearched, onGenerate, isStreaming, streamStatus, streamProgress }: Props) {
   const toReviewed = (l: Lead): ReviewedLead => ({ ...l, recipientName: l.contactName ?? '' })
 
   const ACTIVE_SIZE = 10
@@ -279,21 +282,29 @@ export default function LeadReview({ leads: allLeads, totalSearched, onGenerate 
   const [showBench, setShowBench] = useState(false)
   const [editingTitle, setEditingTitle] = useState<number | null>(null)
   const [editingName, setEditingName] = useState<number | null>(null)
+  const processedCount = useRef(allLeads.length)
 
-  const removeLead = useCallback((rank: number) => {
-    setActive((prev) => {
-      const next = prev.filter((l) => l.rank !== rank)
-      setBench((b) => {
-        if (b.length === 0) return b
-        const [replacement, ...rest] = b
-        setActive(a => [...a.filter(l => l.rank !== rank), replacement])
-        return rest
-      })
-      return next
+  // Accept incoming leads as streaming adds them
+  useEffect(() => {
+    const newLeads = allLeads.slice(processedCount.current)
+    if (newLeads.length === 0) return
+    processedCount.current = allLeads.length
+
+    const newReviewed = newLeads.map(toReviewed)
+
+    setActive((currentActive) => {
+      const needed = ACTIVE_SIZE - currentActive.length
+      if (needed <= 0) {
+        setBench((b) => [...b, ...newReviewed])
+        return currentActive
+      }
+      const forActive = newReviewed.slice(0, needed)
+      const forBench = newReviewed.slice(needed)
+      if (forBench.length > 0) setBench((b) => [...b, ...forBench])
+      return [...currentActive, ...forActive]
     })
-  }, [])
+  }, [allLeads])
 
-  // Simpler remove that doesn't have the closure issue
   const handleRemove = (rank: number) => {
     if (bench.length > 0) {
       const [replacement, ...rest] = bench
@@ -320,16 +331,48 @@ export default function LeadReview({ leads: allLeads, totalSearched, onGenerate 
 
   return (
     <div>
+      {/* Streaming status bar */}
+      <AnimatePresence>
+        {isStreaming && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className="mb-5 flex items-center gap-3"
+          >
+            <Loader2 className="w-3.5 h-3.5 text-[#555] animate-spin flex-shrink-0" />
+            <span className="text-xs text-[#555]">{streamStatus || 'Finding leads…'}</span>
+            {streamProgress && streamProgress.total > 0 && (
+              <div className="flex items-center gap-2 ml-auto">
+                <div className="w-24 h-0.5 bg-[#1a1a1a] rounded-full overflow-hidden">
+                  <motion.div
+                    className="h-full bg-white/20 rounded-full"
+                    animate={{ width: `${(streamProgress.done / streamProgress.total) * 100}%` }}
+                    transition={{ duration: 0.4 }}
+                  />
+                </div>
+                <span className="text-[11px] text-[#333] tabular-nums">
+                  {streamProgress.done}/{streamProgress.total}
+                </span>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <div className="mb-6 flex items-end justify-between">
         <div>
           <h2 className="text-xl font-semibold text-white tracking-tight">
-            {active.length} prospects
+            {active.length > 0 ? `${active.length} prospects` : isStreaming ? 'Searching…' : 'No results'}
           </h2>
           <p className="text-sm text-[#444] mt-1">
-            Scored from {totalSearched.toLocaleString()} companies
+            {totalSearched > 0 && <>Scored from {totalSearched.toLocaleString()} companies · </>}
             {totalRemaining > 0 && (
-              <> · <span className="text-[#555]">{totalRemaining} more in reserve</span></>
+              <span className="text-[#555]">{totalRemaining} more in reserve</span>
+            )}
+            {isStreaming && active.length === 0 && (
+              <span className="text-[#444]">First leads arriving shortly…</span>
             )}
           </p>
         </div>
