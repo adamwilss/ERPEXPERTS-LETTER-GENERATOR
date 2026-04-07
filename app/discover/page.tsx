@@ -48,8 +48,15 @@ export default function DiscoverPage() {
         body: JSON.stringify({ industry, employeeRange, location, keywords }),
       })
       if (!res.ok) {
-        const text = await res.text()
-        throw new Error(text || 'Search failed')
+        let errMsg = `Search failed (HTTP ${res.status})`
+        try {
+          const body = await res.json()
+          errMsg = body.error ?? errMsg
+        } catch {
+          const text = await res.text().catch(() => '')
+          if (text) errMsg = text
+        }
+        throw new Error(errMsg)
       }
       const data = await res.json() as { leads: Lead[]; totalSearched: number }
       setLeads(data.leads)
