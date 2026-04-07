@@ -109,14 +109,7 @@ export async function POST(req: Request) {
   const apolloKey = process.env.APOLLO_API_KEY
   if (!apolloKey) return new Response('APOLLO_API_KEY not configured', { status: 500 })
 
-  // Filter out orgs with no useful data at all
-  const usable = orgs
-    .filter((o) => o.name && (o.estimated_num_employees || o.short_description || o.seo_description || o.industry))
-    .slice(0, 100)
-
-  if (usable.length === 0) {
-    return Response.json({ error: 'Apollo returned no companies with usable data. Try different search criteria.' }, { status: 404 })
-  }
+  const usable = orgs.filter((o) => o.name).slice(0, 100)
 
   const companySummaries = usable
     .map((o, i) => {
