@@ -1,17 +1,23 @@
 export const maxDuration = 30
 
-// NOTE: Apollo industry tag IDs vary per account and cannot be hardcoded reliably.
-// Industry filtering is handled via keyword search (q_organization_keyword_tags) instead.
-
 export interface ApolloOrganization {
+  id?: string
   name?: string
   website_url?: string
   primary_domain?: string
   industry?: string
   estimated_num_employees?: number
   short_description?: string
+  seo_description?: string
   city?: string
+  state?: string
   country?: string
+  phone?: string
+  founded_year?: number
+  annual_revenue_printed?: string
+  linkedin_url?: string
+  technology_names?: string[]
+  keywords?: string[]
 }
 
 interface ApolloResponse {
