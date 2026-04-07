@@ -72,7 +72,7 @@ function getDomain(org: ApolloOrganization): string | null {
 async function searchContacts(apolloKey: string, orgIds: string[]): Promise<Record<string, ApolloPerson>> {
   if (orgIds.length === 0) return {}
   try {
-    const res = await fetch('https://api.apollo.io/api/v1/mixed_people/search', {
+    const res = await fetch('https://api.apollo.io/api/v1/mixed_people/api_search', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache', 'x-api-key': apolloKey },
       body: JSON.stringify({
@@ -229,6 +229,15 @@ Score all ${usable.length} companies. contactTitle = most likely NetSuite decisi
     .filter((l) => l.contactName && (l.description || l.employees !== 'Unknown'))
     .slice(0, 10)
     .map((l, i) => ({ ...l, rank: i + 1 }))
+
+  if (qualityLeads.length === 0) {
+    // Fall back to leads with data even if no contact found
+    const fallback = leads
+      .filter((l) => l.description || l.employees !== 'Unknown')
+      .slice(0, 10)
+      .map((l, i) => ({ ...l, rank: i + 1 }))
+    return Response.json({ leads: fallback, totalSearched: orgs.length })
+  }
 
   return Response.json({ leads: qualityLeads, totalSearched: orgs.length })
 }
