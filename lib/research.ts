@@ -8,7 +8,7 @@ export async function fetchResearch(url: string, company: string): Promise<strin
     const jinaUrl = `https://r.jina.ai/${url}`
     const res = await fetch(jinaUrl, {
       headers: { Accept: 'text/plain', 'X-Return-Format': 'markdown' },
-      signal: AbortSignal.timeout(12000),
+      signal: AbortSignal.timeout(8000),
     })
     if (res.ok) {
       const text = await res.text()
