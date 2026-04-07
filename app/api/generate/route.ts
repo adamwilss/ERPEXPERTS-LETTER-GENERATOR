@@ -1,5 +1,5 @@
 import { streamText } from 'ai'
-import { openai } from '@ai-sdk/openai'
+import { anthropic } from '@ai-sdk/anthropic'
 import { fetchResearch } from '@/lib/research'
 import { buildSystemPrompt, buildUserMessage } from '@/lib/prompt'
 
@@ -19,7 +19,7 @@ export async function POST(req: Request) {
 
   // Generation phase — streamed back to client
   const result = await streamText({
-    model: openai('gpt-4o'),
+    model: anthropic('claude-sonnet-4-6'),
     system: buildSystemPrompt(),
     messages: [
       {

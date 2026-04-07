@@ -4,12 +4,14 @@ import { useState } from 'react'
 import CopyButton from './CopyButton'
 import CalloutStat from './CalloutStat'
 import TechMap from './TechMap'
+import DownloadMenu from './DownloadMenu'
 import { parseStats } from '@/lib/parse'
 
 interface Props {
   coverLetter: string
   businessCase: string
   techMap: string
+  companyName?: string
   isStreaming: boolean
 }
 
@@ -113,7 +115,7 @@ function renderProseWithStats(text: string, _stats: ReturnType<typeof parseStats
   )
 }
 
-export default function LetterOutput({ coverLetter, businessCase, techMap, isStreaming }: Props) {
+export default function LetterOutput({ coverLetter, businessCase, techMap, companyName, isStreaming }: Props) {
   const [activeTab, setActiveTab] = useState<TabId>('letter')
 
   return (
@@ -146,6 +148,16 @@ export default function LetterOutput({ coverLetter, businessCase, techMap, isStr
           )}
           {activeTab === 'map' && techMap && (
             <CopyButton text={techMap} label="Copy tech map" />
+          )}
+          {!isStreaming && coverLetter && businessCase && techMap && (
+            <div className="ml-2 pl-2 border-l border-gray-200">
+              <DownloadMenu 
+                coverLetter={coverLetter} 
+                businessCase={businessCase} 
+                techMap={techMap}
+                companyName={companyName}
+              />
+            </div>
           )}
         </div>
       </div>
