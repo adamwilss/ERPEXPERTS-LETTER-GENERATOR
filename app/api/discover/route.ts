@@ -1,7 +1,7 @@
 import { generateText } from 'ai'
-import { createAnthropic } from '@ai-sdk/anthropic'
+import { createOpenAI } from '@ai-sdk/openai'
 
-const anthropic = createAnthropic({ apiKey: process.env.OPENAI_API_KEY })
+const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
 export const runtime = 'edge'
 export const maxDuration = 120
@@ -130,7 +130,7 @@ Return ONLY valid JSON. No markdown. No explanation outside the JSON. Format:
 Return all ${Math.min(orgs.length, 300)} companies scored. The contactTitle should be the most likely decision-maker title for a NetSuite conversation at a company of this type and size.`
 
   const { text } = await generateText({
-    model: anthropic('claude-sonnet-4-6'),
+    model: openai('gpt-4o'),
     maxOutputTokens: 8000,
     messages: [{ role: 'user', content: prompt }],
   })

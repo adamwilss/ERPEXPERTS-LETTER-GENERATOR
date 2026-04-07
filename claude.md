@@ -22,8 +22,8 @@ The standard for tone, structure, specificity, and commercial sharpness is the G
 | Language | TypeScript | Throughout — frontend, API routes, and generation logic. |
 | Styling | Tailwind CSS | Desktop-first internal tool. |
 | UI components | shadcn/ui | Form, button, card, tabs, textarea. No bespoke component library. |
-| AI model | Claude API — claude-sonnet-4-6 | Via `@anthropic-ai/sdk`. Switch to opus if quality requires it. |
-| AI streaming | Vercel AI SDK (`ai` package) | Pipes Claude streaming tokens directly to the React UI. |
+| AI model | OpenAI API — gpt-4o | Via `@ai-sdk/openai`. |
+| AI streaming | Vercel AI SDK (`ai` package) | Pipes OpenAI streaming tokens directly to the React UI. |
 | Web research — primary | Jina Reader (`r.jina.ai`) | Prepend to any URL. Returns clean markdown. No API key needed for basic use. |
 | Web research — fallback | Tavily Search API | Supplementary company info when the website alone is sparse. Free tier available. |
 | PDF export | `@react-pdf/renderer` | Two-page styled PDF. Add in v2 once output quality is confirmed. |
@@ -96,7 +96,7 @@ The `parse.ts` utility splits on these delimiters and passes each section to the
 
 | Key | Where to get it |
 |---|---|
-| `OPENAI_API_KEY` | console.anthropic.com |
+| `OPENAI_API_KEY` | platform.openai.com |
 | `TAVILY_API_KEY` | app.tavily.com — free tier is sufficient |
 
 ### Hosting

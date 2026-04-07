@@ -1,9 +1,9 @@
 import { streamText } from 'ai'
-import { createAnthropic } from '@ai-sdk/anthropic'
+import { createOpenAI } from '@ai-sdk/openai'
 import { fetchResearch } from '@/lib/research'
 import { buildSystemPrompt, buildUserMessage } from '@/lib/prompt'
 
-const anthropic = createAnthropic({ apiKey: process.env.OPENAI_API_KEY })
+const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
 export const runtime = 'edge'
 export const maxDuration = 120
@@ -30,7 +30,7 @@ export async function POST(req: Request) {
 
     // Generation phase — streamed back to client
     const result = await streamText({
-      model: anthropic('claude-sonnet-4-6'),
+      model: openai('gpt-4o'),
       system: buildSystemPrompt(),
       messages: [
         {
