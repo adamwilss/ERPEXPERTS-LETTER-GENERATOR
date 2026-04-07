@@ -52,6 +52,10 @@ OUTPUT FORMAT:
 Return exactly three parts using these delimiters. Do not add anything before ---PART1--- or after the final content.
 
 ---PART1---
+[POSTAL ADDRESS BLOCK — copy exactly from the prospect details above]
+
+[Date]
+
 SUBJECT: Re: Connecting [Company] technology stack: a short analysis
 
 Dear [First name],
@@ -116,15 +120,20 @@ interface UserMessageArgs {
   jobTitle: string
   notes: string
   research: string
+  postalAddress?: string
 }
 
 export function buildUserMessage(args: UserMessageArgs): string {
-  const { company, url, recipientName, jobTitle, notes, research } = args
+  const { company, url, recipientName, jobTitle, notes, research, postalAddress } = args
   const today = new Date().toLocaleDateString('en-GB', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
   })
+
+  const addressBlock = postalAddress
+    ? `${recipientName}\n${jobTitle}\n${company}\n${postalAddress}`
+    : `${recipientName}\n${jobTitle}\n${company}`
 
   return `PROSPECT DETAILS:
 Company: ${company}
@@ -132,6 +141,8 @@ Website: ${url}
 Recipient: ${recipientName}
 Job title: ${jobTitle}
 Date for letter: ${today}
+Postal address block (use exactly as-is at the top of the cover letter, before the subject line):
+${addressBlock}
 ${notes ? `\nAdditional notes from the user:\n${notes}` : ''}
 
 RESEARCH:

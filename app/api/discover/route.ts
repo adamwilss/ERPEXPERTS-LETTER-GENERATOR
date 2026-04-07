@@ -9,9 +9,12 @@ export interface ApolloOrganization {
   estimated_num_employees?: number
   short_description?: string
   seo_description?: string
+  street_address?: string
   city?: string
   state?: string
   country?: string
+  postal_code?: string
+  raw_address?: string
   phone?: string
   founded_year?: number
   annual_revenue_printed?: string

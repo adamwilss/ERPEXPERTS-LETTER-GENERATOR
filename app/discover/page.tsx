@@ -112,6 +112,7 @@ export default function DiscoverPage() {
             url: lead.website || '',
             recipientName: lead.recipientName || lead.contactTitle,
             jobTitle: lead.contactTitle,
+            postalAddress: lead.postalAddress || '',
             notes: `Industry: ${lead.industry}. Size: ${lead.employees}. ${lead.description}`.slice(0, 500),
           }),
         })

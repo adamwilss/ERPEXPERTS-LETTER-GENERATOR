@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { X, ExternalLink, User, Linkedin } from 'lucide-react'
+import { X, ExternalLink, User } from 'lucide-react'
 
 export interface Lead {
   rank: number
@@ -23,6 +23,7 @@ export interface Lead {
   location?: string
   phone?: string
   linkedinUrl?: string
+  postalAddress?: string
 }
 
 export interface ReviewedLead extends Lead {
@@ -102,8 +103,8 @@ export default function LeadReview({ leads: initialLeads, totalSearched, onGener
                         </a>
                       )}
                       {lead.linkedinUrl && (
-                        <a href={lead.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-500">
-                          <Linkedin className="w-3 h-3" />
+                        <a href={lead.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-gray-400 hover:text-blue-500">
+                          in
                         </a>
                       )}
                     </div>
@@ -158,10 +159,20 @@ export default function LeadReview({ leads: initialLeads, totalSearched, onGener
                         </a>
                       )}
                       {lead.contactLinkedIn && (
-                        <a href={lead.contactLinkedIn} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-500">
-                          <Linkedin className="w-3 h-3" />
+                        <a href={lead.contactLinkedIn} target="_blank" rel="noopener noreferrer" className="text-xs text-gray-400 hover:text-blue-500">
+                          in
                         </a>
                       )}
+                    </div>
+                  )}
+
+                  {/* Postal address */}
+                  {lead.postalAddress && (
+                    <div className="mb-2.5 bg-gray-50 rounded-lg px-3 py-2 border border-gray-100">
+                      <p className="text-xs text-gray-400 mb-1 font-medium uppercase tracking-wide">Post to</p>
+                      <pre className="text-xs text-gray-700 font-sans whitespace-pre-line leading-relaxed">
+                        {lead.contactName ? `${lead.contactName}\n` : ''}{lead.contactTitle ? `${lead.contactTitle}\n` : ''}{lead.company}{'\n'}{lead.postalAddress}
+                      </pre>
                     </div>
                   )}
 

@@ -11,7 +11,7 @@ export const maxDuration = 120
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const { company, url, recipientName, jobTitle, notes } = body
+    const { company, url, recipientName, jobTitle, notes, postalAddress } = body
 
     if (!company || !recipientName || !jobTitle) {
       return new Response('Missing required fields', { status: 400 })
@@ -35,7 +35,7 @@ export async function POST(req: Request) {
       messages: [
         {
           role: 'user',
-          content: buildUserMessage({ company, url: url ?? '', recipientName, jobTitle, notes, research }),
+          content: buildUserMessage({ company, url: url ?? '', recipientName, jobTitle, notes, research, postalAddress: postalAddress ?? '' }),
         },
       ],
       maxOutputTokens: 6000,

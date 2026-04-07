@@ -40,6 +40,7 @@ export interface Lead {
   location?: string
   phone?: string
   linkedinUrl?: string
+  postalAddress?: string
 }
 
 const SENIORITY_RANK: Record<string, number> = {
@@ -173,6 +174,17 @@ Score all ${capped.length} companies. contactTitle = most likely NetSuite decisi
   const leads: Lead[] = scored.map(({ org, score, rationale, contactTitle }, i) => {
     const contact = org.id ? contacts[org.id] : undefined
     const loc = [org.city, org.state, org.country].filter(Boolean).join(', ') || undefined
+
+    // Build postal address for physical letter
+    const addressParts = [
+      org.street_address,
+      org.city,
+      org.state,
+      org.postal_code,
+      org.country !== 'United Kingdom' ? org.country : undefined,
+    ].filter(Boolean)
+    const postalAddress = org.raw_address ?? (addressParts.length > 0 ? addressParts.join('\n') : undefined)
+
     return {
       rank: i + 1,
       company: org.name ?? 'Unknown',
@@ -193,6 +205,7 @@ Score all ${capped.length} companies. contactTitle = most likely NetSuite decisi
       location: loc,
       phone: org.phone,
       linkedinUrl: org.linkedin_url,
+      postalAddress,
     }
   })
 
