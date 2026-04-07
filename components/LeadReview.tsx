@@ -282,13 +282,14 @@ export default function LeadReview({ leads: allLeads, totalSearched, onGenerate,
   const [showBench, setShowBench] = useState(false)
   const [editingTitle, setEditingTitle] = useState<number | null>(null)
   const [editingName, setEditingName] = useState<number | null>(null)
-  const processedCount = useRef(allLeads.length)
+  // Track by rank ID — never by array index (index breaks if array is reordered)
+  const processedRanks = useRef(new Set<number>())
 
   // Accept incoming leads as streaming adds them
   useEffect(() => {
-    const newLeads = allLeads.slice(processedCount.current)
+    const newLeads = allLeads.filter((l) => !processedRanks.current.has(l.rank))
     if (newLeads.length === 0) return
-    processedCount.current = allLeads.length
+    for (const l of newLeads) processedRanks.current.add(l.rank)
 
     const newReviewed = newLeads.map(toReviewed)
 

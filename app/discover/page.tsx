@@ -104,14 +104,9 @@ export default function DiscoverPage() {
               setStreamStatus(event.message)
               if (event.total) setStreamProgress((p) => ({ ...p, total: event.total }))
             } else if (event.type === 'lead') {
-              setStreamedLeads((prev) => {
-                // Sort by combined score as we add
-                const sorted = [...prev, event.lead].sort((a, b) =>
-                  (b.erpScore * 0.6 + b.dataScore * 0.4) - (a.erpScore * 0.6 + a.dataScore * 0.4)
-                )
-                return sorted
-              })
-              setTotalSearched(event.count * 4) // rough estimate of companies searched
+              // Append only — never sort here; sorting reshuffles array indices and
+              // breaks LeadReview's ID-based tracking, causing leads to vanish
+              setStreamedLeads((prev) => [...prev, event.lead])
               setStreamProgress({ done: event.count, total: event.total })
             } else if (event.type === 'done') {
               setTotalSearched(event.total * 4)
