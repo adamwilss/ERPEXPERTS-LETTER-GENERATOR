@@ -152,6 +152,7 @@ Score all ${usable.length} companies. contactTitle = most likely NetSuite decisi
     parsed = JSON.parse(match[0])
   }
 
+  // Take top 15 — we'll drop empty ones after enrichment and keep best 10
   const scored = parsed.scores
     .map(({ index, score, rationale, contactTitle }) => {
       const org = usable[index - 1]
@@ -160,7 +161,7 @@ Score all ${usable.length} companies. contactTitle = most likely NetSuite decisi
     })
     .filter((x): x is NonNullable<typeof x> => x !== null)
     .sort((a, b) => b.score - a.score)
-    .slice(0, 10)
+    .slice(0, 15)
 
   // Enrich top 10 via Apollo org enrichment (full profile by domain) + people search in parallel
   const topOrgIds = scored.map((s) => s.org.id).filter((id): id is string => Boolean(id))
@@ -182,7 +183,7 @@ Score all ${usable.length} companies. contactTitle = most likely NetSuite decisi
     searchContacts(apolloKey, topOrgIds),
   ])
 
-  const leads: Lead[] = scored.map(({ org, score, rationale, contactTitle }, i) => {
+  const leads: Lead[] = scored.map(({ org, score, rationale, contactTitle }) => {
     // Merge search result with enrichment data — enrichment wins for missing fields
     const enriched = (org.id ? enrichedMap[org.id] : {}) ?? {}
     const merged: ApolloOrganization = { ...org, ...Object.fromEntries(Object.entries(enriched).filter(([, v]) => v != null && v !== '')) }
@@ -200,7 +201,7 @@ Score all ${usable.length} companies. contactTitle = most likely NetSuite decisi
     const postalAddress = merged.raw_address ?? (addressParts.length > 0 ? addressParts.join('\n') : undefined)
 
     return {
-      rank: i + 1,
+      rank: 0, // assigned after filtering
       company: merged.name ?? org.name ?? 'Unknown',
       website: merged.website_url ?? merged.primary_domain ?? org.website_url ?? '',
       industry: merged.industry ?? org.industry ?? industry,
@@ -223,5 +224,11 @@ Score all ${usable.length} companies. contactTitle = most likely NetSuite decisi
     }
   })
 
-  return Response.json({ leads, totalSearched: orgs.length })
+  // Drop leads that are still empty after enrichment — no description AND no employees
+  const qualityLeads = leads
+    .filter((l) => l.description || l.employees !== 'Unknown')
+    .slice(0, 10)
+    .map((l, i) => ({ ...l, rank: i + 1 }))
+
+  return Response.json({ leads: qualityLeads, totalSearched: orgs.length })
 }
