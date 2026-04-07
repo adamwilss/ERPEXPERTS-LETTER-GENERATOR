@@ -3,7 +3,7 @@ import { createOpenAI } from '@ai-sdk/openai'
 
 const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
-export const maxDuration = 60
+export const maxDuration = 120
 
 // NOTE: Apollo industry tag IDs vary per account and cannot be hardcoded reliably.
 // Industry filtering is handled via keyword search (q_organization_keyword_tags) instead.
@@ -98,7 +98,7 @@ function deduplicateOrgs(orgs: ApolloOrganization[]): ApolloOrganization[] {
 
 async function scoreWithClaude(orgs: ApolloOrganization[], industry: string): Promise<Lead[]> {
   const companySummaries = orgs
-    .slice(0, 300) // cap at 300 to stay within token budget
+    .slice(0, 100) // cap at 100 to stay well within time budget
     .map((o, i) => {
       const emp = o.estimated_num_employees ? `${o.estimated_num_employees} employees` : 'unknown size'
       const desc = o.short_description ? o.short_description.slice(0, 200) : 'No description available'
@@ -107,40 +107,24 @@ async function scoreWithClaude(orgs: ApolloOrganization[], industry: string): Pr
     })
     .join('\n\n')
 
+  const companyCount = Math.min(orgs.length, 100)
   const prompt = `You are evaluating UK businesses as NetSuite ERP prospects for ERP Experts, a Manchester-based NetSuite implementation firm.
 
-The user searched for companies in the "${industry}" sector. Prioritise companies that fit this profile, but score all companies on ERP-readiness regardless.
-
-Score each company 0–100 on ERP-readiness using these signals:
-- Multi-channel operations (ecommerce + wholesale/trade = high)
-- Multi-site or international footprint
-- Product/inventory-holding businesses (manufacturing, distribution, wholesale)
-- Scale at which manual reconciliation across disconnected systems becomes painful (50–500 employees)
-- Growth indicators suggesting outgrowing current setup
-- Industries with strong ERP pain: manufacturing, distribution, field services, specialty retail
-
-Avoid scoring high: pure software, media agencies, small consultancies, single-location micro-businesses.
+Score each company 0–100 on ERP-readiness:
+- High: multi-channel ops, inventory-holding, multi-site/international, 50–500 employees, manufacturing/distribution/wholesale
+- Low: pure software, media agencies, small consultancies, micro-businesses
 
 Companies to evaluate:
 ${companySummaries}
 
-Return ONLY valid JSON. No markdown. No explanation outside the JSON. Format:
-{
-  "scores": [
-    {
-      "index": 1,
-      "score": 85,
-      "rationale": "Two sentences specific to this company explaining the ERP-readiness score.",
-      "contactTitle": "Finance Director"
-    }
-  ]
-}
+Return ONLY valid JSON, no markdown:
+{"scores":[{"index":1,"score":85,"rationale":"Two sentences on ERP-readiness.","contactTitle":"Finance Director"}]}
 
-Return all ${Math.min(orgs.length, 300)} companies scored. The contactTitle should be the most likely decision-maker title for a NetSuite conversation at a company of this type and size.`
+Return all ${companyCount} companies. contactTitle = most likely NetSuite decision-maker for this company type/size.`
 
   const { text } = await generateText({
     model: openai('gpt-4o'),
-    maxOutputTokens: 8000,
+    maxOutputTokens: 4000,
     messages: [{ role: 'user', content: prompt }],
   })
 
@@ -199,12 +183,7 @@ export async function POST(req: Request) {
   // Search Apollo — just page 1 first to validate the query works
   let allOrgs: ApolloOrganization[] = []
   try {
-    const pages = await Promise.all(
-      [1, 2].map((page) =>
-        searchApollo(apolloKey, industry, employeeRange, location, keywords, page)
-      )
-    )
-    allOrgs = deduplicateOrgs(pages.flat())
+    allOrgs = await searchApollo(apolloKey, industry, employeeRange, location, keywords, 1)
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Apollo search failed'
     return Response.json({ error: message }, { status: 502 })
