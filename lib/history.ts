@@ -1,3 +1,5 @@
+export type PackStatus = 'sent' | 'responded' | 'meeting' | 'not_interested'
+
 export interface SavedPack {
   id: string
   company: string
@@ -8,6 +10,7 @@ export interface SavedPack {
   erpScore?: number
   website?: string
   location?: string
+  status?: PackStatus
 }
 
 const KEY = 'erp_letter_history'
@@ -29,7 +32,6 @@ export function savePack(pack: Omit<SavedPack, 'id' | 'date'>): SavedPack {
     date: new Date().toISOString(),
   }
   const history = loadHistory()
-  // Avoid duplicates — replace if same company + recipient generated today
   const today = new Date().toDateString()
   const filtered = history.filter(
     (h) => !(h.company === saved.company && h.recipientName === saved.recipientName && new Date(h.date).toDateString() === today)
@@ -37,6 +39,11 @@ export function savePack(pack: Omit<SavedPack, 'id' | 'date'>): SavedPack {
   const updated = [saved, ...filtered].slice(0, MAX)
   localStorage.setItem(KEY, JSON.stringify(updated))
   return saved
+}
+
+export function updatePackStatus(id: string, status: PackStatus | undefined): void {
+  const updated = loadHistory().map((h) => h.id === id ? { ...h, status } : h)
+  localStorage.setItem(KEY, JSON.stringify(updated))
 }
 
 export function deletePack(id: string): void {

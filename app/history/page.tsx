@@ -2,10 +2,47 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Trash2, ChevronDown, ChevronRight } from 'lucide-react'
-import { loadHistory, deletePack, clearHistory, type SavedPack } from '@/lib/history'
+import { Trash2, ChevronDown, ChevronRight, Printer } from 'lucide-react'
+import { loadHistory, deletePack, clearHistory, updatePackStatus, type SavedPack, type PackStatus } from '@/lib/history'
 import LetterOutput from '@/components/LetterOutput'
 import { parseOutput } from '@/lib/parse'
+
+const STATUS_OPTIONS: { value: PackStatus; label: string; color: string }[] = [
+  { value: 'sent', label: 'Sent', color: 'bg-blue-50 text-blue-700 border-blue-200' },
+  { value: 'responded', label: 'Responded', color: 'bg-amber-50 text-amber-700 border-amber-200' },
+  { value: 'meeting', label: 'Meeting', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  { value: 'not_interested', label: 'No interest', color: 'bg-gray-100 text-gray-500 border-gray-200' },
+]
+
+function StatusBadge({ status, onChange }: { status?: PackStatus; onChange: (s: PackStatus | undefined) => void }) {
+  const [open, setOpen] = useState(false)
+  const current = STATUS_OPTIONS.find((o) => o.value === status)
+  return (
+    <div className="relative">
+      <button
+        onClick={(e) => { e.stopPropagation(); setOpen((o) => !o) }}
+        className={`text-xs px-2 py-1 rounded-md border font-medium transition-colors ${
+          current ? current.color : 'bg-white text-gray-400 border-gray-200 hover:border-gray-300'
+        }`}
+      >
+        {current?.label ?? '+ Status'}
+      </button>
+      {open && (
+        <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 py-1 min-w-[130px]">
+          {STATUS_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              onClick={(e) => { e.stopPropagation(); onChange(status === opt.value ? undefined : opt.value); setOpen(false) }}
+              className={`w-full text-left px-3 py-1.5 text-xs hover:bg-gray-50 ${status === opt.value ? 'font-semibold' : ''}`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function HistoryPage() {
   const [packs, setPacks] = useState<SavedPack[]>([])
@@ -19,6 +56,11 @@ export default function HistoryPage() {
     deletePack(id)
     setPacks(loadHistory())
     if (expanded === id) setExpanded(null)
+  }
+
+  const handleStatus = (id: string, status: PackStatus | undefined) => {
+    updatePackStatus(id, status)
+    setPacks(loadHistory())
   }
 
   const handleClear = () => {
@@ -86,13 +128,23 @@ export default function HistoryPage() {
                         </div>
                       </div>
                     </button>
-                    <button
-                      onClick={() => handleDelete(pack.id)}
-                      className="ml-4 text-gray-300 hover:text-red-400 transition-colors flex-shrink-0"
-                      title="Delete"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <div className="ml-4 flex items-center gap-2 flex-shrink-0">
+                      <StatusBadge status={pack.status} onChange={(s) => handleStatus(pack.id, s)} />
+                      <button
+                        onClick={() => window.open(`/print?id=${pack.id}`, '_blank')}
+                        className="text-gray-300 hover:text-gray-700 transition-colors"
+                        title="Print letter"
+                      >
+                        <Printer className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(pack.id)}
+                        className="text-gray-300 hover:text-red-400 transition-colors"
+                        title="Delete"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
 
                   {isExpanded && (
