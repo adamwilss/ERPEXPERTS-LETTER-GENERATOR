@@ -35,7 +35,7 @@ const SENIORITY_RANK: Record<string, number> = {
 
 // ── Apollo helpers ─────────────────────────────────────────────────────────────
 
-async function fetchApolloPage(key: string, body: Record<string, unknown>, page: number): Promise<ApolloOrg[]> {
+async function fetchApolloPage(key: string, body: Record<string, unknown>, page: number): Promise<{ orgs: ApolloOrg[]; error?: string }> {
   try {
     const res = await fetch('https://api.apollo.io/api/v1/mixed_companies/search', {
       method: 'POST',
@@ -43,10 +43,16 @@ async function fetchApolloPage(key: string, body: Record<string, unknown>, page:
       body: JSON.stringify({ ...body, page, per_page: 100 }),
       signal: AbortSignal.timeout(18000),
     })
-    if (!res.ok) return []
+    if (!res.ok) {
+      let detail = ''
+      try { const b = await res.json(); detail = b.message ?? b.error ?? '' } catch {}
+      return { orgs: [], error: `Apollo HTTP ${res.status}${detail ? `: ${detail}` : ''}` }
+    }
     const data = await res.json()
-    return data.organizations ?? data.accounts ?? []
-  } catch { return [] }
+    return { orgs: data.organizations ?? data.accounts ?? [] }
+  } catch (e) {
+    return { orgs: [], error: e instanceof Error ? e.message : 'Apollo fetch failed' }
+  }
 }
 
 async function enrichOrg(key: string, domain: string): Promise<Partial<ApolloOrg>> {
@@ -209,14 +215,21 @@ export async function POST(req: Request) {
       try {
         // 1. Fetch companies (2 pages in parallel)
         send({ type: 'status', message: 'Searching Apollo…' })
-        const [page1, page2] = await Promise.all([
+        const [r1, r2] = await Promise.all([
           fetchApolloPage(apolloKey, apolloBody, 1),
           fetchApolloPage(apolloKey, apolloBody, 2),
         ])
 
+        // Surface Apollo errors immediately
+        if (r1.error && r2.error) {
+          send({ type: 'error', message: `Apollo search failed: ${r1.error}` })
+          controller.close()
+          return
+        }
+
         const seen = new Set<string>()
         const allOrgs: ApolloOrg[] = []
-        for (const org of [...page1, ...page2]) {
+        for (const org of [...r1.orgs, ...r2.orgs]) {
           if (!org.name) continue
           const key = org.id ?? org.name
           if (seen.has(key)) continue
@@ -225,7 +238,8 @@ export async function POST(req: Request) {
         }
 
         if (allOrgs.length === 0) {
-          send({ type: 'error', message: 'No companies found. Try different criteria.' })
+          const apolloErr = r1.error ?? r2.error
+          send({ type: 'error', message: apolloErr ? `Apollo error: ${apolloErr}` : 'No companies found. Try different criteria.' })
           controller.close()
           return
         }

@@ -98,24 +98,26 @@ export default function DiscoverPage() {
 
         for (const line of lines) {
           if (!line.trim()) continue
+          // Parse JSON separately so parse errors don't swallow event processing errors
+          let event: Record<string, unknown>
           try {
-            const event = JSON.parse(line)
-            if (event.type === 'status') {
-              setStreamStatus(event.message)
-              if (event.total) setStreamProgress((p) => ({ ...p, total: event.total }))
-            } else if (event.type === 'lead') {
-              // Append only — never sort here; sorting reshuffles array indices and
-              // breaks LeadReview's ID-based tracking, causing leads to vanish
-              setStreamedLeads((prev) => [...prev, event.lead])
-              setStreamProgress({ done: event.count, total: event.total })
-            } else if (event.type === 'done') {
-              setTotalSearched(event.total * 4)
-              setPhase('results')
-            } else if (event.type === 'error') {
-              throw new Error(event.message)
-            }
-          } catch (parseErr) {
-            // Ignore parse errors for partial lines
+            event = JSON.parse(line)
+          } catch {
+            continue // genuinely malformed / partial line
+          }
+          if (event.type === 'status') {
+            setStreamStatus(event.message as string)
+            if (event.total) setStreamProgress((p) => ({ ...p, total: event.total as number }))
+          } else if (event.type === 'lead') {
+            // Append only — never sort here; sorting reshuffles array indices and
+            // breaks LeadReview's ID-based tracking, causing leads to vanish
+            setStreamedLeads((prev) => [...prev, event.lead as Lead])
+            setStreamProgress({ done: event.count as number, total: event.total as number })
+          } else if (event.type === 'done') {
+            setTotalSearched((event.total as number) * 4)
+            setPhase('results')
+          } else if (event.type === 'error') {
+            throw new Error(event.message as string) // propagates to outer catch → shows error UI
           }
         }
       }
