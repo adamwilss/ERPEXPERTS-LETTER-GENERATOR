@@ -28,6 +28,34 @@ interface ApolloResponse {
   accounts?: ApolloOrganization[]
 }
 
+async function fetchPage(
+  apolloKey: string,
+  baseBody: Record<string, unknown>,
+  page: number
+): Promise<ApolloOrganization[]> {
+  try {
+    const res = await fetch('https://api.apollo.io/api/v1/mixed_companies/search', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache',
+        'x-api-key': apolloKey,
+      },
+      body: JSON.stringify({ ...baseBody, page, per_page: 100 }),
+      signal: AbortSignal.timeout(18000),
+    })
+    if (!res.ok) {
+      console.error(`Apollo page ${page} failed:`, res.status)
+      return []
+    }
+    const data = await res.json() as ApolloResponse
+    return data.organizations ?? data.accounts ?? []
+  } catch (err) {
+    console.error(`Apollo page ${page} error:`, err)
+    return []
+  }
+}
+
 export async function POST(req: Request) {
   const body = await req.json()
   const { industry, employeeRange, location = 'United Kingdom', keywords = '' } = body
@@ -41,54 +69,42 @@ export async function POST(req: Request) {
     return new Response('APOLLO_API_KEY not configured', { status: 500 })
   }
 
-  const requestBody: Record<string, unknown> = {
+  const baseBody: Record<string, unknown> = {
     organization_locations: [location],
     organization_num_employees_ranges: [employeeRange],
-    page: 1,
-    per_page: 100,
   }
 
   const userKeywords = keywords.split(',').map((k: string) => k.trim()).filter(Boolean)
   if (userKeywords.length > 0) {
-    requestBody.q_organization_keyword_tags = userKeywords
+    baseBody.q_organization_keyword_tags = userKeywords
   }
 
-  let res: Response
-  try {
-    res = await fetch('https://api.apollo.io/api/v1/mixed_companies/search', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-cache',
-        'x-api-key': apolloKey,
-      },
-      body: JSON.stringify(requestBody),
-      signal: AbortSignal.timeout(20000),
-    })
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Apollo request failed'
-    return Response.json({ error: message }, { status: 502 })
+  // Fetch 2 pages in parallel — up to 200 companies
+  const [page1, page2] = await Promise.all([
+    fetchPage(apolloKey, baseBody, 1),
+    fetchPage(apolloKey, baseBody, 2),
+  ])
+
+  // Merge and deduplicate by ID
+  const seen = new Set<string>()
+  const allOrgs: ApolloOrganization[] = []
+
+  for (const org of [...page1, ...page2]) {
+    if (!org.name) continue
+    const key = org.id ?? org.name
+    if (seen.has(key)) continue
+    seen.add(key)
+    allOrgs.push(org)
   }
 
-  const responseText = await res.text()
-
-  if (!res.ok) {
-    console.error(`Apollo ${res.status}:`, responseText)
-    return Response.json(
-      { error: `Apollo ${res.status}: ${responseText.slice(0, 300)}` },
-      { status: 502 }
-    )
-  }
-
-  const data = JSON.parse(responseText) as ApolloResponse
-  const orgs: ApolloOrganization[] = data.organizations ?? data.accounts ?? []
-
-  if (orgs.length === 0) {
+  if (allOrgs.length === 0) {
     return Response.json(
       { error: 'No companies found. Try broadening your search criteria.' },
       { status: 404 }
     )
   }
 
-  return Response.json({ orgs, totalFound: orgs.length })
+  console.log(`Apollo returned ${allOrgs.length} companies (page1: ${page1.length}, page2: ${page2.length})`)
+
+  return Response.json({ orgs: allOrgs, totalFound: allOrgs.length })
 }

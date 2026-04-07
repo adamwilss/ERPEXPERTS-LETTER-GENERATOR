@@ -292,9 +292,9 @@ Score all ${usable.length} companies.`
     })
     .filter((x): x is NonNullable<typeof x> => x !== null)
     .sort((a, b) => b.score - a.score)
-    .slice(0, 15)
+    .slice(0, 30)  // Increased from 15 — gives frontend a deep bench
 
-  // Enrich top companies by domain
+  // Enrich top 30 companies by domain in parallel
   const enrichedResults = await Promise.all(
     scored.map(async (s) => {
       const domain = getDomain(s.org)
@@ -312,14 +312,14 @@ Score all ${usable.length} companies.`
   const topOrgIds = scored.map((s) => s.org.id).filter((id): id is string => Boolean(id))
   const batchContacts = await batchSearchByIds(apolloKey, topOrgIds)
 
-  // Per-domain fallback for misses
+  // Per-domain fallback for misses — cap at top 20 to stay within timeout
   const missedOrgs = scored.filter((s) => s.org.id && !batchContacts[s.org.id])
   const domainFallbacks: Record<string, ApolloPerson> = {}
 
   if (missedOrgs.length > 0) {
     console.log(`Batch missed ${missedOrgs.length} — running per-domain fallback`)
     const results = await Promise.allSettled(
-      missedOrgs.slice(0, 10).map(async (s) => {
+      missedOrgs.slice(0, 20).map(async (s) => {
         const domain = getDomain(s.org)
         if (!domain) return null
         const person = await searchByDomain(apolloKey, domain)
@@ -376,14 +376,13 @@ Score all ${usable.length} companies.`
   })
 
   // Sort by combined score: 60% ERP fit + 40% data quality
-  // This surfaces leads that are both good prospects AND have actionable data
   const sortedLeads = rawLeads
     .sort((a, b) => {
       const aScore = a.erpScore * 0.6 + a.dataScore * 0.4
       const bScore = b.erpScore * 0.6 + b.dataScore * 0.4
       return bScore - aScore
     })
-    .slice(0, 10)
+    .slice(0, 30)  // Return up to 30 — frontend uses 10 active + 20 bench
     .map((l, i) => ({ ...l, rank: i + 1 }))
 
   return Response.json({ leads: sortedLeads, totalSearched: orgs.length })
