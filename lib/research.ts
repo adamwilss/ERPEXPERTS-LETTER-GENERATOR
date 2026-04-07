@@ -2,7 +2,9 @@ export async function fetchResearch(url: string, company: string): Promise<strin
   const parts: string[] = []
 
   // Primary: Jina Reader — converts any URL to clean markdown, no API key needed
+  // Skip if no URL provided (e.g. batch generation where website is unknown)
   try {
+    if (!url) throw new Error('No URL')
     const jinaUrl = `https://r.jina.ai/${url}`
     const res = await fetch(jinaUrl, {
       headers: { Accept: 'text/plain', 'X-Return-Format': 'markdown' },
@@ -11,7 +13,7 @@ export async function fetchResearch(url: string, company: string): Promise<strin
     if (res.ok) {
       const text = await res.text()
       if (text && text.length > 100) {
-        parts.push(`=== Website content (${url}) ===\n${text.slice(0, 9000)}`)
+        parts.push(`=== Website content (${url}) ===\n${text.slice(0, 12000)}`)
       }
     }
   } catch {
@@ -40,7 +42,7 @@ export async function fetchResearch(url: string, company: string): Promise<strin
           ?.map((r) => `${r.title}\n${r.content}`)
           .join('\n\n')
         if (snippets) {
-          parts.push(`=== Web search results for "${company}" ===\n${snippets.slice(0, 4000)}`)
+          parts.push(`=== Web search results for "${company}" ===\n${snippets.slice(0, 5000)}`)
         }
       }
     } catch {

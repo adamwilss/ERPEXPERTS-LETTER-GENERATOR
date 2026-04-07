@@ -5,6 +5,7 @@ import { parseStats, parseTechTable } from '@/lib/parse'
 const styles = StyleSheet.create({
   page: {
     padding: 40,
+    paddingBottom: 60,
     backgroundColor: '#ffffff',
     fontFamily: 'Helvetica',
     fontSize: 10,
@@ -122,15 +123,19 @@ export const LetterPdfDocument = ({ coverLetter, businessCase, techMap }: Props)
   // 1. Parse Cover Letter
   const letterLines = coverLetter.split('\n')
   const subjectLine = letterLines.find((l) => l.startsWith('SUBJECT:'))?.replace('SUBJECT:', '').trim()
-  const letterBody = letterLines.filter((l) => !l.startsWith('SUBJECT:') && l.trim() !== '')
+  const letterBodyRaw = letterLines.filter((l) => !l.startsWith('SUBJECT:')).join('\n')
+  // Group into paragraphs by splitting on blank lines
+  const letterParagraphs = letterBodyRaw.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean)
 
   // 2. Parse Business Case
   const bcLines = businessCase.split('\n')
   const bcTitle = bcLines.find((l) => l.startsWith('TITLE:'))?.replace('TITLE:', '').trim()
   const bcSubtitle = bcLines.find((l) => l.startsWith('SUBTITLE:'))?.replace('SUBTITLE:', '').trim()
   const bcBodyStart = bcLines.findIndex((l) => !l.startsWith('TITLE:') && !l.startsWith('SUBTITLE:') && l.trim() !== '')
-  const bcBodyText = bcLines.slice(Math.max(bcBodyStart, 0)).join('\n')
-  const { stats, prose } = parseStats(bcBodyText)
+  const bcBodyText = bcLines
+    .slice(Math.max(bcBodyStart, 0))
+    .filter((l) => !l.startsWith('TITLE:') && !l.startsWith('SUBTITLE:'))
+    .join('\n')
   const bcParts = bcBodyText.split(/(\[STAT\][\s\S]*?\[\/STAT\])/g)
 
   // 3. Parse Tech Map
@@ -163,10 +168,9 @@ export const LetterPdfDocument = ({ coverLetter, businessCase, techMap }: Props)
       <Page size="A4" style={styles.page}>
         <Header />
         {subjectLine && <Text style={styles.subject}>Re: {subjectLine.replace(/^Re:\s*/i, '')}</Text>}
-        {letterBody.map((line, i) => {
-          if (!line.trim()) return null
-          return <Text key={i} style={styles.paragraph}>{line.trim()}</Text>
-        })}
+        {letterParagraphs.map((para, i) => (
+          <Text key={i} style={styles.paragraph}>{para}</Text>
+        ))}
         <Footer />
       </Page>
 
@@ -191,10 +195,10 @@ export const LetterPdfDocument = ({ coverLetter, businessCase, techMap }: Props)
           }
           const trimmed = part.trim()
           if (!trimmed) return null
-          return trimmed.split('\n').map((line, li) => {
-            if (!line.trim()) return null
-            return <Text key={`p-${i}-${li}`} style={styles.paragraph}>{line.trim()}</Text>
-          })
+          // Group by double newlines into paragraphs
+          return trimmed.split(/\n{2,}/).filter(Boolean).map((para, pi) => (
+            <Text key={`p-${i}-${pi}`} style={styles.paragraph}>{para.trim()}</Text>
+          ))
         })}
         <Footer />
       </Page>

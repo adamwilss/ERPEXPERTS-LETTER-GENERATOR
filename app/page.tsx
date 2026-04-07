@@ -60,16 +60,22 @@ export default function Home() {
               <div className="flex flex-col items-start gap-3 py-12">
                 <div className="flex items-center gap-3">
                   <div className="w-4 h-4 border-2 border-gray-900 border-t-transparent rounded-full animate-spin" />
-                  <span className="text-sm text-gray-600">Researching company and generating letter pack…</span>
+                  <span className="text-sm text-gray-600">Researching company…</span>
                 </div>
-                <p className="text-xs text-gray-400 ml-7">This takes around 30–60 seconds.</p>
+                <p className="text-xs text-gray-400 ml-7">Fetching and reading the company website — this takes around 15–30 seconds.</p>
+                <button
+                  onClick={() => setSubmitted(false)}
+                  className="ml-7 mt-2 text-xs text-gray-400 hover:text-gray-600 underline"
+                >
+                  Cancel
+                </button>
               </div>
             )}
 
             {isLoading && completion && (
               <div className="mb-4 flex items-center gap-2 text-xs text-gray-400">
                 <div className="w-3 h-3 border border-gray-400 border-t-transparent rounded-full animate-spin" />
-                Writing…
+                Generating letter pack…
               </div>
             )}
 

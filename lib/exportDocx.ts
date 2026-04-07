@@ -18,7 +18,7 @@ export async function exportToDocx(coverLetter: string, businessCase: string, te
         style: 'Subtitle',
       }),
       new Paragraph({ text: '' }),
-      new Paragraph({ text: new Date().toLocaleDateString('en-GB') }),
+      new Paragraph({ text: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) }),
       new Paragraph({ text: '' }),
       ...(subjectLine ? [new Paragraph({ children: [new TextRun({ text: `Re: ${subjectLine.replace(/^Re:\s*/i, '')}`, bold: true })] }), new Paragraph({ text: '' })] : []),
       ...letterBody.map((line) => new Paragraph({ text: line, spacing: { after: 200 } })),
@@ -120,8 +120,22 @@ export async function exportToDocx(coverLetter: string, businessCase: string, te
   mapChildren.push(new Paragraph({ text: '' }), new Paragraph({ text: 'ERP Experts Ltd · Manchester, UK · www.erpexperts.co.uk', style: 'Subtitle' }))
   sections.push({ children: mapChildren })
 
-  // Construct Document
+  // Construct Document with consistent base styles
   const doc = new Document({
+    styles: {
+      default: {
+        document: {
+          run: {
+            font: 'Calibri',
+            size: 22, // 11pt
+            color: '333333',
+          },
+          paragraph: {
+            spacing: { after: 200, line: 276 },
+          },
+        },
+      },
+    },
     sections,
   })
 

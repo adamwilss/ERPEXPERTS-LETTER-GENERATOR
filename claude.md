@@ -30,7 +30,7 @@ The standard for tone, structure, specificity, and commercial sharpness is the G
 | Word export | `docx` (npm) | `.docx` download for editing before send. Add in v2. |
 | Copy | Clipboard API | One-click copy per section. Zero dependency. Ship in v1. |
 | Hosting | Vercel | Auto-deploys from GitHub. Edge Runtime for long-running generation calls. |
-| Secrets | `.env.local` / Vercel env vars | `ANTHROPIC_API_KEY`, `TAVILY_API_KEY`. Never committed. |
+| Secrets | `.env.local` / Vercel env vars | `OPENAI_API_KEY`, `TAVILY_API_KEY`. Never committed. |
 
 ### Project structure
 
@@ -96,7 +96,7 @@ The `parse.ts` utility splits on these delimiters and passes each section to the
 
 | Key | Where to get it |
 |---|---|
-| `ANTHROPIC_API_KEY` | console.anthropic.com |
+| `OPENAI_API_KEY` | console.anthropic.com |
 | `TAVILY_API_KEY` | app.tavily.com — free tier is sufficient |
 
 ### Hosting
@@ -119,7 +119,7 @@ Use **Edge Runtime** on the `/api/generate` route (`export const runtime = 'edge
 **Deployment:**
 - Connect the GitHub repo to Vercel (one-click in the Vercel dashboard)
 - Vercel auto-deploys every push to `main`
-- Set `ANTHROPIC_API_KEY` and `TAVILY_API_KEY` in Project Settings → Environment Variables
+- Set `OPENAI_API_KEY` and `TAVILY_API_KEY` in Project Settings → Environment Variables
 - Custom domain: add `letters.erpexperts.co.uk` in Vercel domain settings — takes about 2 minutes to configure
 
 **Running cost estimate:**

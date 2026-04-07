@@ -28,6 +28,7 @@ function CoverLetterView({ content }: { content: string }) {
   const lines = content.split('\n')
   const subjectLine = lines.find((l) => l.startsWith('SUBJECT:'))?.replace('SUBJECT:', '').trim()
   const body = lines.filter((l) => !l.startsWith('SUBJECT:')).join('\n').trim()
+  const paragraphs = body.split(/\n{2,}/).filter((p) => p.trim())
 
   return (
     <div className="space-y-6">
@@ -52,8 +53,10 @@ function CoverLetterView({ content }: { content: string }) {
         </div>
       )}
 
-      <div className="prose prose-sm max-w-none text-gray-800 leading-relaxed whitespace-pre-line">
-        {body}
+      <div className="text-sm text-gray-800 leading-relaxed space-y-4">
+        {paragraphs.map((para, i) => (
+          <p key={i}>{para.trim()}</p>
+        ))}
       </div>
 
       <div className="pt-4 border-t border-gray-100 text-xs text-gray-400">
@@ -70,7 +73,10 @@ function BusinessCaseView({ content }: { content: string }) {
   const subtitle = lines.find((l) => l.startsWith('SUBTITLE:'))?.replace('SUBTITLE:', '').trim()
 
   const bodyStart = lines.findIndex((l) => !l.startsWith('TITLE:') && !l.startsWith('SUBTITLE:') && l.trim() !== '')
-  const bodyText = lines.slice(bodyStart).join('\n')
+  const bodyText = lines
+    .slice(bodyStart)
+    .filter((l) => !l.startsWith('TITLE:') && !l.startsWith('SUBTITLE:'))
+    .join('\n')
 
   const { stats, prose } = parseStats(bodyText)
 
@@ -79,7 +85,7 @@ function BusinessCaseView({ content }: { content: string }) {
       {title && <h2 className="text-xl font-semibold text-gray-900">{title}</h2>}
       {subtitle && <p className="text-sm text-gray-500 italic">{subtitle}</p>}
 
-      <div className="prose prose-sm max-w-none text-gray-800 leading-relaxed whitespace-pre-line">
+      <div className="text-sm text-gray-800 leading-relaxed">
         {/* Render prose with stat blocks interspersed in their original positions */}
         {renderProseWithStats(bodyText, stats)}
       </div>
@@ -105,11 +111,13 @@ function renderProseWithStats(text: string, _stats: ReturnType<typeof parseStats
         }
         const trimmed = part.trim()
         if (!trimmed) return null
-        return (
-          <p key={i} className="text-gray-800 leading-relaxed mb-4 whitespace-pre-line">
-            {trimmed}
+        // Split on double newlines so multi-paragraph chunks render as separate <p> elements
+        const paras = trimmed.split(/\n{2,}/).filter(Boolean)
+        return paras.map((para, j) => (
+          <p key={`${i}-${j}`} className="text-gray-800 leading-relaxed mb-4">
+            {para.trim()}
           </p>
-        )
+        ))
       })}
     </>
   )
@@ -163,7 +171,7 @@ export default function LetterOutput({ coverLetter, businessCase, techMap, compa
       </div>
 
       {/* Content */}
-      <div className="bg-white rounded-xl border border-gray-200 p-8 max-w-3xl">
+      <div className={`bg-white rounded-xl border border-gray-200 p-8 ${activeTab === 'map' ? 'max-w-4xl' : 'max-w-3xl'}`}>
         {activeTab === 'letter' && (
           coverLetter ? <CoverLetterView content={coverLetter} /> : <Placeholder />
         )}

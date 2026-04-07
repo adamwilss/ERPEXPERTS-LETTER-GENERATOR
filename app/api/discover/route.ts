@@ -1,20 +1,13 @@
 import { generateText } from 'ai'
-import { anthropic } from '@ai-sdk/anthropic'
+import { createAnthropic } from '@ai-sdk/anthropic'
+
+const anthropic = createAnthropic({ apiKey: process.env.OPENAI_API_KEY })
 
 export const runtime = 'edge'
 export const maxDuration = 120
 
-// Apollo industry tag IDs for common B2B sectors
-const INDUSTRY_TAG_IDS: Record<string, string[]> = {
-  Manufacturing: ['5567cd4773696439b10b0000'],
-  'Wholesale Distribution': ['5567cd4773696439b10b0000', '5567cd4e73696439b10b0000'],
-  Ecommerce: ['5567cd4773696439b10b0001'],
-  'Field Services': ['5567cd4773696439b10b0002'],
-  'Professional Services': ['5567cd4773696439b10b0003'],
-  'Specialty Retail': ['5567cd4773696439b10b0004'],
-  Technology: ['5567cd4773696439b10b0005'],
-  Construction: ['5567cd4773696439b10b0006'],
-}
+// NOTE: Apollo industry tag IDs vary per account and cannot be hardcoded reliably.
+// Industry filtering is handled via keyword search (q_organization_keyword_tags) instead.
 
 export interface Lead {
   rank: number
@@ -60,16 +53,9 @@ async function searchApollo(
     per_page: 100,
   }
 
-  // Add industry tags if we have them
-  const tagIds = INDUSTRY_TAG_IDS[industry]
-  if (tagIds) {
-    body.organization_industry_tag_ids = tagIds
-  }
-
-  // Keyword search as q_organization_keyword_tags when provided
-  if (keywords) {
-    body.q_organization_keyword_tags = keywords.split(',').map((k) => k.trim())
-  }
+  // Build keyword tags from industry + any user-supplied keywords
+  const keywordTags = [industry, ...keywords.split(',').map((k) => k.trim()).filter(Boolean)]
+  body.q_organization_keyword_tags = keywordTags
 
   try {
     const res = await fetch('https://api.apollo.io/api/v1/mixed_companies_search', {

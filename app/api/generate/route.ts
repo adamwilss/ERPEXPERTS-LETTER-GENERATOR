@@ -1,5 +1,7 @@
 import { streamText } from 'ai'
-import { anthropic } from '@ai-sdk/anthropic'
+import { createAnthropic } from '@ai-sdk/anthropic'
+
+const anthropic = createAnthropic({ apiKey: process.env.OPENAI_API_KEY })
 import { fetchResearch } from '@/lib/research'
 import { buildSystemPrompt, buildUserMessage } from '@/lib/prompt'
 
@@ -27,7 +29,7 @@ export async function POST(req: Request) {
         content: buildUserMessage({ company, url, recipientName, jobTitle, notes, research }),
       },
     ],
-    maxOutputTokens: 4000,
+    maxOutputTokens: 6000,
   })
 
   return result.toTextStreamResponse()

@@ -87,7 +87,7 @@ export default function DiscoverPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             company: lead.company,
-            url: lead.website || `https://${lead.company.toLowerCase().replace(/\s+/g, '')}.co.uk`,
+            url: lead.website || '',
             recipientName: lead.recipientName || lead.contactTitle,
             jobTitle: lead.contactTitle,
             notes: `Industry: ${lead.industry}. Size: ${lead.employees}. ${lead.description}`.slice(0, 500),

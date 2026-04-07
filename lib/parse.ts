@@ -72,13 +72,13 @@ export function parseTechTable(text: string): { rows: TableRow[]; before: string
   }
   if (tableStart !== -1 && tableEnd === -1) tableEnd = lines.length
 
+  // Keep rows that start with | but are not separator rows (|---|---|---|)
   const tableLines = lines.slice(tableStart, tableEnd).filter(
-    (l) => l.trim().startsWith('|') && !l.replace(/[\s|:-]/g, '').length === false
+    (l) => l.trim().startsWith('|') && !/^\s*\|[\s\-\|:]+\|\s*$/.test(l)
   )
 
-  // Skip header and separator rows
-  const dataLines = tableLines.filter((l) => !l.match(/^\s*\|[\s-|:]+\|\s*$/))
-  dataLines.slice(1).forEach((line) => {
+  // tableLines[0] is the header row — skip it and process data rows
+  tableLines.slice(1).forEach((line) => {
     const cols = line
       .split('|')
       .map((c) => c.trim())
