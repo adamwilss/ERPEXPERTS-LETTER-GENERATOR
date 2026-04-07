@@ -3,8 +3,7 @@ import { createOpenAI } from '@ai-sdk/openai'
 
 const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
-export const runtime = 'edge'
-export const maxDuration = 120
+export const maxDuration = 60
 
 // NOTE: Apollo industry tag IDs vary per account and cannot be hardcoded reliably.
 // Industry filtering is handled via keyword search (q_organization_keyword_tags) instead.
@@ -201,7 +200,7 @@ export async function POST(req: Request) {
   let allOrgs: ApolloOrganization[] = []
   try {
     const pages = await Promise.all(
-      [1, 2, 3, 4, 5].map((page) =>
+      [1, 2].map((page) =>
         searchApollo(apolloKey, industry, employeeRange, location, keywords, page)
       )
     )
