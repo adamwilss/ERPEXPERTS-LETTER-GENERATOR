@@ -46,7 +46,6 @@ async function searchApollo(
   page: number
 ): Promise<ApolloOrganization[]> {
   const body: Record<string, unknown> = {
-    api_key: apolloKey,
     organization_locations: [location],
     organization_num_employees_ranges: [employeeRange],
     page,
@@ -54,24 +53,25 @@ async function searchApollo(
   }
 
   // Only apply user-supplied keyword filter — industry scoring is handled by GPT-4o
-  // Apollo's q_organization_keyword_tags is unreliable and often returns zero results
   const userKeywords = keywords.split(',').map((k) => k.trim()).filter(Boolean)
   if (userKeywords.length > 0) {
     body.q_organization_keyword_tags = userKeywords
   }
 
   try {
-    const res = await fetch('https://api.apollo.io/api/v1/mixed_companies_search', {
+    const res = await fetch('https://api.apollo.io/api/v1/mixed_companies/search', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Cache-Control': 'no-cache',
+        'x-api-key': apolloKey,
       },
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(15000),
     })
 
     if (!res.ok) {
+      console.error(`Apollo ${res.status}:`, await res.text())
       return []
     }
 
