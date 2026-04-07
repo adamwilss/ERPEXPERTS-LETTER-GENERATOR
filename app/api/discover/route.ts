@@ -34,6 +34,7 @@ interface ApolloOrganization {
 
 interface ApolloResponse {
   organizations?: ApolloOrganization[]
+  accounts?: ApolloOrganization[]
   pagination?: { total_entries?: number; total_pages?: number }
 }
 
@@ -70,15 +71,20 @@ async function searchApollo(
       signal: AbortSignal.timeout(15000),
     })
 
+    const responseText = await res.text()
+
     if (!res.ok) {
-      console.error(`Apollo ${res.status}:`, await res.text())
-      return []
+      console.error(`Apollo ${res.status}:`, responseText)
+      // Surface the actual Apollo error so it's visible in the UI during debugging
+      throw new Error(`Apollo ${res.status}: ${responseText.slice(0, 200)}`)
     }
 
-    const data = (await res.json()) as ApolloResponse
-    return data.organizations ?? []
-  } catch {
-    return []
+    const data = JSON.parse(responseText) as ApolloResponse
+    // mixed_companies/search returns either organizations or accounts depending on plan
+    return data.organizations ?? data.accounts ?? []
+  } catch (err) {
+    console.error('Apollo search error:', err)
+    throw err
   }
 }
 
@@ -192,14 +198,19 @@ export async function POST(req: Request) {
     return new Response('APOLLO_API_KEY not configured', { status: 500 })
   }
 
-  // Search Apollo — up to 5 pages (500 results)
-  const pages = await Promise.all(
-    [1, 2, 3, 4, 5].map((page) =>
-      searchApollo(apolloKey, industry, employeeRange, location, keywords, page)
+  // Search Apollo — just page 1 first to validate the query works
+  let allOrgs: ApolloOrganization[] = []
+  try {
+    const pages = await Promise.all(
+      [1, 2, 3, 4, 5].map((page) =>
+        searchApollo(apolloKey, industry, employeeRange, location, keywords, page)
+      )
     )
-  )
-
-  const allOrgs = deduplicateOrgs(pages.flat())
+    allOrgs = deduplicateOrgs(pages.flat())
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Apollo search failed'
+    return Response.json({ error: message }, { status: 502 })
+  }
 
   if (allOrgs.length === 0) {
     return Response.json(
