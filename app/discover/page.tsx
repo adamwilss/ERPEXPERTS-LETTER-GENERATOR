@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import LeadReview, { Lead, ReviewedLead } from '@/components/LeadReview'
 import BatchOutput, { PackStatus } from '@/components/BatchOutput'
 
@@ -159,27 +158,7 @@ export default function DiscoverPage() {
   }
 
   return (
-    <main className="min-h-screen">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <div>
-              <span className="text-lg font-bold tracking-tight text-gray-900">ERP EXPERTS</span>
-              <span className="ml-3 text-sm text-gray-400">Letter Portal</span>
-            </div>
-            <nav className="flex items-center gap-4 text-sm">
-              <Link href="/" className="text-gray-400 hover:text-gray-700">
-                Single letter
-              </Link>
-              <span className="text-gray-900 font-medium">Discover leads</span>
-              <Link href="/history" className="text-gray-400 hover:text-gray-700">History</Link>
-            </nav>
-          </div>
-          <span className="text-xs text-gray-400 uppercase tracking-widest">Internal · Confidential</span>
-        </div>
-      </div>
-
+    <main className="min-h-[calc(100vh-56px)]">
       <div className="max-w-5xl mx-auto px-6 py-10">
 
         {/* Phase 1: Search form */}

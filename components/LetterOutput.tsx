@@ -23,82 +23,128 @@ const tabs = [
 
 type TabId = (typeof tabs)[number]['id']
 
-// Render cover letter: parse SUBJECT line, then prose
 function CoverLetterView({ content }: { content: string }) {
   const lines = content.split('\n')
-  const subjectLine = lines.find((l) => l.startsWith('SUBJECT:'))?.replace('SUBJECT:', '').trim()
-  const body = lines.filter((l) => !l.startsWith('SUBJECT:')).join('\n').trim()
-  const paragraphs = body.split(/\n{2,}/).filter((p) => p.trim())
+
+  // Find SUBJECT: line
+  const subjectIdx = lines.findIndex((l) => l.trim().startsWith('SUBJECT:'))
+  const subjectLine = subjectIdx >= 0
+    ? lines[subjectIdx].replace(/^SUBJECT:\s*/i, '').replace(/^Re:\s*/i, '').trim()
+    : ''
+
+  // Address block + date = everything before SUBJECT:
+  const preLines = (subjectIdx > 0 ? lines.slice(0, subjectIdx) : []).filter((l) => l.trim())
+
+  // Body = everything after SUBJECT:
+  const bodyRaw = subjectIdx >= 0
+    ? lines.slice(subjectIdx + 1).join('\n').trim()
+    : content
+
+  const paragraphs = bodyRaw.split(/\n{2,}/).filter((p) => p.trim())
+
+  // Split body into salutation, paragraphs, sign-off
+  const salutationIdx = paragraphs.findIndex((p) => /^dear\s/i.test(p.trim()))
+  const signoffIdx = paragraphs.findIndex((p) =>
+    /^yours sincerely|^kind regards|^best regards/i.test(p.trim())
+  )
+
+  const salutation = salutationIdx >= 0 ? paragraphs[salutationIdx] : null
+  const body = paragraphs.filter((_, i) => i !== salutationIdx && (signoffIdx < 0 || i < signoffIdx))
+    .filter((_, i) => i !== (salutationIdx >= 0 && salutationIdx < 0 ? salutationIdx : -1))
+  const signoff = signoffIdx >= 0 ? paragraphs.slice(signoffIdx).join('\n\n') : null
 
   return (
-    <div className="space-y-6">
+    <div>
       {/* Letterhead */}
-      <div className="border-b border-gray-200 pb-6">
-        <div className="flex items-start justify-between">
-          <div>
-            <div className="text-base font-bold tracking-tight text-gray-900">ERP EXPERTS</div>
-            <div className="text-xs text-gray-400 mt-0.5">
-              NetSuite Implementation &amp; Aftercare · Manchester, UK · www.erpexperts.co.uk
-            </div>
+      <div className="flex items-start justify-between pb-6 mb-6 border-b border-gray-200">
+        <div>
+          <div className="text-sm font-bold tracking-tight text-gray-900">ERP EXPERTS</div>
+          <div className="text-xs text-gray-400 mt-0.5">
+            NetSuite Implementation · Manchester, UK
           </div>
-          <div className="text-xs text-gray-400">
-            {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
-          </div>
+        </div>
+        <div className="text-xs text-gray-400 text-right">
+          {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
         </div>
       </div>
 
-      {subjectLine && (
-        <div className="text-sm font-medium text-gray-700">
-          Re: {subjectLine.replace(/^Re:\s*/i, '')}
+      {/* Recipient address block */}
+      {preLines.length > 0 && (
+        <div className="mb-6 text-sm text-gray-700 leading-relaxed space-y-0.5">
+          {preLines.map((line, i) => (
+            <div key={i}>{line}</div>
+          ))}
         </div>
       )}
 
-      <div className="text-sm text-gray-800 leading-relaxed space-y-4">
-        {paragraphs.map((para, i) => (
-          <p key={i}>{para.trim()}</p>
-        ))}
+      {/* Subject */}
+      {subjectLine && (
+        <div className="mb-6 text-sm font-semibold text-gray-900">
+          Re: {subjectLine}
+        </div>
+      )}
+
+      {/* Letter body */}
+      <div className="font-letter text-[15px] leading-[1.8] text-gray-800 space-y-5">
+        {salutation && <p className="font-sans text-sm text-gray-700">{salutation}</p>}
+        {paragraphs
+          .filter((_, i) => {
+            if (i === salutationIdx) return false
+            if (signoffIdx >= 0 && i >= signoffIdx) return false
+            return true
+          })
+          .map((para, i) => (
+            <p key={i}>{para.trim()}</p>
+          ))}
       </div>
 
-      <div className="pt-4 border-t border-gray-100 text-xs text-gray-400">
-        ERP Experts Ltd · Manchester, UK · www.erpexperts.co.uk
+      {/* Sign-off */}
+      {signoff && (
+        <div className="mt-8 pt-6 border-t border-gray-100 font-sans text-sm text-gray-700 whitespace-pre-line leading-relaxed">
+          {signoff}
+        </div>
+      )}
+
+      <div className="mt-8 pt-4 border-t border-gray-100 text-xs text-gray-400 flex items-center justify-between">
+        <span>ERP Experts Ltd · Manchester, UK</span>
+        <span>www.erpexperts.co.uk</span>
       </div>
     </div>
   )
 }
 
-// Render business case: extract title/subtitle, stat blocks, and prose
 function BusinessCaseView({ content }: { content: string }) {
   const lines = content.split('\n')
   const title = lines.find((l) => l.startsWith('TITLE:'))?.replace('TITLE:', '').trim()
   const subtitle = lines.find((l) => l.startsWith('SUBTITLE:'))?.replace('SUBTITLE:', '').trim()
-
-  const bodyStart = lines.findIndex((l) => !l.startsWith('TITLE:') && !l.startsWith('SUBTITLE:') && l.trim() !== '')
+  const bodyStart = lines.findIndex(
+    (l) => !l.startsWith('TITLE:') && !l.startsWith('SUBTITLE:') && l.trim() !== ''
+  )
   const bodyText = lines
     .slice(bodyStart)
     .filter((l) => !l.startsWith('TITLE:') && !l.startsWith('SUBTITLE:'))
     .join('\n')
 
-  const { stats, prose } = parseStats(bodyText)
-
   return (
-    <div className="space-y-6">
-      {title && <h2 className="text-xl font-semibold text-gray-900">{title}</h2>}
-      {subtitle && <p className="text-sm text-gray-500 italic">{subtitle}</p>}
-
-      <div className="text-sm text-gray-800 leading-relaxed">
-        {/* Render prose with stat blocks interspersed in their original positions */}
-        {renderProseWithStats(bodyText, stats)}
+    <div>
+      {title && (
+        <h2 className="text-xl font-semibold text-gray-900 tracking-tight mb-2">{title}</h2>
+      )}
+      {subtitle && (
+        <p className="text-sm text-gray-500 italic mb-8 pb-6 border-b border-gray-200">{subtitle}</p>
+      )}
+      <div className="font-letter text-[15px] leading-[1.8] text-gray-800">
+        {renderProseWithStats(bodyText)}
       </div>
-
-      <div className="pt-4 border-t border-gray-100 text-xs text-gray-400">
-        ERP Experts Ltd · Manchester, UK · www.erpexperts.co.uk
+      <div className="mt-8 pt-4 border-t border-gray-100 text-xs text-gray-400 flex items-center justify-between">
+        <span>ERP Experts Ltd · Manchester, UK</span>
+        <span>www.erpexperts.co.uk</span>
       </div>
     </div>
   )
 }
 
-function renderProseWithStats(text: string, _stats: ReturnType<typeof parseStats>['stats']) {
-  // Split on [STAT]...[/STAT] blocks and render alternating prose + stat components
+function renderProseWithStats(text: string) {
   const parts = text.split(/(\[STAT\][\s\S]*?\[\/STAT\])/g)
   return (
     <>
@@ -111,76 +157,62 @@ function renderProseWithStats(text: string, _stats: ReturnType<typeof parseStats
         }
         const trimmed = part.trim()
         if (!trimmed) return null
-        // Split on double newlines so multi-paragraph chunks render as separate <p> elements
-        const paras = trimmed.split(/\n{2,}/).filter(Boolean)
-        return paras.map((para, j) => (
-          <p key={`${i}-${j}`} className="text-gray-800 leading-relaxed mb-4">
-            {para.trim()}
-          </p>
+        return trimmed.split(/\n{2,}/).filter(Boolean).map((para, j) => (
+          <p key={`${i}-${j}`} className="mb-5 last:mb-0">{para.trim()}</p>
         ))
       })}
     </>
   )
 }
 
-export default function LetterOutput({ coverLetter, businessCase, techMap, companyName, isStreaming }: Props) {
+export default function LetterOutput({
+  coverLetter, businessCase, techMap, companyName, isStreaming,
+}: Props) {
   const [activeTab, setActiveTab] = useState<TabId>('letter')
 
   return (
     <div>
       {/* Tab bar */}
-      <div className="flex items-center gap-1 border-b border-gray-200 mb-6">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-2.5 text-sm font-medium rounded-t-md transition-colors ${
-              activeTab === tab.id
-                ? 'text-gray-900 border-b-2 border-gray-900 -mb-px bg-white'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            {tab.label}
-            {isStreaming && tab.id === activeTab && (
-              <span className="ml-2 inline-block w-1.5 h-1.5 bg-gray-400 rounded-full animate-pulse" />
-            )}
-          </button>
-        ))}
+      <div className="flex items-center gap-0.5 mb-6">
+        <div className="flex items-center gap-0.5 bg-white border border-gray-200 rounded-lg p-1">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${
+                activeTab === tab.id
+                  ? 'bg-[#0A0A0A] text-white shadow-sm'
+                  : 'text-gray-500 hover:text-gray-900'
+              }`}
+            >
+              {tab.label}
+              {isStreaming && tab.id === activeTab && (
+                <span className="ml-1.5 inline-block w-1 h-1 bg-current rounded-full animate-pulse" />
+              )}
+            </button>
+          ))}
+        </div>
 
         <div className="ml-auto flex items-center gap-2">
-          {activeTab === 'letter' && coverLetter && (
-            <CopyButton text={coverLetter} label="Copy cover letter" />
-          )}
-          {activeTab === 'case' && businessCase && (
-            <CopyButton text={businessCase} label="Copy business case" />
-          )}
-          {activeTab === 'map' && techMap && (
-            <CopyButton text={techMap} label="Copy tech map" />
-          )}
+          {activeTab === 'letter' && coverLetter && <CopyButton text={coverLetter} label="Copy" />}
+          {activeTab === 'case' && businessCase && <CopyButton text={businessCase} label="Copy" />}
+          {activeTab === 'map' && techMap && <CopyButton text={techMap} label="Copy" />}
           {!isStreaming && coverLetter && businessCase && techMap && (
-            <div className="ml-2 pl-2 border-l border-gray-200">
-              <DownloadMenu 
-                coverLetter={coverLetter} 
-                businessCase={businessCase} 
-                techMap={techMap}
-                companyName={companyName}
-              />
-            </div>
+            <DownloadMenu
+              coverLetter={coverLetter}
+              businessCase={businessCase}
+              techMap={techMap}
+              companyName={companyName}
+            />
           )}
         </div>
       </div>
 
-      {/* Content */}
-      <div className={`bg-white rounded-xl border border-gray-200 p-8 ${activeTab === 'map' ? 'max-w-4xl' : 'max-w-3xl'}`}>
-        {activeTab === 'letter' && (
-          coverLetter ? <CoverLetterView content={coverLetter} /> : <Placeholder />
-        )}
-        {activeTab === 'case' && (
-          businessCase ? <BusinessCaseView content={businessCase} /> : <Placeholder />
-        )}
-        {activeTab === 'map' && (
-          techMap ? <TechMap content={techMap} /> : <Placeholder />
-        )}
+      {/* Document */}
+      <div className={`letter-paper rounded-xl ${activeTab === 'map' ? 'max-w-4xl' : 'max-w-2xl'} p-10`}>
+        {activeTab === 'letter' && (coverLetter ? <CoverLetterView content={coverLetter} /> : <Placeholder />)}
+        {activeTab === 'case' && (businessCase ? <BusinessCaseView content={businessCase} /> : <Placeholder />)}
+        {activeTab === 'map' && (techMap ? <TechMap content={techMap} /> : <Placeholder />)}
       </div>
     </div>
   )
@@ -188,8 +220,6 @@ export default function LetterOutput({ coverLetter, businessCase, techMap, compa
 
 function Placeholder() {
   return (
-    <div className="py-8 text-center text-sm text-gray-400">
-      Generating…
-    </div>
+    <div className="py-12 text-center text-sm text-gray-300">Generating…</div>
   )
 }

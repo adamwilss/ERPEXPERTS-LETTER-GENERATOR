@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import { useCompletion } from '@ai-sdk/react'
 import LetterForm, { FormValues } from '@/components/LetterForm'
 import LetterOutput from '@/components/LetterOutput'
@@ -25,88 +24,124 @@ export default function Home() {
   const parsed = completion ? parseOutput(completion) : null
 
   return (
-    <main className="min-h-screen">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-6">
+    <main className="min-h-[calc(100vh-56px)]">
+      {!submitted ? (
+        <div className="max-w-5xl mx-auto px-6 py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-12">
+            {/* Form */}
             <div>
-              <span className="text-lg font-bold tracking-tight text-gray-900">ERP EXPERTS</span>
-              <span className="ml-3 text-sm text-gray-400">Letter Portal</span>
+              <div className="mb-8">
+                <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">
+                  Generate outreach pack
+                </h1>
+                <p className="text-sm text-gray-500 mt-2 leading-relaxed">
+                  Enter the prospect details. The system researches the company and produces a
+                  three-part personalised letter pack in under 60 seconds.
+                </p>
+              </div>
+              <LetterForm onSubmit={handleSubmit} />
             </div>
-            <nav className="flex items-center gap-4 text-sm">
-              <span className="text-gray-900 font-medium">Single letter</span>
-              <Link href="/discover" className="text-gray-400 hover:text-gray-700">Discover leads</Link>
-              <Link href="/history" className="text-gray-400 hover:text-gray-700">History</Link>
-            </nav>
-          </div>
-          <span className="text-xs text-gray-400 uppercase tracking-widest">Internal · Confidential</span>
-        </div>
-      </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-10">
-        {!submitted ? (
-          <div className="max-w-xl">
-            <h1 className="text-2xl font-semibold text-gray-900 mb-1">Generate outreach pack</h1>
-            <p className="text-gray-500 text-sm mb-8">
-              Enter the prospect details below. The system will research the company and produce a
-              three-part letter pack in under 60 seconds.
-            </p>
-            <LetterForm onSubmit={handleSubmit} />
-          </div>
-        ) : (
-          <div>
-            {isLoading && !completion && (
-              <div className="flex flex-col items-start gap-3 py-12">
-                <div className="flex items-center gap-3">
-                  <div className="w-4 h-4 border-2 border-gray-900 border-t-transparent rounded-full animate-spin" />
-                  <span className="text-sm text-gray-600">Researching company…</span>
+            {/* Sidebar */}
+            <div className="space-y-4 pt-[52px]">
+              <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">
+                  What you get
+                </p>
+                <div className="space-y-3">
+                  {[
+                    ['Cover letter', 'Company-specific, signed by Ric. Ready to print and post.'],
+                    ['Business case', 'Pain points, benchmarks, and case study reference.'],
+                    ['Tech map', 'Which systems integrate, replace, or get eliminated.'],
+                  ].map(([title, desc]) => (
+                    <div key={title} className="flex gap-3">
+                      <span className="mt-0.5 w-1.5 h-1.5 rounded-full bg-gray-900 flex-shrink-0" />
+                      <div>
+                        <div className="text-xs font-medium text-gray-900">{title}</div>
+                        <div className="text-xs text-gray-400 mt-0.5">{desc}</div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <p className="text-xs text-gray-400 ml-7">Fetching and reading the company website — this takes around 15–30 seconds.</p>
-                <button
-                  onClick={() => setSubmitted(false)}
-                  className="ml-7 mt-2 text-xs text-gray-400 hover:text-gray-600 underline"
-                >
-                  Cancel
-                </button>
               </div>
-            )}
-
-            {isLoading && completion && (
-              <div className="mb-4 flex items-center gap-2 text-xs text-gray-400">
-                <div className="w-3 h-3 border border-gray-400 border-t-transparent rounded-full animate-spin" />
-                Generating letter pack…
+              <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                  Credentials
+                </p>
+                <div className="space-y-2 text-xs text-gray-500">
+                  <div className="flex justify-between">
+                    <span>Experience</span>
+                    <span className="font-medium text-gray-900">21 years NetSuite</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Projects completed</span>
+                    <span className="font-medium text-gray-900">350+</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Abandoned implementations</span>
+                    <span className="font-medium text-gray-900">0</span>
+                  </div>
+                </div>
               </div>
-            )}
-
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700">
-                Something went wrong: {error.message}. Check your API key and try again.
-              </div>
-            )}
-
-            {parsed && (
-              <LetterOutput
-                coverLetter={parsed.part1}
-                businessCase={parsed.part2}
-                techMap={parsed.part3}
-                companyName={companyName}
-                isStreaming={isLoading}
-              />
-            )}
-
-            {!isLoading && !error && (
-              <button
-                onClick={() => { setSubmitted(false) }}
-                className="mt-8 text-sm text-gray-400 hover:text-gray-600 underline"
-              >
-                Generate another
-              </button>
-            )}
+            </div>
           </div>
-        )}
-      </div>
-      <footer className="mt-auto py-6 text-center text-xs text-gray-400 border-t border-gray-100">
+        </div>
+      ) : (
+        <div className="max-w-5xl mx-auto px-6 py-10">
+          {isLoading && !completion && (
+            <div className="py-16 flex flex-col items-start gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-4 h-4 border-2 border-gray-900 border-t-transparent rounded-full animate-spin" />
+                <span className="text-sm font-medium text-gray-900">Researching {companyName}…</span>
+              </div>
+              <div className="ml-7 space-y-1.5">
+                <p className="text-xs text-gray-400">Reading the company website and gathering context.</p>
+                <p className="text-xs text-gray-400">This takes around 15–30 seconds.</p>
+              </div>
+              <button
+                onClick={() => setSubmitted(false)}
+                className="ml-7 mt-1 text-xs text-gray-400 hover:text-gray-700 underline underline-offset-2"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+
+          {isLoading && completion && (
+            <div className="mb-5 flex items-center gap-2 text-xs text-gray-400">
+              <div className="w-3 h-3 border border-gray-400 border-t-transparent rounded-full animate-spin" />
+              Writing letter pack…
+            </div>
+          )}
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-xl p-5 text-sm text-red-700">
+              Generation failed: {error.message}
+            </div>
+          )}
+
+          {parsed && (
+            <LetterOutput
+              coverLetter={parsed.part1}
+              businessCase={parsed.part2}
+              techMap={parsed.part3}
+              companyName={companyName}
+              isStreaming={isLoading}
+            />
+          )}
+
+          {!isLoading && !error && (
+            <button
+              onClick={() => setSubmitted(false)}
+              className="mt-8 text-sm text-gray-400 hover:text-gray-700 underline underline-offset-2 transition-colors"
+            >
+              ← Generate another
+            </button>
+          )}
+        </div>
+      )}
+
+      <footer className="mt-auto py-6 text-center text-xs text-gray-400 border-t border-gray-200">
         ERP Experts Ltd · Internal Outreach Generation Portal
       </footer>
     </main>

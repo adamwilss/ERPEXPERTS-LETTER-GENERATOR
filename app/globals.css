@@ -4,7 +4,22 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: 'Inter', system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
+@layer base {
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background-color: #F3F2EF;
+    color: #111;
+  }
+
+  .font-letter {
+    font-family: Georgia, 'Times New Roman', serif;
+  }
+}
+
+@layer utilities {
+  .letter-paper {
+    background: #FEFEFE;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 8px 32px rgba(0,0,0,0.05);
+  }
 }

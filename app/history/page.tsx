@@ -30,24 +30,7 @@ export default function HistoryPage() {
   }
 
   return (
-    <main className="min-h-screen">
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <div>
-              <span className="text-lg font-bold tracking-tight text-gray-900">ERP EXPERTS</span>
-              <span className="ml-3 text-sm text-gray-400">Letter Portal</span>
-            </div>
-            <nav className="flex items-center gap-4 text-sm">
-              <Link href="/" className="text-gray-400 hover:text-gray-700">Single letter</Link>
-              <Link href="/discover" className="text-gray-400 hover:text-gray-700">Discover leads</Link>
-              <span className="text-gray-900 font-medium">History</span>
-            </nav>
-          </div>
-          <span className="text-xs text-gray-400 uppercase tracking-widest">Internal · Confidential</span>
-        </div>
-      </div>
-
+    <main className="min-h-[calc(100vh-56px)]">
       <div className="max-w-5xl mx-auto px-6 py-10">
         <div className="flex items-end justify-between mb-6">
           <div>
