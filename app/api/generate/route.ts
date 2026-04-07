@@ -1,9 +1,9 @@
 import { streamText } from 'ai'
 import { createAnthropic } from '@ai-sdk/anthropic'
-
-const anthropic = createAnthropic({ apiKey: process.env.OPENAI_API_KEY })
 import { fetchResearch } from '@/lib/research'
 import { buildSystemPrompt, buildUserMessage } from '@/lib/prompt'
+
+const anthropic = createAnthropic({ apiKey: process.env.OPENAI_API_KEY })
 
 export const runtime = 'edge'
 export const maxDuration = 120

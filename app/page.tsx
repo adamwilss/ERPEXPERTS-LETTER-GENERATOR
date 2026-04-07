@@ -13,6 +13,7 @@ export default function Home() {
 
   const { complete, completion, isLoading, error } = useCompletion({
     api: '/api/generate',
+    streamProtocol: 'text',
   })
 
   const handleSubmit = async (values: FormValues) => {
