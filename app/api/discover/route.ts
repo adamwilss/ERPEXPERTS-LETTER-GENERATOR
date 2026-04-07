@@ -53,9 +53,12 @@ async function searchApollo(
     per_page: 100,
   }
 
-  // Build keyword tags from industry + any user-supplied keywords
-  const keywordTags = [industry, ...keywords.split(',').map((k) => k.trim()).filter(Boolean)]
-  body.q_organization_keyword_tags = keywordTags
+  // Only apply user-supplied keyword filter — industry scoring is handled by GPT-4o
+  // Apollo's q_organization_keyword_tags is unreliable and often returns zero results
+  const userKeywords = keywords.split(',').map((k) => k.trim()).filter(Boolean)
+  if (userKeywords.length > 0) {
+    body.q_organization_keyword_tags = userKeywords
+  }
 
   try {
     const res = await fetch('https://api.apollo.io/api/v1/mixed_companies_search', {
@@ -101,6 +104,8 @@ async function scoreWithClaude(orgs: ApolloOrganization[], industry: string): Pr
     .join('\n\n')
 
   const prompt = `You are evaluating UK businesses as NetSuite ERP prospects for ERP Experts, a Manchester-based NetSuite implementation firm.
+
+The user searched for companies in the "${industry}" sector. Prioritise companies that fit this profile, but score all companies on ERP-readiness regardless.
 
 Score each company 0–100 on ERP-readiness using these signals:
 - Multi-channel operations (ecommerce + wholesale/trade = high)
