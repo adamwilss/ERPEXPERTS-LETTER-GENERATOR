@@ -60,9 +60,9 @@ export default function DownloadMenu({ coverLetter, businessCase, techMap, compa
       <div>
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#666] bg-transparent border border-[#2a2a2a] rounded-lg hover:text-[#e8e8e8] hover:border-[#3a3a3a] focus:outline-none transition-all duration-150"
         >
-          <Download className="w-3.5 h-3.5" />
+          <Download className="w-3 h-3" />
           Export
         </button>
       </div>
@@ -70,22 +70,22 @@ export default function DownloadMenu({ coverLetter, businessCase, techMap, compa
       {isOpen && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
-          <div className="absolute right-0 z-20 w-48 mt-2 origin-top-right bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+          <div className="absolute right-0 z-20 w-44 mt-1.5 origin-top-right bg-[#161616] border border-[#2a2a2a] rounded-lg shadow-xl shadow-black/50">
             <div className="py-1">
               <button
                 onClick={handlePdf}
                 disabled={isGeneratingPdf}
-                className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+                className="w-full flex items-center px-3 py-2 text-xs text-[#888] hover:text-white hover:bg-white/[0.04] transition-colors disabled:opacity-40"
               >
-                {isGeneratingPdf ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileText className="w-4 h-4 mr-2 text-red-500" />}
+                {isGeneratingPdf ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <FileText className="w-3.5 h-3.5 mr-2 text-red-400" />}
                 Download PDF
               </button>
               <button
                 onClick={handleDocx}
                 disabled={isGeneratingDocx}
-                className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+                className="w-full flex items-center px-3 py-2 text-xs text-[#888] hover:text-white hover:bg-white/[0.04] transition-colors disabled:opacity-40"
               >
-                {isGeneratingDocx ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FileText className="w-4 h-4 mr-2 text-blue-500" />}
+                {isGeneratingDocx ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <FileText className="w-3.5 h-3.5 mr-2 text-blue-400" />}
                 Download DOCX
               </button>
             </div>

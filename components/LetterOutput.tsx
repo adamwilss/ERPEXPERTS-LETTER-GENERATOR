@@ -26,31 +26,24 @@ type TabId = (typeof tabs)[number]['id']
 function CoverLetterView({ content }: { content: string }) {
   const lines = content.split('\n')
 
-  // Find SUBJECT: line
   const subjectIdx = lines.findIndex((l) => l.trim().startsWith('SUBJECT:'))
   const subjectLine = subjectIdx >= 0
     ? lines[subjectIdx].replace(/^SUBJECT:\s*/i, '').replace(/^Re:\s*/i, '').trim()
     : ''
 
-  // Address block + date = everything before SUBJECT:
   const preLines = (subjectIdx > 0 ? lines.slice(0, subjectIdx) : []).filter((l) => l.trim())
 
-  // Body = everything after SUBJECT:
   const bodyRaw = subjectIdx >= 0
     ? lines.slice(subjectIdx + 1).join('\n').trim()
     : content
 
   const paragraphs = bodyRaw.split(/\n{2,}/).filter((p) => p.trim())
 
-  // Split body into salutation, paragraphs, sign-off
   const salutationIdx = paragraphs.findIndex((p) => /^dear\s/i.test(p.trim()))
   const signoffIdx = paragraphs.findIndex((p) =>
     /^yours sincerely|^kind regards|^best regards/i.test(p.trim())
   )
 
-  const salutation = salutationIdx >= 0 ? paragraphs[salutationIdx] : null
-  const body = paragraphs.filter((_, i) => i !== salutationIdx && (signoffIdx < 0 || i < signoffIdx))
-    .filter((_, i) => i !== (salutationIdx >= 0 && salutationIdx < 0 ? salutationIdx : -1))
   const signoff = signoffIdx >= 0 ? paragraphs.slice(signoffIdx).join('\n\n') : null
 
   return (
@@ -86,16 +79,23 @@ function CoverLetterView({ content }: { content: string }) {
 
       {/* Letter body */}
       <div className="font-letter text-[15px] leading-[1.8] text-gray-800 space-y-5">
-        {salutation && <p className="font-sans text-sm text-gray-700">{salutation}</p>}
         {paragraphs
           .filter((_, i) => {
             if (i === salutationIdx) return false
             if (signoffIdx >= 0 && i >= signoffIdx) return false
             return true
           })
-          .map((para, i) => (
-            <p key={i}>{para.trim()}</p>
-          ))}
+          .map((para, i) => {
+            if (i === 0 && salutationIdx >= 0) {
+              return (
+                <>
+                  <p key="sal" className="font-sans text-sm text-gray-700">{paragraphs[salutationIdx]}</p>
+                  <p key={i}>{para.trim()}</p>
+                </>
+              )
+            }
+            return <p key={i}>{para.trim()}</p>
+          })}
       </div>
 
       {/* Sign-off */}
@@ -174,15 +174,15 @@ export default function LetterOutput({
     <div>
       {/* Tab bar */}
       <div className="flex items-center gap-0.5 mb-6">
-        <div className="flex items-center gap-0.5 bg-white border border-gray-200 rounded-lg p-1">
+        <div className="flex items-center gap-0.5 bg-[#111] border border-[#1e1e1e] rounded-lg p-1">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${
+              className={`px-4 py-1.5 text-[13px] font-medium rounded-md transition-all duration-150 ${
                 activeTab === tab.id
-                  ? 'bg-[#0A0A0A] text-white shadow-sm'
-                  : 'text-gray-500 hover:text-gray-900'
+                  ? 'bg-white text-[#090909] shadow-sm'
+                  : 'text-[#555] hover:text-[#ccc]'
               }`}
             >
               {tab.label}
@@ -208,7 +208,7 @@ export default function LetterOutput({
         </div>
       </div>
 
-      {/* Document */}
+      {/* Document — light paper on dark background */}
       <div className={`letter-paper rounded-xl ${activeTab === 'map' ? 'max-w-4xl' : 'max-w-2xl'} p-10`}>
         {activeTab === 'letter' && (coverLetter ? <CoverLetterView content={coverLetter} /> : <Placeholder />)}
         {activeTab === 'case' && (businessCase ? <BusinessCaseView content={businessCase} /> : <Placeholder />)}

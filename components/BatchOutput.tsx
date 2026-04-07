@@ -52,48 +52,48 @@ export default function BatchOutput({ packs }: Props) {
     <div>
       {/* Progress header */}
       <div className="mb-6">
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between mb-3">
           <div>
-            <span className="text-sm font-semibold text-gray-900">
+            <span className="text-sm font-semibold text-white">
               {allDone ? `All ${total} letter packs ready` : `Generating letter packs…`}
             </span>
             {!allDone && currentlyGenerating && (
-              <span className="ml-2 text-xs text-gray-400">Writing {currentlyGenerating.company}</span>
+              <span className="ml-2 text-xs text-[#555]">Writing {currentlyGenerating.company}</span>
             )}
           </div>
-          <span className="text-sm font-semibold tabular-nums text-gray-500">{done}/{total}</span>
+          <span className="text-sm font-semibold tabular-nums text-[#555]">{done}/{total}</span>
         </div>
-        <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+        <div className="w-full h-1 bg-[#1a1a1a] rounded-full overflow-hidden">
           <div
-            className={`h-full rounded-full transition-all duration-700 ${allDone ? 'bg-emerald-500' : 'bg-gray-900'}`}
+            className={`h-full rounded-full transition-all duration-700 ${allDone ? 'bg-emerald-500' : 'bg-white'}`}
             style={{ width: `${(done / total) * 100}%` }}
           />
         </div>
         {!allDone && (
-          <p className="text-xs text-gray-400 mt-1.5">
-            ~{(total - done) * 45}s remaining · letters appear as each one finishes
+          <p className="text-xs text-[#444] mt-1.5">
+            ~{(total - done) * 45}s remaining · letters appear as each finishes
           </p>
         )}
       </div>
 
       {/* Pack list */}
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         {packs.map((pack) => {
           const isExpanded = expanded === pack.company
           const parsed = pack.completion ? parseOutput(pack.completion) : null
 
+          const borderColor = pack.status === 'generating'
+            ? 'border-[#2a2a2a]'
+            : pack.status === 'error'
+            ? 'border-red-500/20'
+            : pack.status === 'done'
+            ? 'border-[#1e1e1e] hover:border-[#2a2a2a]'
+            : 'border-[#141414]'
+
           return (
             <div
               key={pack.company}
-              className={`bg-white border rounded-xl overflow-hidden transition-colors ${
-                pack.status === 'done'
-                  ? 'border-gray-200 hover:border-gray-300'
-                  : pack.status === 'generating'
-                  ? 'border-gray-300'
-                  : pack.status === 'error'
-                  ? 'border-red-200'
-                  : 'border-gray-100'
-              }`}
+              className={`bg-[#111] border rounded-xl overflow-hidden transition-colors duration-150 ${borderColor}`}
             >
               {/* Header row */}
               <button
@@ -103,51 +103,51 @@ export default function BatchOutput({ packs }: Props) {
                   }
                 }}
                 className={`w-full flex items-center justify-between px-5 py-4 text-left transition-colors ${
-                  pack.status === 'done' ? 'hover:bg-gray-50 cursor-pointer' : 'cursor-default'
+                  pack.status === 'done' ? 'hover:bg-white/[0.02] cursor-pointer' : 'cursor-default'
                 }`}
               >
                 <div className="flex items-center gap-3">
                   {pack.status === 'done' ? (
                     <CheckCircle className="w-4 h-4 text-emerald-500 flex-shrink-0" />
                   ) : pack.status === 'generating' ? (
-                    <Loader2 className="w-4 h-4 text-gray-500 animate-spin flex-shrink-0" />
+                    <Loader2 className="w-4 h-4 text-[#555] animate-spin flex-shrink-0" />
                   ) : pack.status === 'error' ? (
                     <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
                   ) : (
-                    <span className="w-4 h-4 rounded-full border-2 border-gray-200 flex-shrink-0" />
+                    <span className="w-4 h-4 rounded-full border-2 border-[#2a2a2a] flex-shrink-0" />
                   )}
                   <span className={`text-sm font-medium ${
-                    pack.status === 'pending' ? 'text-gray-400' : 'text-gray-900'
+                    pack.status === 'pending' ? 'text-[#444]' : 'text-white'
                   }`}>
                     {pack.company}
                   </span>
                   {pack.status === 'error' && (
-                    <span className="text-xs text-red-500">{pack.error ?? 'Generation failed'}</span>
+                    <span className="text-xs text-red-400">{pack.error ?? 'Generation failed'}</span>
                   )}
                 </div>
 
                 <div className="flex items-center gap-2">
                   {pack.status === 'done' && (
                     <>
-                      <span className="text-xs text-gray-400">View pack</span>
+                      <span className="text-xs text-[#444]">View pack</span>
                       {isExpanded
-                        ? <ChevronDown className="w-4 h-4 text-gray-400" />
-                        : <ChevronRight className="w-4 h-4 text-gray-400" />
+                        ? <ChevronDown className="w-4 h-4 text-[#444]" />
+                        : <ChevronRight className="w-4 h-4 text-[#444]" />
                       }
                     </>
                   )}
                   {pack.status === 'generating' && (
-                    <span className="text-xs text-gray-400 animate-pulse">Writing…</span>
+                    <span className="text-xs text-[#444] animate-pulse">Writing…</span>
                   )}
                   {pack.status === 'pending' && (
-                    <span className="text-xs text-gray-300">Queued</span>
+                    <span className="text-xs text-[#333]">Queued</span>
                   )}
                 </div>
               </button>
 
               {/* Expanded letter output */}
               {isExpanded && parsed && (
-                <div className="border-t border-gray-100 p-6">
+                <div className="border-t border-[#1a1a1a] p-6">
                   <LetterOutput
                     coverLetter={parsed.part1}
                     businessCase={parsed.part2}
@@ -163,7 +163,7 @@ export default function BatchOutput({ packs }: Props) {
       </div>
 
       {allDone && (
-        <p className="mt-6 text-xs text-gray-400 text-center">
+        <p className="mt-6 text-xs text-[#333] text-center">
           Click any row to expand and review the letter pack.
         </p>
       )}

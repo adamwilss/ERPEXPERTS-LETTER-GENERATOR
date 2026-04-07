@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -8,19 +8,55 @@
   body {
     font-family: 'Inter', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
-    background-color: #F3F2EF;
-    color: #111;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: #090909;
+    color: #e8e8e8;
   }
 
   .font-letter {
     font-family: Georgia, 'Times New Roman', serif;
   }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #2a2a2a #0d0d0d;
+  }
+
+  *::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: #0d0d0d;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background-color: #2a2a2a;
+    border-radius: 3px;
+  }
 }
 
 @layer utilities {
+  /* Light paper surface for printed documents */
   .letter-paper {
-    background: #FEFEFE;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 8px 32px rgba(0,0,0,0.05);
+    background: #FDFDF8;
+    color: #111;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.04),
+      0 4px 6px rgba(0,0,0,0.4),
+      0 12px 48px rgba(0,0,0,0.5),
+      0 32px 80px rgba(0,0,0,0.3);
+  }
+
+  /* Dark card surface */
+  .surface {
+    background: #111111;
+    border: 1px solid #1e1e1e;
+  }
+
+  .surface-elevated {
+    background: #161616;
+    border: 1px solid #222222;
   }
 }
 
@@ -47,7 +83,7 @@
 
 @media print {
   .no-print { display: none !important; }
-  body { background: white !important; }
+  body { background: white !important; color: #111 !important; }
   .print-page { margin: 0; padding: 18mm 20mm; max-width: 100%; }
   @page { size: A4; margin: 0; }
 }
