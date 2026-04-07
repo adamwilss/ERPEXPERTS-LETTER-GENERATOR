@@ -69,32 +69,55 @@ function getDomain(org: ApolloOrganization): string | null {
   return raw.replace(/^https?:\/\//, '').split('/')[0].split('?')[0] || null
 }
 
+async function apolloPeopleSearch(apolloKey: string, body: Record<string, unknown>): Promise<ApolloPerson[]> {
+  const res = await fetch('https://api.apollo.io/api/v1/mixed_people/api_search', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache', 'x-api-key': apolloKey },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(12000),
+  })
+  if (!res.ok) {
+    console.error('People search failed:', res.status, await res.text())
+    return []
+  }
+  const data = await res.json()
+  const people: ApolloPerson[] = data.contacts ?? data.people ?? data.results ?? []
+  console.log(`Apollo people search returned ${people.length} results (keys: ${Object.keys(data).join(', ')})`)
+  return people
+}
+
+function buildByOrgMap(people: ApolloPerson[]): Record<string, ApolloPerson> {
+  const byOrg: Record<string, ApolloPerson> = {}
+  for (const person of people) {
+    const orgId = person.organization_id
+    if (!orgId) continue
+    const newRank = SENIORITY_RANK[person.seniority ?? ''] ?? 0
+    const existingRank = SENIORITY_RANK[byOrg[orgId]?.seniority ?? ''] ?? -1
+    if (!byOrg[orgId] || newRank > existingRank) byOrg[orgId] = person
+  }
+  return byOrg
+}
+
 async function searchContacts(apolloKey: string, orgIds: string[]): Promise<Record<string, ApolloPerson>> {
   if (orgIds.length === 0) return {}
   try {
-    const res = await fetch('https://api.apollo.io/api/v1/mixed_people/api_search', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache', 'x-api-key': apolloKey },
-      body: JSON.stringify({
-        organization_ids: orgIds,
-        person_seniority: ['c_suite', 'owner', 'founder', 'partner', 'vp', 'director'],
-        page: 1,
-        per_page: 50,
-      }),
-      signal: AbortSignal.timeout(15000),
+    // Primary search: by org ID
+    const people = await apolloPeopleSearch(apolloKey, {
+      organization_ids: orgIds,
+      person_seniority: ['c_suite', 'owner', 'founder', 'partner', 'vp', 'director'],
+      page: 1,
+      per_page: 50,
     })
-    if (!res.ok) { console.error('People search failed:', res.status); return {} }
-    const data = await res.json()
-    const people: ApolloPerson[] = data.people ?? []
-    const byOrg: Record<string, ApolloPerson> = {}
-    for (const person of people) {
-      const orgId = person.organization_id
-      if (!orgId) continue
-      const newRank = SENIORITY_RANK[person.seniority ?? ''] ?? 0
-      const existingRank = SENIORITY_RANK[byOrg[orgId]?.seniority ?? ''] ?? -1
-      if (!byOrg[orgId] || newRank > existingRank) byOrg[orgId] = person
-    }
-    return byOrg
+    if (people.length > 0) return buildByOrgMap(people)
+
+    // Fallback: try q_organization_ids (alternative param name)
+    const fallback = await apolloPeopleSearch(apolloKey, {
+      q_organization_ids: orgIds,
+      person_seniority: ['c_suite', 'owner', 'founder', 'partner', 'vp', 'director'],
+      page: 1,
+      per_page: 50,
+    })
+    return buildByOrgMap(fallback)
   } catch (err) {
     console.error('People search error:', err)
     return {}

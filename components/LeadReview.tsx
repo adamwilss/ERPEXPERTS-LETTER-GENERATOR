@@ -176,6 +176,15 @@ export default function LeadReview({ leads: initialLeads, totalSearched, onGener
                     </div>
                   )}
 
+                  <div className="flex items-center justify-between gap-4 mb-3">
+                    <button
+                      onClick={() => onGenerate([lead])}
+                      className="text-xs px-3 py-1.5 bg-[#0A0A0A] text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
+                    >
+                      Generate this letter
+                    </button>
+                  </div>
+
                   <div className="flex flex-wrap gap-5">
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-gray-400">Address to:</span>
