@@ -29,7 +29,6 @@ export interface Lead {
   erpScore: number
   rationale: string
   contactTitle: string
-  // Enriched fields
   contactName?: string
   contactEmail?: string
   contactLinkedIn?: string
@@ -44,30 +43,38 @@ export interface Lead {
 }
 
 const SENIORITY_RANK: Record<string, number> = {
-  c_suite: 7,
-  owner: 6,
-  founder: 6,
-  partner: 5,
-  vp: 4,
-  head: 3,
-  director: 3,
-  manager: 2,
-  senior: 1,
+  c_suite: 7, owner: 6, founder: 6, partner: 5, vp: 4, head: 3, director: 3, manager: 2, senior: 1,
 }
 
-async function searchContacts(
-  apolloKey: string,
-  orgIds: string[]
-): Promise<Record<string, ApolloPerson>> {
+// Enrich a single org by domain — returns full profile from Apollo
+async function enrichOrg(apolloKey: string, domain: string): Promise<Partial<ApolloOrganization>> {
+  try {
+    const res = await fetch(
+      `https://api.apollo.io/api/v1/organizations/enrich?domain=${encodeURIComponent(domain)}`,
+      {
+        headers: { 'x-api-key': apolloKey, 'Cache-Control': 'no-cache' },
+        signal: AbortSignal.timeout(8000),
+      }
+    )
+    if (!res.ok) return {}
+    const data = await res.json()
+    return data.organization ?? {}
+  } catch {
+    return {}
+  }
+}
+
+function getDomain(org: ApolloOrganization): string | null {
+  const raw = org.primary_domain ?? org.website_url ?? ''
+  return raw.replace(/^https?:\/\//, '').split('/')[0].split('?')[0] || null
+}
+
+async function searchContacts(apolloKey: string, orgIds: string[]): Promise<Record<string, ApolloPerson>> {
   if (orgIds.length === 0) return {}
   try {
     const res = await fetch('https://api.apollo.io/api/v1/mixed_people/search', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-cache',
-        'x-api-key': apolloKey,
-      },
+      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache', 'x-api-key': apolloKey },
       body: JSON.stringify({
         organization_ids: orgIds,
         person_seniority: ['c_suite', 'owner', 'founder', 'partner', 'vp', 'director'],
@@ -76,24 +83,16 @@ async function searchContacts(
       }),
       signal: AbortSignal.timeout(15000),
     })
-    if (!res.ok) {
-      console.error('People search failed:', res.status, await res.text())
-      return {}
-    }
+    if (!res.ok) { console.error('People search failed:', res.status); return {} }
     const data = await res.json()
     const people: ApolloPerson[] = data.people ?? []
-
-    // Pick highest-seniority person per org
     const byOrg: Record<string, ApolloPerson> = {}
     for (const person of people) {
       const orgId = person.organization_id
       if (!orgId) continue
-      const existing = byOrg[orgId]
       const newRank = SENIORITY_RANK[person.seniority ?? ''] ?? 0
-      const existingRank = SENIORITY_RANK[existing?.seniority ?? ''] ?? -1
-      if (!existing || newRank > existingRank) {
-        byOrg[orgId] = person
-      }
+      const existingRank = SENIORITY_RANK[byOrg[orgId]?.seniority ?? ''] ?? -1
+      if (!byOrg[orgId] || newRank > existingRank) byOrg[orgId] = person
     }
     return byOrg
   } catch (err) {
@@ -105,18 +104,21 @@ async function searchContacts(
 export async function POST(req: Request) {
   const { orgs, industry } = await req.json() as { orgs: ApolloOrganization[]; industry: string }
 
-  if (!orgs?.length || !industry) {
-    return new Response('Missing orgs or industry', { status: 400 })
-  }
+  if (!orgs?.length || !industry) return new Response('Missing orgs or industry', { status: 400 })
 
   const apolloKey = process.env.APOLLO_API_KEY
-  if (!apolloKey) {
-    return new Response('APOLLO_API_KEY not configured', { status: 500 })
+  if (!apolloKey) return new Response('APOLLO_API_KEY not configured', { status: 500 })
+
+  // Filter out orgs with no useful data at all
+  const usable = orgs
+    .filter((o) => o.name && (o.estimated_num_employees || o.short_description || o.seo_description || o.industry))
+    .slice(0, 100)
+
+  if (usable.length === 0) {
+    return Response.json({ error: 'Apollo returned no companies with usable data. Try different search criteria.' }, { status: 404 })
   }
 
-  const capped = orgs.slice(0, 100)
-
-  const companySummaries = capped
+  const companySummaries = usable
     .map((o, i) => {
       const emp = o.estimated_num_employees ? `${o.estimated_num_employees} employees` : 'unknown size'
       const desc = (o.short_description || o.seo_description || 'No description').slice(0, 150)
@@ -124,7 +126,7 @@ export async function POST(req: Request) {
       const tech = o.technology_names?.slice(0, 5).join(', ') || ''
       const rev = o.annual_revenue_printed ? ` | Revenue: ${o.annual_revenue_printed}` : ''
       const techLine = tech ? ` | Tech: ${tech}` : ''
-      return `${i + 1}. ${o.name ?? 'Unknown'} | ${o.industry ?? industry} | ${emp} | ${loc}${rev}${techLine}\n   ${desc}`
+      return `${i + 1}. ${o.name} | ${o.industry ?? industry} | ${emp} | ${loc}${rev}${techLine}\n   ${desc}`
     })
     .join('\n\n')
 
@@ -140,7 +142,7 @@ ${companySummaries}
 Return ONLY valid JSON, no markdown:
 {"scores":[{"index":1,"score":85,"rationale":"Two sentences on ERP-readiness.","contactTitle":"Finance Director"}]}
 
-Score all ${capped.length} companies. contactTitle = most likely NetSuite decision-maker (e.g. Finance Director, MD, CFO, Operations Director).`
+Score all ${usable.length} companies. contactTitle = most likely NetSuite decision-maker (e.g. Finance Director, MD, CFO, Operations Director).`
 
   const { text } = await generateText({
     model: openai('gpt-4o'),
@@ -159,7 +161,7 @@ Score all ${capped.length} companies. contactTitle = most likely NetSuite decisi
 
   const scored = parsed.scores
     .map(({ index, score, rationale, contactTitle }) => {
-      const org = orgs[index - 1]
+      const org = usable[index - 1]
       if (!org) return null
       return { org, score, rationale, contactTitle }
     })
@@ -167,44 +169,63 @@ Score all ${capped.length} companies. contactTitle = most likely NetSuite decisi
     .sort((a, b) => b.score - a.score)
     .slice(0, 10)
 
-  // Enrich top 10 with named contacts from Apollo people search
+  // Enrich top 10 via Apollo org enrichment (full profile by domain) + people search in parallel
   const topOrgIds = scored.map((s) => s.org.id).filter((id): id is string => Boolean(id))
-  const contacts = await searchContacts(apolloKey, topOrgIds)
+
+  const [enrichedMap, contacts] = await Promise.all([
+    // Enrich each top-10 org by domain to fill missing fields
+    Promise.all(
+      scored.map(async (s) => {
+        const domain = getDomain(s.org)
+        if (!domain) return { id: s.org.id, data: {} as Partial<ApolloOrganization> }
+        const data = await enrichOrg(apolloKey, domain)
+        return { id: s.org.id, data }
+      })
+    ).then((results) => {
+      const map: Record<string, Partial<ApolloOrganization>> = {}
+      for (const r of results) { if (r.id) map[r.id] = r.data }
+      return map
+    }),
+    searchContacts(apolloKey, topOrgIds),
+  ])
 
   const leads: Lead[] = scored.map(({ org, score, rationale, contactTitle }, i) => {
-    const contact = org.id ? contacts[org.id] : undefined
-    const loc = [org.city, org.state, org.country].filter(Boolean).join(', ') || undefined
+    // Merge search result with enrichment data — enrichment wins for missing fields
+    const enriched = (org.id ? enrichedMap[org.id] : {}) ?? {}
+    const merged: ApolloOrganization = { ...org, ...Object.fromEntries(Object.entries(enriched).filter(([, v]) => v != null && v !== '')) }
 
-    // Build postal address for physical letter
+    const contact = org.id ? contacts[org.id] : undefined
+    const loc = [merged.city, merged.state, merged.country].filter(Boolean).join(', ') || undefined
+
     const addressParts = [
-      org.street_address,
-      org.city,
-      org.state,
-      org.postal_code,
-      org.country !== 'United Kingdom' ? org.country : undefined,
+      merged.street_address,
+      merged.city,
+      merged.state,
+      merged.postal_code,
+      merged.country !== 'United Kingdom' ? merged.country : undefined,
     ].filter(Boolean)
-    const postalAddress = org.raw_address ?? (addressParts.length > 0 ? addressParts.join('\n') : undefined)
+    const postalAddress = merged.raw_address ?? (addressParts.length > 0 ? addressParts.join('\n') : undefined)
 
     return {
       rank: i + 1,
-      company: org.name ?? 'Unknown',
-      website: org.website_url ?? org.primary_domain ?? '',
-      industry: org.industry ?? industry,
-      employees: org.estimated_num_employees ? `~${org.estimated_num_employees}` : 'Unknown',
-      description: org.short_description || org.seo_description || '',
+      company: merged.name ?? org.name ?? 'Unknown',
+      website: merged.website_url ?? merged.primary_domain ?? org.website_url ?? '',
+      industry: merged.industry ?? org.industry ?? industry,
+      employees: merged.estimated_num_employees ? `~${merged.estimated_num_employees}` : 'Unknown',
+      description: merged.short_description || merged.seo_description || org.short_description || org.seo_description || '',
       erpScore: score,
       rationale,
       contactTitle: contact?.title ?? contactTitle,
       contactName: contact?.name,
       contactEmail: contact?.email,
       contactLinkedIn: contact?.linkedin_url,
-      orgId: org.id,
-      foundedYear: org.founded_year,
-      annualRevenue: org.annual_revenue_printed,
-      techStack: org.technology_names?.slice(0, 8),
+      orgId: merged.id,
+      foundedYear: merged.founded_year,
+      annualRevenue: merged.annual_revenue_printed,
+      techStack: (merged.technology_names ?? org.technology_names)?.slice(0, 8),
       location: loc,
-      phone: org.phone,
-      linkedinUrl: org.linkedin_url,
+      phone: merged.phone,
+      linkedinUrl: merged.linkedin_url,
       postalAddress,
     }
   })
