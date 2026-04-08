@@ -42,17 +42,18 @@ interface Props {
 }
 
 function ScoreDisplay({ erpScore, dataScore }: { erpScore: number; dataScore: number }) {
-  // Data completeness is the primary signal — leads without a contact or address aren't actionable
+  // dataScore: 70+ = complete (name+email+address), 35–69 = partial, <35 = sparse/no contact
   const dataColor = dataScore >= 70
     ? 'text-emerald-400'
-    : dataScore >= 40
+    : dataScore >= 35
     ? 'text-amber-400'
     : 'text-[#555]'
-  const dataLabel = dataScore >= 70 ? 'Ready' : dataScore >= 40 ? 'Partial' : 'Sparse'
+  const dataLabel = dataScore >= 70 ? 'Ready' : dataScore >= 35 ? 'Partial' : 'Sparse'
 
-  const erpBarColor = erpScore >= 75
+  // erpScore: 0–100 with real spread — 60+ is a strong prospect
+  const erpBarColor = erpScore >= 60
     ? 'bg-emerald-500'
-    : erpScore >= 50
+    : erpScore >= 35
     ? 'bg-amber-500'
     : 'bg-[#333]'
 
@@ -62,11 +63,11 @@ function ScoreDisplay({ erpScore, dataScore }: { erpScore: number; dataScore: nu
         <span className={`text-2xl font-bold tabular-nums leading-none ${dataColor}`}>{dataScore}</span>
         <span className="text-[10px] text-[#444] mt-0.5 uppercase tracking-[0.07em]">{dataLabel}</span>
       </div>
-      <div className="flex items-center gap-1.5" title={`ERP fit score: ${erpScore}/100`}>
+      <div className="flex items-center gap-1.5" title={`ERP fit: ${erpScore}/100`}>
         <div className="w-12 h-1 bg-[#1a1a1a] rounded-full overflow-hidden">
           <div className={`h-full rounded-full transition-all duration-500 ${erpBarColor}`} style={{ width: `${erpScore}%` }} />
         </div>
-        <span className="text-[10px] text-[#333]">ERP fit</span>
+        <span className="text-[10px] text-[#333]">{erpScore} ERP</span>
       </div>
     </div>
   )

@@ -128,14 +128,22 @@ function buildAddress(org: ApolloOrg, personOrg?: ApolloPerson['organization']):
 }
 
 // Data completeness score — primary display signal.
+// Designed to spread across 0–100: sparse (0–30), partial (35–65), complete (70–100).
 function computeDataScore(lead: Partial<StreamedLead>): number {
   let s = 0
-  if (lead.contactName) s += 40
-  if (lead.contactEmail) s += 20
-  if (lead.postalAddress && /\d/.test(lead.postalAddress)) s += 20
-  else if (lead.postalAddress) s += 8
-  if (lead.description && lead.description.length > 60) s += 8
-  if (lead.techStack?.length) s += 7
+  // Contact identification — split so having a name alone isn't worth 40
+  if (lead.contactName) s += 20
+  if (lead.contactEmail) s += 28   // email is the most actionable signal
+  if (lead.postalAddress && /\d/.test(lead.postalAddress)) s += 25  // postable address
+  else if (lead.postalAddress) s += 10   // city-only partial address
+  if (lead.contactLinkedIn) s += 5       // can verify/research the person
+  // Content quality — affects letter generation
+  const descLen = lead.description?.length ?? 0
+  if (descLen > 100) s += 10
+  else if (descLen > 40) s += 5
+  // Operational context
+  if ((lead.techStack?.length ?? 0) >= 3) s += 7
+  else if ((lead.techStack?.length ?? 0) >= 1) s += 3
   if (lead.annualRevenue) s += 5
   return Math.min(100, s)
 }
@@ -158,19 +166,41 @@ function preScore(org: ApolloOrg): number {
 }
 
 // Heuristic ERP fit score — instant, no AI call. Used for partial/sparse leads.
+// Designed to spread across 0–100. Base is 0 — a score must be earned.
 function computeErpScore(org: ApolloOrg): number {
-  let s = 20
+  let s = 0
   const emp = org.estimated_num_employees ?? 0
-  if (emp >= 50 && emp <= 500) s += 35
-  else if (emp >= 20 && emp <= 2000) s += 20
+
+  // Employee count — 50–200 is the NetSuite sweet spot
+  if (emp >= 50 && emp <= 200) s += 40
+  else if (emp > 200 && emp <= 500) s += 30
+  else if ((emp >= 20 && emp < 50) || (emp > 500 && emp <= 1000)) s += 18
   else if (emp > 0) s += 8
-  if (org.annual_revenue_printed) s += 10
-  if (org.technology_names?.length) s += Math.min(15, org.technology_names.length * 3)
+
+  // Tech stack count — many tools signals a fragmented stack and real ERP pain
+  const techCount = org.technology_names?.length ?? 0
+  if (techCount >= 8) s += 25
+  else if (techCount >= 5) s += 18
+  else if (techCount >= 3) s += 11
+  else if (techCount >= 1) s += 5
+
+  // Description keyword matches — operational complexity signals
   const desc = (org.short_description || org.seo_description || '').toLowerCase()
-  const erpKeywords = ['ecommerce', 'distribution', 'manufacturing', 'wholesale', 'inventory',
-    'multi-site', 'international', 'logistics', 'supply chain', 'retail', 'stock', 'warehouse',
-    'field service', 'construction', 'professional services']
-  s += Math.min(20, erpKeywords.filter(k => desc.includes(k)).length * 7)
+  const erpKeywords = [
+    'ecommerce', 'distribution', 'manufacturing', 'wholesale', 'inventory',
+    'multi-site', 'international', 'logistics', 'supply chain', 'retail',
+    'stock', 'warehouse', 'field service', 'construction', 'professional services',
+    'multi-currency', 'import', 'export', 'fulfilment', 'procurement',
+  ]
+  const hits = erpKeywords.filter(k => desc.includes(k)).length
+  if (hits >= 3) s += 20
+  else if (hits === 2) s += 13
+  else if (hits === 1) s += 6
+
+  // Revenue and tenure signals
+  if (org.annual_revenue_printed) s += 10
+  if (org.founded_year && org.founded_year < 2012) s += 5  // legacy systems likely
+
   return Math.min(100, s)
 }
 
