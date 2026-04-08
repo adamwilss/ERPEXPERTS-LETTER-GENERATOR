@@ -349,7 +349,6 @@ export async function POST(req: Request) {
             const desc = merged.short_description || merged.seo_description || ''
 
             const lead: RawLead = {
-              rank: 0, // assigned when streaming
               company: merged.name ?? org.name ?? 'Unknown',
               website: merged.website_url ?? merged.primary_domain ?? domain,
               industry: merged.industry ?? org.industry ?? industry,
