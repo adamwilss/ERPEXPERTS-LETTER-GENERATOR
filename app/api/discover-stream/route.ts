@@ -127,19 +127,19 @@ function buildAddress(org: ApolloOrg, personOrg?: ApolloPerson['organization']):
   return undefined
 }
 
-// Data completeness score — "can we send this lead a letter right now?"
-// Purely about whether the required fields exist. No content quality mixing.
-//   0        = no contact at all
-//   35       = name only
-//   60       = name + email
-//   75       = name + postal address
-//   100      = name + email + postal address
+// Data completeness score — "can we send this lead a personalised letter?"
+// Name is the gate: no name = 0, regardless of what else exists.
+//   0   = no contact name
+//   40  = name only
+//   65  = name + email
+//   75  = name + postal address
+//   100 = name + email + postal address
 function computeDataScore(lead: Partial<StreamedLead>): number {
-  let s = 0
-  if (lead.contactName) s += 35
+  if (!lead.contactName) return 0
+  let s = 40
   if (lead.contactEmail) s += 25
-  if (lead.postalAddress && /\d/.test(lead.postalAddress)) s += 40
-  return Math.min(100, s)
+  if (lead.postalAddress && /\d/.test(lead.postalAddress)) s += 35
+  return s
 }
 
 // Pre-score based on org-level data in the Apollo search response (no API calls).
@@ -173,12 +173,12 @@ function computeErpScore(org: ApolloOrg): number {
   const techCount = org.technology_names?.length ?? 0
   const desc = (org.short_description || org.seo_description || '').toLowerCase()
 
-  // Employee count — scored on a gradient, not just bands
+  // Employee count — capped at 25 so it can't dominate when other signals are absent
   let empScore = 0
-  if (emp >= 50 && emp <= 200) empScore = 40
-  else if (emp > 200 && emp <= 500) empScore = 30
-  else if ((emp >= 20 && emp < 50) || (emp > 500 && emp <= 1500)) empScore = 18
-  else if (emp > 0) empScore = 6
+  if (emp >= 50 && emp <= 200) empScore = 25
+  else if (emp > 200 && emp <= 500) empScore = 20
+  else if ((emp >= 20 && emp < 50) || (emp > 500 && emp <= 1500)) empScore = 12
+  else if (emp > 0) empScore = 5
 
   // Tech stack breadth — number of named tools Apollo has detected
   let techScore = 0

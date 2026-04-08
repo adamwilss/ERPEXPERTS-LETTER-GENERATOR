@@ -487,7 +487,7 @@ export default function LeadReview({ leads: allLeads, totalSearched, onGenerate,
                         </div>
                       </div>
                       <div className="flex items-center gap-3 flex-shrink-0">
-                        <span className={`text-sm font-bold tabular-nums ${lead.dataScore >= 70 ? 'text-emerald-500/50' : lead.dataScore >= 40 ? 'text-amber-500/50' : 'text-[#333]'}`}>
+                        <span className={`text-sm font-bold tabular-nums ${lead.dataScore >= 75 ? 'text-emerald-500/50' : lead.dataScore >= 40 ? 'text-amber-500/50' : 'text-[#333]'}`}>
                           {lead.dataScore}
                         </span>
                         {active.length < ACTIVE_SIZE && (
