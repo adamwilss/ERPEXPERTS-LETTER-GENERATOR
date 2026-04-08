@@ -172,7 +172,8 @@ export default function DiscoverPage() {
             recipientName: lead.recipientName || lead.contactTitle,
             jobTitle: lead.contactTitle,
             postalAddress: lead.postalAddress || '',
-            notes: `Industry: ${lead.industry}. Size: ${lead.employees}. ${lead.description}`.slice(0, 500),
+            industry: lead.industry,
+            notes: `Size: ${lead.employees}. ${lead.description}`.slice(0, 400),
           }),
         })
         if (!res.ok) throw new Error(await res.text())

@@ -121,10 +121,11 @@ interface UserMessageArgs {
   notes: string
   research: string
   postalAddress?: string
+  netsuiteContext?: string
 }
 
 export function buildUserMessage(args: UserMessageArgs): string {
-  const { company, url, recipientName, jobTitle, notes, research, postalAddress } = args
+  const { company, url, recipientName, jobTitle, notes, research, postalAddress, netsuiteContext } = args
   const today = new Date().toLocaleDateString('en-GB', {
     day: 'numeric',
     month: 'long',
@@ -147,6 +148,6 @@ ${notes ? `\nAdditional notes from the user:\n${notes}` : ''}
 
 RESEARCH:
 ${research}
-
+${netsuiteContext ? `\n${netsuiteContext}` : ''}
 Now produce the three-part letter pack. Follow the output format exactly. Start immediately with ---PART1---`
 }
