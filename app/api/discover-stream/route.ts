@@ -127,24 +127,18 @@ function buildAddress(org: ApolloOrg, personOrg?: ApolloPerson['organization']):
   return undefined
 }
 
-// Data completeness score — primary display signal.
-// Designed to spread across 0–100: sparse (0–30), partial (35–65), complete (70–100).
+// Data completeness score — "can we send this lead a letter right now?"
+// Purely about whether the required fields exist. No content quality mixing.
+//   0        = no contact at all
+//   35       = name only
+//   60       = name + email
+//   75       = name + postal address
+//   100      = name + email + postal address
 function computeDataScore(lead: Partial<StreamedLead>): number {
   let s = 0
-  // Contact identification — split so having a name alone isn't worth 40
-  if (lead.contactName) s += 20
-  if (lead.contactEmail) s += 28   // email is the most actionable signal
-  if (lead.postalAddress && /\d/.test(lead.postalAddress)) s += 25  // postable address
-  else if (lead.postalAddress) s += 10   // city-only partial address
-  if (lead.contactLinkedIn) s += 5       // can verify/research the person
-  // Content quality — affects letter generation
-  const descLen = lead.description?.length ?? 0
-  if (descLen > 100) s += 10
-  else if (descLen > 40) s += 5
-  // Operational context
-  if ((lead.techStack?.length ?? 0) >= 3) s += 7
-  else if ((lead.techStack?.length ?? 0) >= 1) s += 3
-  if (lead.annualRevenue) s += 5
+  if (lead.contactName) s += 35
+  if (lead.contactEmail) s += 25
+  if (lead.postalAddress && /\d/.test(lead.postalAddress)) s += 40
   return Math.min(100, s)
 }
 
@@ -165,27 +159,35 @@ function preScore(org: ApolloOrg): number {
   return s
 }
 
-// Heuristic ERP fit score — instant, no AI call. Used for partial/sparse leads.
-// Designed to spread across 0–100. Base is 0 — a score must be earned.
+// ERP fit score — "is this company a good NetSuite prospect?"
+// Four independent signal groups, each with its own ceiling.
+// Calibrated so a typical good prospect lands 55–75, an ideal one 80+.
+//
+//   Employee count   0–40   (50–200 is the NetSuite sweet spot)
+//   Tech breadth     0–30   (many tools = fragmented stack = real pain)
+//   Op. keywords     0–20   (description signals operational complexity)
+//   Revenue signal   0–10   (revenue data = scale and ability to invest)
+//
 function computeErpScore(org: ApolloOrg): number {
-  let s = 0
   const emp = org.estimated_num_employees ?? 0
-
-  // Employee count — 50–200 is the NetSuite sweet spot
-  if (emp >= 50 && emp <= 200) s += 40
-  else if (emp > 200 && emp <= 500) s += 30
-  else if ((emp >= 20 && emp < 50) || (emp > 500 && emp <= 1000)) s += 18
-  else if (emp > 0) s += 8
-
-  // Tech stack count — many tools signals a fragmented stack and real ERP pain
   const techCount = org.technology_names?.length ?? 0
-  if (techCount >= 8) s += 25
-  else if (techCount >= 5) s += 18
-  else if (techCount >= 3) s += 11
-  else if (techCount >= 1) s += 5
-
-  // Description keyword matches — operational complexity signals
   const desc = (org.short_description || org.seo_description || '').toLowerCase()
+
+  // Employee count — scored on a gradient, not just bands
+  let empScore = 0
+  if (emp >= 50 && emp <= 200) empScore = 40
+  else if (emp > 200 && emp <= 500) empScore = 30
+  else if ((emp >= 20 && emp < 50) || (emp > 500 && emp <= 1500)) empScore = 18
+  else if (emp > 0) empScore = 6
+
+  // Tech stack breadth — number of named tools Apollo has detected
+  let techScore = 0
+  if (techCount >= 8) techScore = 30
+  else if (techCount >= 5) techScore = 22
+  else if (techCount >= 3) techScore = 14
+  else if (techCount >= 1) techScore = 7
+
+  // Operational complexity keywords in company description
   const erpKeywords = [
     'ecommerce', 'distribution', 'manufacturing', 'wholesale', 'inventory',
     'multi-site', 'international', 'logistics', 'supply chain', 'retail',
@@ -193,15 +195,12 @@ function computeErpScore(org: ApolloOrg): number {
     'multi-currency', 'import', 'export', 'fulfilment', 'procurement',
   ]
   const hits = erpKeywords.filter(k => desc.includes(k)).length
-  if (hits >= 3) s += 20
-  else if (hits === 2) s += 13
-  else if (hits === 1) s += 6
+  const keywordScore = hits >= 3 ? 20 : hits === 2 ? 13 : hits === 1 ? 7 : 0
 
-  // Revenue and tenure signals
-  if (org.annual_revenue_printed) s += 10
-  if (org.founded_year && org.founded_year < 2012) s += 5  // legacy systems likely
+  // Revenue present = scale signal
+  const revenueScore = org.annual_revenue_printed ? 10 : 0
 
-  return Math.min(100, s)
+  return Math.min(100, empScore + techScore + keywordScore + revenueScore)
 }
 
 function defaultContactTitle(industry: string): string {

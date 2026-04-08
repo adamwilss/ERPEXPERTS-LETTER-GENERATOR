@@ -42,18 +42,23 @@ interface Props {
 }
 
 function ScoreDisplay({ erpScore, dataScore }: { erpScore: number; dataScore: number }) {
-  // dataScore: 70+ = complete (name+email+address), 35–69 = partial, <35 = sparse/no contact
-  const dataColor = dataScore >= 70
+  // dataScore: exactly 3 possible states
+  //   100 = name + email + address (ready to post)
+  //    75 = name + address (postable, no email)
+  //    60 = name + email (email only, no address)
+  //    35 = name only
+  //     0 = no contact
+  const dataColor = dataScore >= 75
     ? 'text-emerald-400'
     : dataScore >= 35
     ? 'text-amber-400'
     : 'text-[#555]'
-  const dataLabel = dataScore >= 70 ? 'Ready' : dataScore >= 35 ? 'Partial' : 'Sparse'
+  const dataLabel = dataScore >= 75 ? 'Ready' : dataScore >= 35 ? 'Partial' : 'No contact'
 
-  // erpScore: 0–100 with real spread — 60+ is a strong prospect
-  const erpBarColor = erpScore >= 60
+  // erpScore: 55+ = strong prospect, 30–54 = moderate, <30 = weak signals
+  const erpBarColor = erpScore >= 55
     ? 'bg-emerald-500'
-    : erpScore >= 35
+    : erpScore >= 30
     ? 'bg-amber-500'
     : 'bg-[#333]'
 
