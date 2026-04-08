@@ -143,14 +143,13 @@ function buildAddress(org: ApolloOrg, personOrg?: ApolloPerson['organization']):
 // Data completeness score — "can we send this lead a personalised letter?"
 // Name is the gate: no name = 0, regardless of what else exists.
 //   0   = no contact name
-//   40  = name only
+//   35  = name only
 //   65  = name + email
-//   75  = name + postal address
 //   100 = name + email + postal address
 function computeDataScore(lead: Partial<StreamedLead>): number {
   if (!lead.contactName) return 0
-  let s = 40
-  if (lead.contactEmail) s += 25
+  let s = 35
+  if (lead.contactEmail) s += 30
   if (lead.postalAddress && /\d/.test(lead.postalAddress)) s += 35
   return s
 }
@@ -173,47 +172,57 @@ function preScore(org: ApolloOrg): number {
 }
 
 // ERP fit score — "is this company a good NetSuite prospect?"
-// Four independent signal groups, each with its own ceiling.
-// Calibrated so a typical good prospect lands 55–75, an ideal one 80+.
+// Four signal groups, weighted by how reliably each predicts ERP pain.
 //
-//   Employee count   0–40   (50–200 is the NetSuite sweet spot)
-//   Tech breadth     0–30   (many tools = fragmented stack = real pain)
-//   Op. keywords     0–20   (description signals operational complexity)
-//   Revenue signal   0–10   (revenue data = scale and ability to invest)
+//   Operational keywords  0–40  (strongest signal: description reveals complexity)
+//   Company size fit      0–25  (smooth tent curve — no cliffs)
+//   Tech fragmentation    0–20  (many tools = disconnected stack, but not dominant)
+//   Revenue indicator     0–15  (scale signal: can they invest?)
 //
 function computeErpScore(org: ApolloOrg): number {
   const emp = org.estimated_num_employees ?? 0
   const techCount = org.technology_names?.length ?? 0
-  const desc = (org.short_description || org.seo_description || '').toLowerCase()
+  const text = `${org.short_description ?? ''} ${org.seo_description ?? ''} ${org.industry ?? ''} ${org.keywords?.join(' ') ?? ''}`.toLowerCase()
 
-  // Employee count — capped at 25 so it can't dominate when other signals are absent
-  let empScore = 0
-  if (emp >= 50 && emp <= 200) empScore = 25
-  else if (emp > 200 && emp <= 500) empScore = 20
-  else if ((emp >= 20 && emp < 50) || (emp > 500 && emp <= 1500)) empScore = 12
-  else if (emp > 0) empScore = 5
-
-  // Tech stack breadth — number of named tools Apollo has detected
-  let techScore = 0
-  if (techCount >= 8) techScore = 30
-  else if (techCount >= 5) techScore = 22
-  else if (techCount >= 3) techScore = 14
-  else if (techCount >= 1) techScore = 7
-
-  // Operational complexity keywords in company description
+  // 1. Operational complexity keywords (0–40)
+  // Each matching keyword adds 6pts, capped at 40 (≥7 keywords = max).
   const erpKeywords = [
-    'ecommerce', 'distribution', 'manufacturing', 'wholesale', 'inventory',
-    'multi-site', 'international', 'logistics', 'supply chain', 'retail',
-    'stock', 'warehouse', 'field service', 'construction', 'professional services',
-    'multi-currency', 'import', 'export', 'fulfilment', 'procurement',
+    'ecommerce', 'e-commerce', 'online store', 'shopify', 'woocommerce',
+    'distribution', 'wholesale', 'manufacturing', 'fabrication',
+    'inventory', 'stock', 'warehouse', 'fulfilment', 'fulfillment',
+    'multi-site', 'multiple locations', 'international', 'global', 'export', 'import',
+    'logistics', 'supply chain', 'procurement', '3pl',
+    'retail', 'trade', 'omnichannel',
+    'field service', 'construction', 'professional services', 'project-based', 'job costing',
+    'multi-currency', 'cross-border',
   ]
-  const hits = erpKeywords.filter(k => desc.includes(k)).length
-  const keywordScore = hits >= 3 ? 20 : hits === 2 ? 13 : hits === 1 ? 7 : 0
+  const hits = erpKeywords.filter(k => text.includes(k)).length
+  const keywordScore = Math.min(40, hits * 6)
 
-  // Revenue present = scale signal
-  const revenueScore = org.annual_revenue_printed ? 10 : 0
+  // 2. Company size fit (0–25) — smooth tent curve, peak at 100–249 employees
+  let sizeScore = 0
+  if (emp >= 100 && emp <= 249) sizeScore = 25
+  else if (emp >= 50 && emp < 100) sizeScore = 22
+  else if (emp >= 250 && emp < 500) sizeScore = 16
+  else if (emp >= 30 && emp < 50) sizeScore = 16
+  else if (emp >= 500 && emp < 1000) sizeScore = 8
+  else if (emp >= 15 && emp < 30) sizeScore = 10
+  else if (emp >= 5 && emp < 15) sizeScore = 5
+  else if (emp >= 1000) sizeScore = 3
+  else if (emp > 0) sizeScore = 2
 
-  return Math.min(100, empScore + techScore + keywordScore + revenueScore)
+  // 3. Tech fragmentation (0–20) — more tools = more integration pain
+  let techScore = 0
+  if (techCount >= 10) techScore = 20
+  else if (techCount >= 7) techScore = 16
+  else if (techCount >= 4) techScore = 11
+  else if (techCount >= 2) techScore = 6
+  else if (techCount >= 1) techScore = 3
+
+  // 4. Revenue indicator (0–15) — presence of revenue data = scale signal
+  const revenueScore = org.annual_revenue_printed ? 15 : 0
+
+  return Math.min(100, keywordScore + sizeScore + techScore + revenueScore)
 }
 
 function defaultContactTitle(industry: string): string {

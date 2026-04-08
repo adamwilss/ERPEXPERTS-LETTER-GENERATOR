@@ -49,21 +49,21 @@ function CoverLetterView({ content }: { content: string }) {
   return (
     <div>
       {/* Letterhead */}
-      <div className="flex items-start justify-between pb-6 mb-6 border-b border-gray-200">
+      <div className="flex items-start justify-between pb-7 mb-7 border-b border-gray-200">
         <div>
-          <div className="text-sm font-bold tracking-tight text-gray-900">ERP EXPERTS</div>
-          <div className="text-xs text-gray-400 mt-0.5">
+          <div className="text-[13px] font-bold tracking-[0.06em] text-gray-900">ERP EXPERTS</div>
+          <div className="text-[11px] text-gray-400 mt-1 tracking-wide">
             NetSuite Implementation · Manchester, UK
           </div>
         </div>
-        <div className="text-xs text-gray-400 text-right">
+        <div className="text-[12px] text-gray-400 text-right leading-relaxed">
           {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
         </div>
       </div>
 
       {/* Recipient address block */}
       {preLines.length > 0 && (
-        <div className="mb-6 text-sm text-gray-700 leading-relaxed space-y-0.5">
+        <div className="mb-7 text-[13px] text-gray-600 leading-[1.7] space-y-0.5 font-sans">
           {preLines.map((line, i) => (
             <div key={i}>{line}</div>
           ))}
@@ -72,13 +72,13 @@ function CoverLetterView({ content }: { content: string }) {
 
       {/* Subject */}
       {subjectLine && (
-        <div className="mb-6 text-sm font-semibold text-gray-900">
+        <div className="mb-7 text-[14px] font-semibold text-gray-900 tracking-[-0.01em]">
           Re: {subjectLine}
         </div>
       )}
 
       {/* Letter body */}
-      <div className="font-letter text-[15px] leading-[1.8] text-gray-800 space-y-5">
+      <div className="font-letter text-[16px] leading-[1.9] text-gray-800 space-y-7">
         {paragraphs
           .filter((_, i) => {
             if (i === salutationIdx) return false
@@ -89,7 +89,7 @@ function CoverLetterView({ content }: { content: string }) {
             if (i === 0 && salutationIdx >= 0) {
               return (
                 <>
-                  <p key="sal" className="font-sans text-sm text-gray-700">{paragraphs[salutationIdx]}</p>
+                  <p key="sal" className="font-sans text-[14px] text-gray-700">{paragraphs[salutationIdx]}</p>
                   <p key={i}>{para.trim()}</p>
                 </>
               )
@@ -100,12 +100,12 @@ function CoverLetterView({ content }: { content: string }) {
 
       {/* Sign-off */}
       {signoff && (
-        <div className="mt-8 pt-6 border-t border-gray-100 font-sans text-sm text-gray-700 whitespace-pre-line leading-relaxed">
+        <div className="mt-10 pt-7 border-t border-gray-100 font-sans text-[14px] text-gray-700 whitespace-pre-line leading-[1.7]">
           {signoff}
         </div>
       )}
 
-      <div className="mt-8 pt-4 border-t border-gray-100 text-xs text-gray-400 flex items-center justify-between">
+      <div className="mt-10 pt-5 border-t border-gray-100 text-[11px] text-gray-400 flex items-center justify-between tracking-wide">
         <span>ERP Experts Ltd · Manchester, UK</span>
         <span>www.erpexperts.co.uk</span>
       </div>
@@ -128,15 +128,15 @@ function BusinessCaseView({ content }: { content: string }) {
   return (
     <div>
       {title && (
-        <h2 className="text-xl font-semibold text-gray-900 tracking-tight mb-2">{title}</h2>
+        <h2 className="text-[22px] font-semibold text-gray-900 tracking-[-0.02em] leading-tight mb-3">{title}</h2>
       )}
       {subtitle && (
-        <p className="text-sm text-gray-500 italic mb-8 pb-6 border-b border-gray-200">{subtitle}</p>
+        <p className="text-[14px] text-gray-500 italic mb-9 pb-7 border-b border-gray-200 leading-relaxed">{subtitle}</p>
       )}
-      <div className="font-letter text-[15px] leading-[1.8] text-gray-800">
+      <div className="font-letter text-[16px] leading-[1.9] text-gray-800">
         {renderProseWithStats(bodyText)}
       </div>
-      <div className="mt-8 pt-4 border-t border-gray-100 text-xs text-gray-400 flex items-center justify-between">
+      <div className="mt-10 pt-5 border-t border-gray-100 text-[11px] text-gray-400 flex items-center justify-between tracking-wide">
         <span>ERP Experts Ltd · Manchester, UK</span>
         <span>www.erpexperts.co.uk</span>
       </div>
@@ -158,7 +158,7 @@ function renderProseWithStats(text: string) {
         const trimmed = part.trim()
         if (!trimmed) return null
         return trimmed.split(/\n{2,}/).filter(Boolean).map((para, j) => (
-          <p key={`${i}-${j}`} className="mb-5 last:mb-0">{para.trim()}</p>
+          <p key={`${i}-${j}`} className="mb-6 last:mb-0">{para.trim()}</p>
         ))
       })}
     </>
@@ -172,17 +172,17 @@ export default function LetterOutput({
 
   return (
     <div>
-      {/* Tab bar */}
+      {/* Tab bar — adaptive light/dark */}
       <div className="flex items-center gap-0.5 mb-6">
-        <div className="flex items-center gap-0.5 bg-[#111] border border-[#1e1e1e] rounded-lg p-1">
+        <div className="flex items-center gap-0.5 bg-gray-100 dark:bg-[#111] border border-gray-200 dark:border-[#1e1e1e] rounded-lg p-1">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`px-4 py-1.5 text-[13px] font-medium rounded-md transition-all duration-150 ${
                 activeTab === tab.id
-                  ? 'bg-white text-[#090909] shadow-sm'
-                  : 'text-[#555] hover:text-[#ccc]'
+                  ? 'bg-white dark:bg-white text-gray-900 dark:text-[#090909] shadow-sm'
+                  : 'text-gray-400 dark:text-[#555] hover:text-gray-700 dark:hover:text-[#ccc]'
               }`}
             >
               {tab.label}
@@ -208,8 +208,8 @@ export default function LetterOutput({
         </div>
       </div>
 
-      {/* Document — light paper on dark background */}
-      <div className={`letter-paper rounded-xl ${activeTab === 'map' ? 'max-w-4xl' : 'max-w-2xl'} p-10`}>
+      {/* Document — light paper surface */}
+      <div className={`letter-paper rounded-xl ${activeTab === 'map' ? 'max-w-4xl' : 'max-w-2xl'} px-12 py-11`}>
         {activeTab === 'letter' && (coverLetter ? <CoverLetterView content={coverLetter} /> : <Placeholder />)}
         {activeTab === 'case' && (businessCase ? <BusinessCaseView content={businessCase} /> : <Placeholder />)}
         {activeTab === 'map' && (techMap ? <TechMap content={techMap} /> : <Placeholder />)}

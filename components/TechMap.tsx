@@ -63,19 +63,19 @@ function RelationshipGroup({ label, rows, cfg }: {
   return (
     <div>
       {/* Group header */}
-      <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 border-y border-gray-100">
-        <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${cfg.dot}`} />
-        <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.08em]">
+      <div className="flex items-center gap-2 px-4 py-2.5 bg-gray-50/80 border-y border-gray-100">
+        <span className={`w-2 h-2 rounded-full flex-shrink-0 ${cfg.dot}`} />
+        <span className="text-[11px] font-semibold text-gray-500 uppercase tracking-[0.08em]">
           {label}
         </span>
-        <span className="text-[11px] text-gray-300 ml-auto">{rows.length}</span>
+        <span className="text-[11px] text-gray-400 ml-auto">{rows.length}</span>
       </div>
 
       {/* Rows */}
       {rows.map((row, i) => (
         <div
           key={i}
-          className={`flex gap-5 px-4 py-4 border-b border-gray-100 last:border-b-0 ${cfg.rowBg}`}
+          className={`flex gap-5 px-4 py-5 border-b border-gray-100 last:border-b-0 ${cfg.rowBg}`}
         >
           {/* System name */}
           <div className="w-36 flex-shrink-0 pt-0.5">
@@ -92,7 +92,7 @@ function RelationshipGroup({ label, rows, cfg }: {
           </div>
 
           {/* Meaning */}
-          <p className="flex-1 text-[13px] text-gray-600 leading-relaxed">
+          <p className="flex-1 text-[14px] text-gray-600 leading-relaxed">
             {row.meaning}
           </p>
         </div>
@@ -172,10 +172,10 @@ export default function TechMap({ content }: { content: string }) {
     <div>
       {/* Header */}
       {title && (
-        <h2 className="text-xl font-semibold text-gray-900 tracking-tight mb-2">{title}</h2>
+        <h2 className="text-[22px] font-semibold text-gray-900 tracking-[-0.02em] leading-tight mb-3">{title}</h2>
       )}
       {subtitle && (
-        <p className="text-sm text-gray-500 mb-6 pb-6 border-b border-gray-200 leading-relaxed">{subtitle}</p>
+        <p className="text-[14px] text-gray-500 mb-7 pb-7 border-b border-gray-200 leading-relaxed">{subtitle}</p>
       )}
 
       {rows.length > 0 && (
@@ -214,7 +214,7 @@ export default function TechMap({ content }: { content: string }) {
 
       {after && <CTABlock text={after} />}
 
-      <div className="mt-8 pt-4 border-t border-gray-100 text-xs text-gray-400 flex items-center justify-between">
+      <div className="mt-10 pt-5 border-t border-gray-100 text-[11px] text-gray-400 flex items-center justify-between tracking-wide">
         <span>ERP Experts Ltd · Manchester, UK</span>
         <span>www.erpexperts.co.uk</span>
       </div>

@@ -41,32 +41,31 @@ interface Props {
   streamProgress?: { done: number; total: number }
 }
 
+function contactBadge(dataScore: number): { label: string; className: string } {
+  if (dataScore >= 100) return { label: 'Full', className: 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 ring-1 ring-emerald-200 dark:ring-emerald-500/20' }
+  if (dataScore >= 65) return { label: 'Email', className: 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 ring-1 ring-amber-200 dark:ring-amber-500/20' }
+  if (dataScore >= 35) return { label: 'Name', className: 'bg-gray-100 dark:bg-[#1a1a1a] text-gray-500 dark:text-[#555] ring-1 ring-gray-200 dark:ring-[#2a2a2a]' }
+  return { label: 'None', className: 'bg-gray-50 dark:bg-[#111] text-gray-300 dark:text-[#333] ring-1 ring-gray-100 dark:ring-[#1e1e1e]' }
+}
+
 function ScoreDisplay({ erpScore, dataScore }: { erpScore: number; dataScore: number }) {
-  const dataColor = dataScore >= 75
+  const erpColor = erpScore >= 60
     ? 'text-emerald-600 dark:text-emerald-400'
-    : dataScore >= 35
+    : erpScore >= 35
     ? 'text-amber-600 dark:text-amber-400'
     : 'text-gray-400 dark:text-[#444]'
-  const dataLabel = dataScore >= 75 ? 'Ready' : dataScore >= 35 ? 'Partial' : 'No contact'
 
-  const erpBarColor = erpScore >= 55
-    ? 'bg-emerald-500'
-    : erpScore >= 30
-    ? 'bg-amber-500'
-    : 'bg-gray-300 dark:bg-[#2a2a2a]'
+  const badge = contactBadge(dataScore)
 
   return (
     <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
       <div className="flex flex-col items-end">
-        <span className={`text-2xl font-bold tabular-nums leading-none ${dataColor}`}>{dataScore}</span>
-        <span className="text-[10px] text-gray-400 dark:text-[#444] mt-0.5 uppercase tracking-[0.07em]">{dataLabel}</span>
+        <span className={`text-2xl font-bold tabular-nums leading-none ${erpColor}`}>{erpScore}</span>
+        <span className="text-[10px] text-gray-400 dark:text-[#444] mt-0.5 uppercase tracking-[0.07em]">ERP fit</span>
       </div>
-      <div className="flex items-center gap-1.5" title={`ERP fit: ${erpScore}/100`}>
-        <div className="w-12 h-1 bg-gray-200 dark:bg-[#222] rounded-full overflow-hidden">
-          <div className={`h-full rounded-full transition-all duration-500 ${erpBarColor}`} style={{ width: `${erpScore}%` }} />
-        </div>
-        <span className="text-[10px] text-gray-400 dark:text-[#444]">{erpScore} ERP</span>
-      </div>
+      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${badge.className}`}>
+        {badge.label}
+      </span>
     </div>
   )
 }
@@ -401,10 +400,10 @@ export default function LeadReview({ leads: allLeads, totalSearched, onGenerate,
         )}
       </div>
 
-      {/* Active deck — contact-complete leads first, then by GPT rank */}
+      {/* Active deck — best ERP fit first, contact completeness as tiebreaker */}
       <div className="space-y-2 mb-6">
         <AnimatePresence mode="popLayout" initial={false}>
-          {[...active].sort((a, b) => b.dataScore - a.dataScore || a.rank - b.rank).map((lead, i) => (
+          {[...active].sort((a, b) => b.erpScore - a.erpScore || b.dataScore - a.dataScore || a.rank - b.rank).map((lead, i) => (
             <motion.div
               key={lead.rank}
               layout
@@ -478,9 +477,14 @@ export default function LeadReview({ leads: allLeads, totalSearched, onGenerate,
                         </div>
                       </div>
                       <div className="flex items-center gap-3 flex-shrink-0">
-                        <span className={`text-sm font-bold tabular-nums ${lead.dataScore >= 75 ? 'text-emerald-600 dark:text-emerald-400' : lead.dataScore >= 40 ? 'text-amber-600 dark:text-amber-400' : 'text-gray-300 dark:text-[#333]'}`}>
-                          {lead.dataScore}
-                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <span className={`text-sm font-bold tabular-nums ${lead.erpScore >= 60 ? 'text-emerald-600 dark:text-emerald-400' : lead.erpScore >= 35 ? 'text-amber-600 dark:text-amber-400' : 'text-gray-300 dark:text-[#333]'}`}>
+                            {lead.erpScore}
+                          </span>
+                          <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${contactBadge(lead.dataScore).className}`}>
+                            {contactBadge(lead.dataScore).label}
+                          </span>
+                        </div>
                         {active.length < ACTIVE_SIZE && (
                           <button
                             onClick={() => promoteFromBench(lead)}
