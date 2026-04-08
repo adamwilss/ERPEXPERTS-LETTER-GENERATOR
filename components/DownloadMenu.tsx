@@ -34,12 +34,10 @@ export default function DownloadMenu({ coverLetter, businessCase, techMap, compa
   const handlePdf = async () => {
     try {
       setIsGeneratingPdf(true)
-      // Generate PDF blob
       const doc = <LetterPdfDocument coverLetter={coverLetter} businessCase={businessCase} techMap={techMap} />
       const asPdf = pdf(doc)
       const blob = await asPdf.toBlob()
-      
-      // Download
+
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
@@ -57,35 +55,33 @@ export default function DownloadMenu({ coverLetter, businessCase, techMap, compa
 
   return (
     <div className="relative inline-block text-left">
-      <div>
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#666] bg-transparent border border-[#2a2a2a] rounded-lg hover:text-[#e8e8e8] hover:border-[#3a3a3a] focus:outline-none transition-all duration-150"
-        >
-          <Download className="w-3 h-3" />
-          Export
-        </button>
-      </div>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-500 dark:text-[#666] bg-white dark:bg-transparent border border-gray-200 dark:border-[#2a2a2a] rounded-lg hover:text-gray-800 dark:hover:text-[#e8e8e8] hover:border-gray-300 dark:hover:border-[#3a3a3a] focus:outline-none transition-all duration-150"
+      >
+        <Download className="w-3 h-3" />
+        Export
+      </button>
 
       {isOpen && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
-          <div className="absolute right-0 z-20 w-44 mt-1.5 origin-top-right bg-[#161616] border border-[#2a2a2a] rounded-lg shadow-xl shadow-black/50">
+          <div className="absolute right-0 z-20 w-44 mt-1.5 origin-top-right bg-white dark:bg-[#161616] border border-gray-200 dark:border-[#2a2a2a] rounded-lg shadow-lg dark:shadow-xl dark:shadow-black/50">
             <div className="py-1">
               <button
                 onClick={handlePdf}
                 disabled={isGeneratingPdf}
-                className="w-full flex items-center px-3 py-2 text-xs text-[#888] hover:text-white hover:bg-white/[0.04] transition-colors disabled:opacity-40"
+                className="w-full flex items-center px-3 py-2 text-xs text-gray-600 dark:text-[#888] hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/[0.04] transition-colors disabled:opacity-40"
               >
-                {isGeneratingPdf ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <FileText className="w-3.5 h-3.5 mr-2 text-red-400" />}
+                {isGeneratingPdf ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <FileText className="w-3.5 h-3.5 mr-2 text-red-500 dark:text-red-400" />}
                 Download PDF
               </button>
               <button
                 onClick={handleDocx}
                 disabled={isGeneratingDocx}
-                className="w-full flex items-center px-3 py-2 text-xs text-[#888] hover:text-white hover:bg-white/[0.04] transition-colors disabled:opacity-40"
+                className="w-full flex items-center px-3 py-2 text-xs text-gray-600 dark:text-[#888] hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-white/[0.04] transition-colors disabled:opacity-40"
               >
-                {isGeneratingDocx ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <FileText className="w-3.5 h-3.5 mr-2 text-blue-400" />}
+                {isGeneratingDocx ? <Loader2 className="w-3.5 h-3.5 mr-2 animate-spin" /> : <FileText className="w-3.5 h-3.5 mr-2 text-blue-500 dark:text-blue-400" />}
                 Download DOCX
               </button>
             </div>

@@ -57,7 +57,7 @@ export default function Home() {
                     ['Tech map', 'Which systems integrate, replace, or get eliminated.'],
                   ].map(([title, desc]) => (
                     <div key={title} className="flex gap-3">
-                      <span className="mt-1 w-1 h-1 rounded-full bg-gray-300 dark:bg-[#2a2a2a] flex-shrink-0" />
+                      <span className="mt-1.5 w-1 h-1 rounded-full bg-gray-300 dark:bg-[#2a2a2a] flex-shrink-0" />
                       <div>
                         <div className="text-[13px] font-medium text-gray-700 dark:text-[#ccc]">{title}</div>
                         <div className="text-xs text-gray-500 dark:text-[#555] mt-0.5 leading-relaxed">{desc}</div>

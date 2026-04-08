@@ -2,13 +2,59 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { Loader2 } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
+import { useDiscoverStore } from '@/lib/discover-store'
 
 const nav = [
   { href: '/', label: 'Single letter' },
   { href: '/discover', label: 'Discover leads' },
   { href: '/history', label: 'History' },
 ]
+
+function SessionPill() {
+  const phase = useDiscoverStore((s) => s.phase)
+  const leads = useDiscoverStore((s) => s.leads)
+  const packs = useDiscoverStore((s) => s.packs)
+  const pathname = usePathname()
+
+  // Don't show if already on /discover or no active session
+  if (pathname === '/discover' || phase === 'form') return null
+
+  let label: string
+  let color: string
+  let showSpinner = false
+
+  if (phase === 'streaming') {
+    label = 'Searching…'
+    color = 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20'
+    showSpinner = true
+  } else if (phase === 'results') {
+    label = `${leads.length} leads`
+    color = 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20'
+  } else if (phase === 'generating') {
+    const done = packs.filter((p) => p.status === 'done').length
+    label = `Generating ${done}/${packs.length}`
+    color = 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 border-blue-200 dark:border-blue-500/20'
+    showSpinner = true
+  } else if (phase === 'done') {
+    const done = packs.filter((p) => p.status === 'done').length
+    label = `${done} packs ready`
+    color = 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20'
+  } else {
+    return null
+  }
+
+  return (
+    <Link
+      href="/discover"
+      className={`flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-md border transition-colors hover:opacity-80 ${color}`}
+    >
+      {showSpinner && <Loader2 className="w-3 h-3 animate-spin" />}
+      {label}
+    </Link>
+  )
+}
 
 export default function Header() {
   const pathname = usePathname()
@@ -49,7 +95,8 @@ export default function Header() {
           </nav>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          <SessionPill />
           <ThemeToggle />
           <span className="text-[10px] text-gray-300 dark:text-[#333] uppercase tracking-[0.2em] font-medium select-none">
             Internal

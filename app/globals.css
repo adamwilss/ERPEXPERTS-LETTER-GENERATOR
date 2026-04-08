@@ -22,23 +22,20 @@
     font-family: Georgia, 'Times New Roman', serif;
   }
 
+  /* Scrollbar — light */
   * {
     scrollbar-width: thin;
-    scrollbar-color: #d4d4d4 #f0f0f0;
+    scrollbar-color: #d4d4d4 transparent;
   }
+  *::-webkit-scrollbar { width: 6px; }
+  *::-webkit-scrollbar-track { background: transparent; }
+  *::-webkit-scrollbar-thumb { background-color: #d4d4d4; border-radius: 3px; }
 
-  *::-webkit-scrollbar {
-    width: 6px;
+  /* Scrollbar — dark */
+  html.dark * {
+    scrollbar-color: #333 transparent;
   }
-
-  *::-webkit-scrollbar-track {
-    background: #f0f0f0;
-  }
-
-  *::-webkit-scrollbar-thumb {
-    background-color: #d4d4d4;
-    border-radius: 3px;
-  }
+  html.dark *::-webkit-scrollbar-thumb { background-color: #333; }
 }
 
 @layer utilities {
@@ -47,21 +44,15 @@
     background: #FDFDF8;
     color: #111;
     box-shadow:
+      0 1px 3px rgba(0,0,0,0.08),
+      0 4px 12px rgba(0,0,0,0.04);
+  }
+  html.dark .letter-paper {
+    box-shadow:
       0 0 0 1px rgba(255,255,255,0.04),
       0 4px 6px rgba(0,0,0,0.4),
       0 12px 48px rgba(0,0,0,0.5),
       0 32px 80px rgba(0,0,0,0.3);
-  }
-
-  /* Dark card surface */
-  .surface {
-    background: #111111;
-    border: 1px solid #1e1e1e;
-  }
-
-  .surface-elevated {
-    background: #161616;
-    border: 1px solid #222222;
   }
 }
 

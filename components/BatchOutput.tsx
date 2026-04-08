@@ -1,11 +1,9 @@
 'use client'
 
-import { useEffect } from 'react'
 import { useState } from 'react'
 import { ChevronDown, ChevronRight, CheckCircle, Loader2, AlertCircle } from 'lucide-react'
 import LetterOutput from './LetterOutput'
 import { parseOutput } from '@/lib/parse'
-import { savePack } from '@/lib/history'
 
 export interface PackStatus {
   company: string
@@ -25,22 +23,6 @@ interface Props {
 
 export default function BatchOutput({ packs }: Props) {
   const [expanded, setExpanded] = useState<string | null>(null)
-
-  useEffect(() => {
-    for (const pack of packs) {
-      if (pack.status === 'done' && pack.completion) {
-        savePack({
-          company: pack.company,
-          recipientName: pack.recipientName ?? '',
-          contactTitle: pack.contactTitle ?? '',
-          completion: pack.completion,
-          erpScore: pack.erpScore,
-          website: pack.website,
-          location: pack.location,
-        })
-      }
-    }
-  }, [packs])
 
   const done = packs.filter((p) => p.status === 'done').length
   const total = packs.length
