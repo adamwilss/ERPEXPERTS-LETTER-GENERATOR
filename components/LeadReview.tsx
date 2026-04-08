@@ -42,31 +42,31 @@ interface Props {
 }
 
 function ScoreDisplay({ erpScore, dataScore }: { erpScore: number; dataScore: number }) {
-  const erpColor = erpScore >= 75
+  // Data completeness is the primary signal — leads without a contact or address aren't actionable
+  const dataColor = dataScore >= 70
     ? 'text-emerald-400'
-    : erpScore >= 50
+    : dataScore >= 40
     ? 'text-amber-400'
     : 'text-[#555]'
-  const erpLabel = erpScore >= 75 ? 'Complex ops' : erpScore >= 50 ? 'Moderate fit' : 'Low signals'
+  const dataLabel = dataScore >= 70 ? 'Ready' : dataScore >= 40 ? 'Partial' : 'Sparse'
 
-  const barColor = dataScore >= 70
+  const erpBarColor = erpScore >= 75
     ? 'bg-emerald-500'
-    : dataScore >= 40
+    : erpScore >= 50
     ? 'bg-amber-500'
     : 'bg-[#333]'
-  const dataLabel = dataScore >= 70 ? 'Full data' : dataScore >= 40 ? 'Partial' : 'Sparse'
 
   return (
     <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
       <div className="flex flex-col items-end">
-        <span className={`text-2xl font-bold tabular-nums leading-none ${erpColor}`}>{erpScore}</span>
-        <span className="text-[10px] text-[#444] mt-0.5 uppercase tracking-[0.07em]">{erpLabel}</span>
+        <span className={`text-2xl font-bold tabular-nums leading-none ${dataColor}`}>{dataScore}</span>
+        <span className="text-[10px] text-[#444] mt-0.5 uppercase tracking-[0.07em]">{dataLabel}</span>
       </div>
-      <div className="flex items-center gap-1.5" title={`Data quality: ${dataScore}/100`}>
+      <div className="flex items-center gap-1.5" title={`ERP fit score: ${erpScore}/100`}>
         <div className="w-12 h-1 bg-[#1a1a1a] rounded-full overflow-hidden">
-          <div className={`h-full rounded-full transition-all duration-500 ${barColor}`} style={{ width: `${dataScore}%` }} />
+          <div className={`h-full rounded-full transition-all duration-500 ${erpBarColor}`} style={{ width: `${erpScore}%` }} />
         </div>
-        <span className="text-[10px] text-[#333]">{dataLabel}</span>
+        <span className="text-[10px] text-[#333]">ERP fit</span>
       </div>
     </div>
   )
@@ -404,10 +404,10 @@ export default function LeadReview({ leads: allLeads, totalSearched, onGenerate,
         )}
       </div>
 
-      {/* Active deck */}
+      {/* Active deck — sorted by data completeness: leads with a contact + address first */}
       <div className="space-y-2 mb-6">
         <AnimatePresence mode="popLayout" initial={false}>
-          {active.map((lead, i) => (
+          {[...active].sort((a, b) => b.dataScore - a.dataScore).map((lead, i) => (
             <motion.div
               key={lead.rank}
               layout
@@ -481,8 +481,8 @@ export default function LeadReview({ leads: allLeads, totalSearched, onGenerate,
                         </div>
                       </div>
                       <div className="flex items-center gap-3 flex-shrink-0">
-                        <span className={`text-sm font-bold tabular-nums ${lead.erpScore >= 75 ? 'text-emerald-500/50' : lead.erpScore >= 50 ? 'text-amber-500/50' : 'text-[#333]'}`}>
-                          {lead.erpScore}
+                        <span className={`text-sm font-bold tabular-nums ${lead.dataScore >= 70 ? 'text-emerald-500/50' : lead.dataScore >= 40 ? 'text-amber-500/50' : 'text-[#333]'}`}>
+                          {lead.dataScore}
                         </span>
                         {active.length < ACTIVE_SIZE && (
                           <button

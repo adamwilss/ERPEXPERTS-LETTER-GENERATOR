@@ -29,6 +29,8 @@ export interface StreamedLead {
   location?: string; phone?: string; linkedinUrl?: string; postalAddress?: string
 }
 
+type RawLead = Omit<StreamedLead, 'dataScore' | 'rank'>
+
 const SENIORITY_RANK: Record<string, number> = {
   c_suite: 7, owner: 6, founder: 6, partner: 5, vp: 4, head: 3, director: 3, manager: 2, senior: 1,
 }
@@ -91,17 +93,14 @@ function pickBest(people: ApolloPerson[]): ApolloPerson | null {
 async function findContact(key: string, domain: string, orgId?: string): Promise<ApolloPerson | null> {
   const seniority = ['c_suite', 'owner', 'founder', 'partner', 'vp', 'director']
 
-  // Domain search (most reliable)
   const byDomain = await apolloPeopleSearch(key, { organization_domains: [domain], person_seniority: seniority, per_page: 5 })
   if (byDomain.length) return pickBest(byDomain)
 
-  // Org ID fallback
   if (orgId) {
     const byId = await apolloPeopleSearch(key, { organization_ids: [orgId], person_seniority: seniority, per_page: 5 })
     if (byId.length) return pickBest(byId)
   }
 
-  // Broader seniority
   const broader = await apolloPeopleSearch(key, {
     organization_domains: [domain],
     person_seniority: [...seniority, 'manager', 'head'],
@@ -128,61 +127,136 @@ function buildAddress(org: ApolloOrg, personOrg?: ApolloPerson['organization']):
   return undefined
 }
 
+// Data completeness score — primary display signal.
 function computeDataScore(lead: Partial<StreamedLead>): number {
   let s = 0
-  if (lead.contactName) s += 35
+  if (lead.contactName) s += 40
   if (lead.contactEmail) s += 20
   if (lead.postalAddress && /\d/.test(lead.postalAddress)) s += 20
-  else if (lead.postalAddress) s += 5
-  if (lead.description && lead.description.length > 60) s += 10
-  if (lead.techStack?.length) s += 8
-  if (lead.annualRevenue) s += 7
+  else if (lead.postalAddress) s += 8
+  if (lead.description && lead.description.length > 60) s += 8
+  if (lead.techStack?.length) s += 7
+  if (lead.annualRevenue) s += 5
   return Math.min(100, s)
 }
 
-// ── GPT scoring ────────────────────────────────────────────────────────────────
+// Pre-score based on org-level data in the Apollo search response (no API calls).
+// Used to pick which candidates are worth enriching.
+function preScore(org: ApolloOrg): number {
+  let s = 0
+  const desc = org.short_description || org.seo_description || ''
+  if (desc.length > 80) s += 20
+  else if (desc.length > 30) s += 10
+  if (org.annual_revenue_printed) s += 15
+  if (org.estimated_num_employees) s += 10
+  if (org.linkedin_url) s += 10
+  if (org.phone) s += 8
+  if (org.city) s += 7
+  if (org.technology_names?.length) s += 5
+  if (org.founded_year) s += 5
+  return s
+}
 
-async function scoreWithGPT(orgs: ApolloOrg[], industry: string, openaiKey: string) {
+// Heuristic ERP fit score — instant, no AI call. Used for partial/sparse leads.
+function computeErpScore(org: ApolloOrg): number {
+  let s = 20
+  const emp = org.estimated_num_employees ?? 0
+  if (emp >= 50 && emp <= 500) s += 35
+  else if (emp >= 20 && emp <= 2000) s += 20
+  else if (emp > 0) s += 8
+  if (org.annual_revenue_printed) s += 10
+  if (org.technology_names?.length) s += Math.min(15, org.technology_names.length * 3)
+  const desc = (org.short_description || org.seo_description || '').toLowerCase()
+  const erpKeywords = ['ecommerce', 'distribution', 'manufacturing', 'wholesale', 'inventory',
+    'multi-site', 'international', 'logistics', 'supply chain', 'retail', 'stock', 'warehouse',
+    'field service', 'construction', 'professional services']
+  s += Math.min(20, erpKeywords.filter(k => desc.includes(k)).length * 7)
+  return Math.min(100, s)
+}
+
+function defaultContactTitle(industry: string): string {
+  const i = industry.toLowerCase()
+  if (i.includes('finance') || i.includes('accounting')) return 'Finance Director'
+  if (i.includes('technology') || i.includes('software')) return 'CEO'
+  if (i.includes('manufacturing') || i.includes('distribution') || i.includes('logistics')) return 'Operations Director'
+  if (i.includes('retail') || i.includes('ecommerce')) return 'Managing Director'
+  if (i.includes('construction') || i.includes('field')) return 'Managing Director'
+  return 'Managing Director'
+}
+
+// Classify lead by data completeness.
+// "complete" = has name + email + postal address with a digit — ready to print and post.
+function classifyLead(lead: RawLead): 'complete' | 'partial' | 'sparse' {
+  const hasName = Boolean(lead.contactName)
+  const hasEmail = Boolean(lead.contactEmail)
+  const hasAddress = Boolean(lead.postalAddress && /\d/.test(lead.postalAddress))
+  if (hasName && hasEmail && hasAddress) return 'complete'
+  if (hasName) return 'partial'
+  return 'sparse'
+}
+
+// AI ranks only the complete leads. Small set (typically 5–15) = reliable JSON, fast call.
+async function scoreCompletesWithGPT(
+  leads: RawLead[],
+  openaiKey: string
+): Promise<Array<{ lead: RawLead; rationale: string }>> {
+  if (leads.length === 0) return []
+  if (leads.length === 1) {
+    const l = leads[0]
+    return [{ lead: l, rationale: l.description.slice(0, 160) || `${l.industry} company, ${l.employees} employees` }]
+  }
+
   const openai = createOpenAI({ apiKey: openaiKey })
 
-  const summaries = orgs.map((o, i) => {
-    const emp = o.estimated_num_employees ? `${o.estimated_num_employees} employees` : 'unknown size'
-    const desc = (o.short_description || o.seo_description || 'No description').slice(0, 200)
-    const loc = [o.city, o.country].filter(Boolean).join(', ') || 'UK'
-    const tech = o.technology_names?.slice(0, 5).join(', ') || ''
-    const rev = o.annual_revenue_printed ? ` | Revenue: ${o.annual_revenue_printed}` : ''
-    const techLine = tech ? ` | Tech: ${tech}` : ''
-    return `${i + 1}. ${o.name} | ${emp} | ${loc}${rev}${techLine}\n   ${desc}`
-  }).join('\n\n')
+  const summaries = leads
+    .map((l, i) => {
+      const tech = l.techStack?.slice(0, 5).join(', ') || ''
+      const rev = l.annualRevenue ? ` | Revenue: ${l.annualRevenue}` : ''
+      const techLine = tech ? ` | Tech: ${tech}` : ''
+      const desc = (l.description || 'No description').slice(0, 180)
+      return `${i + 1}. ${l.company} | ${l.employees} employees | ${l.location ?? 'UK'}${rev}${techLine}\n   ${desc}`
+    })
+    .join('\n\n')
 
-  const prompt = `Rank these UK companies as NetSuite ERP prospects. Industry filter already applied — do NOT penalise by sector. Score 0–100 on OPERATIONAL COMPLEXITY within this batch.
+  const prompt = `You are ranking ${leads.length} UK companies for a NetSuite ERP implementation firm. All have a named contact, email, and postal address — rank them by operational complexity and ERP pain signals. Multi-site, international, complex inventory, disconnected tech stacks, and revenue scale are the strongest signals.
 
-HIGH signals (75–100): multi-channel (ecommerce + trade + B2B), multi-site/international, complex inventory, disconnected tech stack, 150+ employees with operational overhead
-MID (40–74): standard single-site operations, some growth complexity, 50–150 employees
-LOW (5–39): simple operations, small team, generic description, no operational substance
+Return ONLY valid JSON (no markdown wrapping):
+{"ranked":[{"index":1,"rationale":"Two specific sentences about this company's operational complexity and why they need ERP."},...]}
 
-Compare companies AGAINST EACH OTHER. Force real spread — top company should clearly outscore the bottom.
+List all ${leads.length} companies in order, best prospect first.
 
-${summaries}
-
-Return ONLY valid JSON:
-{"scores":[{"index":1,"score":85,"rationale":"Two specific sentences about this company's operational complexity.","contactTitle":"Most likely decision-maker title (MD/CEO/CFO/Finance Director/Operations Director/Supply Chain Director)"}]}
-
-Score all ${orgs.length} companies.`
-
-  const { text } = await generateText({
-    model: openai('gpt-4o'),
-    maxOutputTokens: 5000,
-    messages: [{ role: 'user', content: prompt }],
-  })
+${summaries}`
 
   try {
-    const parsed = JSON.parse(text)
-    return parsed.scores as Array<{ index: number; score: number; rationale: string; contactTitle: string }>
+    const { text } = await generateText({
+      model: openai('gpt-4o'),
+      maxOutputTokens: 1200,
+      messages: [{ role: 'user', content: prompt }],
+    })
+
+    let parsed: { ranked: Array<{ index: number; rationale: string }> }
+    try {
+      parsed = JSON.parse(text)
+    } catch {
+      const match = text.match(/\{[\s\S]*\}/)
+      if (!match) throw new Error('unparseable')
+      parsed = JSON.parse(match[0])
+    }
+
+    return parsed.ranked
+      .map(({ index, rationale }) => {
+        const lead = leads[index - 1]
+        return lead ? { lead, rationale } : null
+      })
+      .filter((x): x is NonNullable<typeof x> => x !== null)
   } catch {
-    const match = text.match(/\{[\s\S]*\}/)
-    if (!match) return []
-    return (JSON.parse(match[0])).scores
+    // Fallback: heuristic ERP order, description as rationale
+    return [...leads]
+      .sort((a, b) => b.erpScore - a.erpScore)
+      .map((lead) => ({
+        lead,
+        rationale: lead.description.slice(0, 160) || `${lead.industry} company, ${lead.employees} employees`,
+      }))
   }
 }
 
@@ -213,14 +287,13 @@ export async function POST(req: Request) {
       }
 
       try {
-        // 1. Fetch companies (2 pages in parallel)
+        // Phase 1a: Apollo search (2 pages in parallel)
         send({ type: 'status', message: 'Searching Apollo…' })
         const [r1, r2] = await Promise.all([
           fetchApolloPage(apolloKey, apolloBody, 1),
           fetchApolloPage(apolloKey, apolloBody, 2),
         ])
 
-        // Surface Apollo errors immediately
         if (r1.error && r2.error) {
           send({ type: 'error', message: `Apollo search failed: ${r1.error}` })
           controller.close()
@@ -230,7 +303,7 @@ export async function POST(req: Request) {
         const seen = new Set<string>()
         const allOrgs: ApolloOrg[] = []
         for (const org of [...r1.orgs, ...r2.orgs]) {
-          if (!org.name) continue
+          if (!org.name || !getDomain(org)) continue
           const key = org.id ?? org.name
           if (seen.has(key)) continue
           seen.add(key)
@@ -244,31 +317,25 @@ export async function POST(req: Request) {
           return
         }
 
-        send({ type: 'status', message: `Found ${allOrgs.length} companies — scoring with AI…` })
+        // Phase 1b: Pre-sort by org data richness, enrich top 60
+        const candidates = allOrgs
+          .sort((a, b) => preScore(b) - preScore(a))
+          .slice(0, 60)
 
-        // 2. Score all with GPT
-        type ScoreRow = { index: number; score: number; rationale: string; contactTitle: string }
-        const scores = await scoreWithGPT(allOrgs, industry, openaiKey)
-        const top30 = (scores as ScoreRow[])
-          .map(({ index, score, rationale, contactTitle }: ScoreRow) => {
-            const org = allOrgs[index - 1]
-            return org ? { org, score, rationale, contactTitle } : null
-          })
-          .filter((x): x is NonNullable<typeof x> => x !== null)
-          .sort((a: { score: number }, b: { score: number }) => b.score - a.score)
-          .slice(0, 30)
+        send({ type: 'status', message: `Found ${allOrgs.length} companies — enriching top ${candidates.length}…`, total: candidates.length })
 
-        send({ type: 'status', message: `Scored — enriching top ${top30.length} prospects…`, total: top30.length })
+        // Phase 1c: Enrich + contact lookup for all candidates in parallel
+        // Collect into buckets — do not stream yet
+        const complete: RawLead[] = []
+        const partial: RawLead[] = []
+        const sparse: RawLead[] = []
 
-        // 3. Enrich + find contact for each — stream as each completes
-        let count = 0
-        type ScoredOrg = { org: ApolloOrg; score: number; rationale: string; contactTitle: string }
         await Promise.all(
-          top30.map(async ({ org, score, rationale, contactTitle }: ScoredOrg, idx: number) => {
-            const domain = getDomain(org)
+          candidates.map(async (org) => {
+            const domain = getDomain(org)!
             const [enriched, contact] = await Promise.all([
-              domain ? enrichOrg(apolloKey, domain) : Promise.resolve({} as Partial<ApolloOrg>),
-              domain ? findContact(apolloKey, domain, org.id) : Promise.resolve(null),
+              enrichOrg(apolloKey, domain),
+              findContact(apolloKey, domain, org.id),
             ])
 
             const merged: ApolloOrg = {
@@ -278,17 +345,19 @@ export async function POST(req: Request) {
 
             const loc = [merged.city, merged.state, merged.country].filter(Boolean).join(', ') || undefined
             const postalAddress = buildAddress(merged, contact?.organization)
+            const erpScore = computeErpScore(merged)
+            const desc = merged.short_description || merged.seo_description || ''
 
-            const partial: Omit<StreamedLead, 'dataScore'> = {
-              rank: idx + 1,
+            const lead: RawLead = {
+              rank: 0, // assigned when streaming
               company: merged.name ?? org.name ?? 'Unknown',
-              website: merged.website_url ?? merged.primary_domain ?? '',
+              website: merged.website_url ?? merged.primary_domain ?? domain,
               industry: merged.industry ?? org.industry ?? industry,
               employees: merged.estimated_num_employees ? `~${merged.estimated_num_employees}` : 'Unknown',
-              description: merged.short_description || merged.seo_description || '',
-              erpScore: score,
-              rationale,
-              contactTitle: contact?.title ?? contactTitle,
+              description: desc,
+              erpScore,
+              rationale: desc.length > 40 ? desc.slice(0, 160) : `${merged.industry ?? industry} company, ${merged.estimated_num_employees ?? '?'} employees`,
+              contactTitle: contact?.title ?? defaultContactTitle(merged.industry ?? industry),
               contactName: contact?.name,
               contactEmail: contact?.email,
               contactLinkedIn: contact?.linkedin_url,
@@ -302,11 +371,64 @@ export async function POST(req: Request) {
               postalAddress,
             }
 
-            const lead: StreamedLead = { ...partial, dataScore: computeDataScore(partial) }
-            count++
-            send({ type: 'lead', lead, count, total: top30.length })
+            const bucket = classifyLead(lead)
+            if (bucket === 'complete') complete.push(lead)
+            else if (bucket === 'partial') partial.push(lead)
+            else sparse.push(lead)
           })
         )
+
+        send({
+          type: 'status',
+          message: `Enriched ${candidates.length} — ${complete.length} ready · ${partial.length} partial${complete.length > 0 ? ' · AI ranking…' : ''}`,
+        })
+
+        // Phase 2: AI ranks the complete leads only (small set → reliable JSON)
+        let rankedCompletes: Array<{ lead: RawLead; rationale: string }>
+        if (complete.length > 0) {
+          rankedCompletes = await scoreCompletesWithGPT(complete, openaiKey)
+        } else {
+          rankedCompletes = []
+        }
+
+        // Heuristic sort for partial and sparse
+        const sortedPartials = [...partial].sort((a, b) => b.erpScore - a.erpScore)
+        const sortedSparse = [...sparse].sort((a, b) => b.erpScore - a.erpScore)
+
+        // Phase 3: Stream in priority order — complete (AI-ranked) → partial → sparse
+        let count = 0
+        const totalToStream = rankedCompletes.length + sortedPartials.length + sortedSparse.length
+        send({ type: 'status', message: 'Streaming results…', total: totalToStream })
+
+        for (const { lead, rationale } of rankedCompletes) {
+          count++
+          send({
+            type: 'lead',
+            lead: { ...lead, rank: count, rationale, dataScore: computeDataScore(lead) } as StreamedLead,
+            count,
+            total: totalToStream,
+          })
+        }
+
+        for (const lead of sortedPartials) {
+          count++
+          send({
+            type: 'lead',
+            lead: { ...lead, rank: count, dataScore: computeDataScore(lead) } as StreamedLead,
+            count,
+            total: totalToStream,
+          })
+        }
+
+        for (const lead of sortedSparse) {
+          count++
+          send({
+            type: 'lead',
+            lead: { ...lead, rank: count, dataScore: computeDataScore(lead) } as StreamedLead,
+            count,
+            total: totalToStream,
+          })
+        }
 
         send({ type: 'done', total: count })
         controller.close()
