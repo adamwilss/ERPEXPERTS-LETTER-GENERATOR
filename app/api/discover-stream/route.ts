@@ -77,10 +77,23 @@ async function apolloPeopleSearch(key: string, body: Record<string, unknown>): P
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(10000),
     })
-    if (!res.ok) return []
+    if (!res.ok) {
+      const errText = await res.text().catch(() => '')
+      console.warn(`[Apollo people] HTTP ${res.status} | body: ${JSON.stringify(body)} | response: ${errText.slice(0, 300)}`)
+      return []
+    }
     const data = await res.json()
-    return data.contacts ?? data.people ?? data.results ?? []
-  } catch { return [] }
+    const people: ApolloPerson[] = data.contacts ?? data.people ?? data.results ?? []
+    console.log(`[Apollo people] ${people.length} result(s) | keys: ${Object.keys(data).join(', ')} | query: ${JSON.stringify(body)}`)
+    if (people.length > 0) {
+      const sample = people[0]
+      console.log(`[Apollo people] sample — name: ${sample.name ?? 'null'}, title: ${sample.title ?? 'null'}, email: ${sample.email ?? 'null'}, seniority: ${sample.seniority ?? 'null'}`)
+    }
+    return people
+  } catch (err) {
+    console.error(`[Apollo people] exception: ${err} | query: ${JSON.stringify(body)}`)
+    return []
+  }
 }
 
 function pickBest(people: ApolloPerson[]): ApolloPerson | null {
@@ -224,8 +237,10 @@ function classifyLead(lead: RawLead): 'complete' | 'partial' | 'sparse' {
   return 'sparse'
 }
 
-// AI ranks only the complete leads. Small set (typically 5–15) = reliable JSON, fast call.
-async function scoreCompletesWithGPT(
+// AI ranks leads by operational complexity and ERP pain signals.
+// Called on the top candidates from all tiers so ranking is always meaningful,
+// even when Apollo returns no contact data.
+async function rankLeadsWithGPT(
   leads: RawLead[],
   openaiKey: string
 ): Promise<Array<{ lead: RawLead; rationale: string }>> {
@@ -247,7 +262,7 @@ async function scoreCompletesWithGPT(
     })
     .join('\n\n')
 
-  const prompt = `You are ranking ${leads.length} UK companies for a NetSuite ERP implementation firm. All have a named contact, email, and postal address — rank them by operational complexity and ERP pain signals. Multi-site, international, complex inventory, disconnected tech stacks, and revenue scale are the strongest signals.
+  const prompt = `You are ranking ${leads.length} UK companies for a NetSuite ERP implementation firm. Rank them by operational complexity and ERP pain signals. Multi-site, international, complex inventory, disconnected tech stacks, and revenue scale are the strongest signals. You MUST differentiate — the top company should score noticeably better than the bottom.
 
 Return ONLY valid JSON (no markdown wrapping):
 {"ranked":[{"index":1,"rationale":"Two specific sentences about this company's operational complexity and why they need ERP."},...]}
@@ -408,51 +423,31 @@ export async function POST(req: Request) {
 
         send({
           type: 'status',
-          message: `Enriched ${candidates.length} — ${complete.length} ready · ${partial.length} partial${complete.length > 0 ? ' · AI ranking…' : ''}`,
+          message: `Enriched ${candidates.length} — ${complete.length} ready · ${partial.length} partial · AI ranking…`,
         })
 
-        // Phase 2: AI ranks the complete leads only (small set → reliable JSON)
-        let rankedCompletes: Array<{ lead: RawLead; rationale: string }>
-        if (complete.length > 0) {
-          rankedCompletes = await scoreCompletesWithGPT(complete, openaiKey)
-        } else {
-          rankedCompletes = []
-        }
+        // Phase 2: AI ranks ALL leads by operational complexity (not just completes).
+        // Pre-sort each tier by ERP score, then combine: complete → partial → sparse.
+        // GPT sees the top 30 and ranks them — contact completeness is a secondary
+        // signal displayed in the UI, not the primary ranking axis.
+        const allLeadsForRanking = [
+          ...complete,
+          ...partial.sort((a, b) => b.erpScore - a.erpScore),
+          ...sparse.sort((a, b) => b.erpScore - a.erpScore),
+        ].slice(0, 30)
 
-        // Heuristic sort for partial and sparse
-        const sortedPartials = [...partial].sort((a, b) => b.erpScore - a.erpScore)
-        const sortedSparse = [...sparse].sort((a, b) => b.erpScore - a.erpScore)
+        const rankedAll = await rankLeadsWithGPT(allLeadsForRanking, openaiKey)
 
-        // Phase 3: Stream in priority order — complete (AI-ranked) → partial → sparse
+        // Phase 3: Stream in GPT-ranked order
         let count = 0
-        const totalToStream = rankedCompletes.length + sortedPartials.length + sortedSparse.length
+        const totalToStream = rankedAll.length
         send({ type: 'status', message: 'Streaming results…', total: totalToStream })
 
-        for (const { lead, rationale } of rankedCompletes) {
+        for (const { lead, rationale } of rankedAll) {
           count++
           send({
             type: 'lead',
             lead: { ...lead, rank: count, rationale, dataScore: computeDataScore(lead) } as StreamedLead,
-            count,
-            total: totalToStream,
-          })
-        }
-
-        for (const lead of sortedPartials) {
-          count++
-          send({
-            type: 'lead',
-            lead: { ...lead, rank: count, dataScore: computeDataScore(lead) } as StreamedLead,
-            count,
-            total: totalToStream,
-          })
-        }
-
-        for (const lead of sortedSparse) {
-          count++
-          send({
-            type: 'lead',
-            lead: { ...lead, rank: count, dataScore: computeDataScore(lead) } as StreamedLead,
             count,
             total: totalToStream,
           })

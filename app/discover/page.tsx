@@ -98,26 +98,23 @@ export default function DiscoverPage() {
 
         for (const line of lines) {
           if (!line.trim()) continue
-          // Parse JSON separately so parse errors don't swallow event processing errors
           let event: Record<string, unknown>
           try {
             event = JSON.parse(line)
           } catch {
-            continue // genuinely malformed / partial line
+            continue
           }
           if (event.type === 'status') {
             setStreamStatus(event.message as string)
             if (event.total) setStreamProgress((p) => ({ ...p, total: event.total as number }))
           } else if (event.type === 'lead') {
-            // Append only — never sort here; sorting reshuffles array indices and
-            // breaks LeadReview's ID-based tracking, causing leads to vanish
             setStreamedLeads((prev) => [...prev, event.lead as Lead])
             setStreamProgress({ done: event.count as number, total: event.total as number })
           } else if (event.type === 'done') {
             setTotalSearched((event.total as number) * 4)
             setPhase('results')
           } else if (event.type === 'error') {
-            throw new Error(event.message as string) // propagates to outer catch → shows error UI
+            throw new Error(event.message as string)
           }
         }
       }
@@ -219,8 +216,8 @@ export default function DiscoverPage() {
               transition={{ duration: 0.2 }}
               className="max-w-2xl"
             >
-              <h1 className="text-[22px] font-semibold text-white tracking-tight mb-1">Discover leads</h1>
-              <p className="text-sm text-[#555] mb-8 leading-relaxed">
+              <h1 className="text-[22px] font-semibold text-gray-900 dark:text-white tracking-tight mb-1">Discover leads</h1>
+              <p className="text-sm text-gray-500 dark:text-[#555] mb-8 leading-relaxed">
                 Pick a preset to search instantly, or customise your own criteria below.
               </p>
 
@@ -232,12 +229,12 @@ export default function DiscoverPage() {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.97 }}
                     onClick={() => handlePreset(preset)}
-                    className="bg-[#111] border border-[#1e1e1e] hover:border-[#333] hover:bg-[#161616] rounded-xl px-4 py-3 text-left transition-colors group"
+                    className="bg-white dark:bg-[#111] border border-gray-200 dark:border-[#1e1e1e] hover:border-gray-300 dark:hover:border-[#2a2a2a] hover:bg-gray-50 dark:hover:bg-white/[0.02] rounded-xl px-4 py-3 text-left transition-colors group shadow-sm dark:shadow-none"
                   >
-                    <div className="text-[13px] font-medium text-[#ccc] group-hover:text-white transition-colors">
+                    <div className="text-[13px] font-medium text-gray-700 dark:text-[#ccc] group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
                       {preset.label}
                     </div>
-                    <div className="text-[11px] text-[#444] mt-0.5">{preset.sub}</div>
+                    <div className="text-[11px] text-gray-400 dark:text-[#444] mt-0.5">{preset.sub}</div>
                   </motion.button>
                 ))}
               </div>
@@ -245,7 +242,7 @@ export default function DiscoverPage() {
               {/* Custom search toggle */}
               <button
                 onClick={() => setShowCustom((v) => !v)}
-                className="flex items-center gap-2 text-xs text-[#444] hover:text-[#888] transition-colors mb-4"
+                className="flex items-center gap-2 text-xs text-gray-400 dark:text-[#444] hover:text-gray-600 dark:hover:text-[#888] transition-colors mb-4"
               >
                 {showCustom ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                 Custom search
@@ -260,7 +257,7 @@ export default function DiscoverPage() {
                     transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
                     className="overflow-hidden"
                   >
-                    <div className="bg-[#111] border border-[#1e1e1e] rounded-xl p-6 space-y-4">
+                    <div className="bg-white dark:bg-[#111] border border-gray-200 dark:border-[#1e1e1e] rounded-xl p-6 space-y-4 shadow-sm dark:shadow-none">
                       <div className="grid grid-cols-2 gap-4">
                         <SelectField label="Industry" value={industry} onChange={setIndustry}
                           options={INDUSTRIES.map((i) => ({ label: i, value: i }))} />
@@ -269,24 +266,24 @@ export default function DiscoverPage() {
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-[11px] font-medium text-[#555] mb-1.5 uppercase tracking-[0.1em]">Location</label>
+                          <label className="block text-[11px] font-medium text-gray-400 dark:text-[#444] mb-1.5 uppercase tracking-[0.1em]">Location</label>
                           <input type="text" value={location} onChange={(e) => setLocation(e.target.value)}
-                            className="w-full border border-[#222] bg-[#0d0d0d] rounded-lg px-3 py-2.5 text-sm text-[#e8e8e8] focus:outline-none focus:border-[#3a3a3a] focus:ring-1 focus:ring-white/10 transition-colors" />
+                            className="w-full border border-gray-200 dark:border-[#1e1e1e] bg-white dark:bg-[#1a1a1a] rounded-lg px-3 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-gray-400 dark:focus:border-[#2a2a2a] focus:ring-1 focus:ring-gray-200 dark:focus:ring-[#1e1e1e] transition-colors" />
                         </div>
                         <div>
-                          <label className="block text-[11px] font-medium text-[#555] mb-1.5 uppercase tracking-[0.1em]">
-                            Keywords <span className="normal-case font-normal text-[#3a3a3a]">(optional)</span>
+                          <label className="block text-[11px] font-medium text-gray-400 dark:text-[#444] mb-1.5 uppercase tracking-[0.1em]">
+                            Keywords <span className="normal-case font-normal text-gray-300 dark:text-[#333]">(optional)</span>
                           </label>
                           <input type="text" value={keywords} onChange={(e) => setKeywords(e.target.value)}
                             placeholder="e.g. multi-site, ecommerce"
-                            className="w-full border border-[#222] bg-[#0d0d0d] rounded-lg px-3 py-2.5 text-sm text-[#e8e8e8] placeholder:text-[#333] focus:outline-none focus:border-[#3a3a3a] focus:ring-1 focus:ring-white/10 transition-colors" />
+                            className="w-full border border-gray-200 dark:border-[#1e1e1e] bg-white dark:bg-[#1a1a1a] rounded-lg px-3 py-2.5 text-sm text-gray-900 dark:text-white placeholder:text-gray-300 dark:placeholder:text-[#333] focus:outline-none focus:border-gray-400 dark:focus:border-[#2a2a2a] focus:ring-1 focus:ring-gray-200 dark:focus:ring-[#1e1e1e] transition-colors" />
                         </div>
                       </div>
                       <motion.button
                         whileHover={{ scale: 1.01 }}
                         whileTap={{ scale: 0.99 }}
                         onClick={handleCustomSearch}
-                        className="w-full px-5 py-3 bg-white text-[#090909] text-sm font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+                        className="w-full px-5 py-3 bg-gray-900 dark:bg-white text-white dark:text-[#090909] text-sm font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 hover:bg-gray-800 dark:hover:bg-[#e8e8e8]"
                       >
                         <Search className="w-4 h-4" />
                         Search
@@ -300,7 +297,7 @@ export default function DiscoverPage() {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="mt-4 bg-red-500/5 border border-red-500/20 rounded-lg p-4 text-sm text-red-400"
+                  className="mt-4 bg-red-50 dark:bg-red-500/5 border border-red-200 dark:border-red-500/20 rounded-lg p-4 text-sm text-red-600 dark:text-red-400"
                 >
                   {searchError}
                 </motion.div>
@@ -316,12 +313,12 @@ export default function DiscoverPage() {
               <div className="flex items-center gap-3">
                 {activePreset && (
                   <div className="flex items-center gap-2">
-                    <Zap className="w-3.5 h-3.5 text-[#444]" />
-                    <span className="text-xs text-[#555]">{activePreset}</span>
+                    <Zap className="w-3.5 h-3.5 text-gray-400 dark:text-[#444]" />
+                    <span className="text-xs text-gray-500 dark:text-[#555]">{activePreset}</span>
                   </div>
                 )}
               </div>
-              <button onClick={reset} className="text-xs text-[#333] hover:text-[#888] underline underline-offset-2 transition-colors">
+              <button onClick={reset} className="text-xs text-gray-400 dark:text-[#444] hover:text-gray-600 dark:hover:text-[#888] underline underline-offset-2 transition-colors">
                 ← New search
               </button>
             </div>
@@ -341,7 +338,7 @@ export default function DiscoverPage() {
         {(phase === 'generating' || phase === 'done') && (
           <>
             {phase === 'done' && (
-              <button onClick={reset} className="mb-6 text-xs text-[#444] hover:text-[#888] underline underline-offset-2 transition-colors">
+              <button onClick={reset} className="mb-6 text-xs text-gray-400 dark:text-[#444] hover:text-gray-600 dark:hover:text-[#888] underline underline-offset-2 transition-colors">
                 ← New search
               </button>
             )}
@@ -350,7 +347,7 @@ export default function DiscoverPage() {
         )}
       </div>
 
-      <footer className="mt-auto py-6 text-center text-[11px] text-[#333] border-t border-[#141414]">
+      <footer className="mt-auto py-6 text-center text-[11px] text-gray-300 dark:text-[#333] border-t border-gray-200 dark:border-[#1e1e1e]">
         ERP Experts Ltd · Internal Outreach Generation Portal
       </footer>
     </main>
@@ -363,17 +360,17 @@ function SelectField({ label, value, onChange, options }: {
 }) {
   return (
     <div>
-      <label className="block text-[11px] font-medium text-[#555] mb-1.5 uppercase tracking-[0.1em]">{label}</label>
+      <label className="block text-[11px] font-medium text-gray-400 dark:text-[#444] mb-1.5 uppercase tracking-[0.1em]">{label}</label>
       <div className="relative">
         <select value={value} onChange={(e) => onChange(e.target.value)}
-          className="w-full appearance-none border border-[#222] bg-[#0d0d0d] rounded-lg px-3 py-2.5 text-sm text-[#e8e8e8] focus:outline-none focus:border-[#3a3a3a] focus:ring-1 focus:ring-white/10 transition-colors cursor-pointer"
+          className="w-full appearance-none border border-gray-200 dark:border-[#1e1e1e] bg-white dark:bg-[#1a1a1a] rounded-lg px-3 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-gray-400 dark:focus:border-[#2a2a2a] focus:ring-1 focus:ring-gray-200 dark:focus:ring-[#1e1e1e] transition-colors cursor-pointer"
         >
           {options.map((opt) => (
-            <option key={opt.value} value={opt.value} className="bg-[#111] text-[#e8e8e8]">{opt.label}</option>
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
           ))}
         </select>
         <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
-          <svg className="w-4 h-4 text-[#444]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="w-4 h-4 text-gray-400 dark:text-[#444]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
           </svg>
         </div>

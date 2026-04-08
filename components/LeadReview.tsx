@@ -42,37 +42,30 @@ interface Props {
 }
 
 function ScoreDisplay({ erpScore, dataScore }: { erpScore: number; dataScore: number }) {
-  // dataScore: exactly 3 possible states
-  //   100 = name + email + address (ready to post)
-  //    75 = name + address (postable, no email)
-  //    60 = name + email (email only, no address)
-  //    35 = name only
-  //     0 = no contact
   const dataColor = dataScore >= 75
-    ? 'text-emerald-400'
+    ? 'text-emerald-600 dark:text-emerald-400'
     : dataScore >= 35
-    ? 'text-amber-400'
-    : 'text-[#555]'
+    ? 'text-amber-600 dark:text-amber-400'
+    : 'text-gray-400 dark:text-[#444]'
   const dataLabel = dataScore >= 75 ? 'Ready' : dataScore >= 35 ? 'Partial' : 'No contact'
 
-  // erpScore: 55+ = strong prospect, 30–54 = moderate, <30 = weak signals
   const erpBarColor = erpScore >= 55
     ? 'bg-emerald-500'
     : erpScore >= 30
     ? 'bg-amber-500'
-    : 'bg-[#333]'
+    : 'bg-gray-300 dark:bg-[#2a2a2a]'
 
   return (
     <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
       <div className="flex flex-col items-end">
         <span className={`text-2xl font-bold tabular-nums leading-none ${dataColor}`}>{dataScore}</span>
-        <span className="text-[10px] text-[#444] mt-0.5 uppercase tracking-[0.07em]">{dataLabel}</span>
+        <span className="text-[10px] text-gray-400 dark:text-[#444] mt-0.5 uppercase tracking-[0.07em]">{dataLabel}</span>
       </div>
       <div className="flex items-center gap-1.5" title={`ERP fit: ${erpScore}/100`}>
-        <div className="w-12 h-1 bg-[#1a1a1a] rounded-full overflow-hidden">
+        <div className="w-12 h-1 bg-gray-200 dark:bg-[#222] rounded-full overflow-hidden">
           <div className={`h-full rounded-full transition-all duration-500 ${erpBarColor}`} style={{ width: `${erpScore}%` }} />
         </div>
-        <span className="text-[10px] text-[#333]">{erpScore} ERP</span>
+        <span className="text-[10px] text-gray-400 dark:text-[#444]">{erpScore} ERP</span>
       </div>
     </div>
   )
@@ -102,11 +95,11 @@ function LeadCard({
   setEditingName: (v: boolean) => void
 }) {
   return (
-    <div className="bg-[#111] border border-[#1e1e1e] rounded-xl overflow-hidden hover:border-[#2a2a2a] transition-colors duration-200">
+    <div className="bg-white dark:bg-[#111] border border-gray-200 dark:border-[#1e1e1e] rounded-xl overflow-hidden hover:border-gray-300 dark:hover:border-[#2a2a2a] transition-colors duration-200 shadow-sm dark:shadow-none">
       <div className="p-5">
         <div className="flex gap-4 items-start">
           {/* Rank */}
-          <div className="flex-shrink-0 w-5 text-[11px] font-bold text-[#2a2a2a] mt-1 tabular-nums">
+          <div className="flex-shrink-0 w-5 text-[11px] font-bold text-gray-300 dark:text-[#333] mt-1 tabular-nums">
             {index + 1}
           </div>
 
@@ -115,38 +108,38 @@ function LeadCard({
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-semibold text-white text-[15px] leading-tight">{lead.company}</span>
+                  <span className="font-semibold text-gray-900 dark:text-white text-[15px] leading-tight">{lead.company}</span>
                   {lead.website && (
                     <a
                       href={lead.website.startsWith('http') ? lead.website : `https://${lead.website}`}
                       target="_blank" rel="noopener noreferrer"
-                      className="text-[#3a3a3a] hover:text-[#888] transition-colors"
+                      className="text-gray-300 dark:text-[#333] hover:text-gray-500 dark:hover:text-[#555] transition-colors"
                     >
                       <ExternalLink className="w-3 h-3" />
                     </a>
                   )}
                   {lead.linkedinUrl && (
                     <a href={lead.linkedinUrl} target="_blank" rel="noopener noreferrer"
-                      className="text-[10px] text-[#3a3a3a] hover:text-blue-400 transition-colors font-medium border border-[#2a2a2a] px-1.5 py-0.5 rounded"
+                      className="text-[10px] text-gray-400 dark:text-[#444] hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium border border-gray-200 dark:border-[#1e1e1e] px-1.5 py-0.5 rounded"
                     >
                       in
                     </a>
                   )}
                 </div>
-                <div className="text-xs text-[#555] mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                <div className="text-xs text-gray-400 dark:text-[#444] mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5">
                   <span>{lead.industry}</span>
                   {lead.employees !== 'Unknown' && (
-                    <><span className="text-[#2a2a2a]">·</span><span>{lead.employees} employees</span></>
+                    <><span className="text-gray-200 dark:text-[#222]">·</span><span>{lead.employees} employees</span></>
                   )}
                   {lead.location && (
-                    <><span className="text-[#2a2a2a]">·</span>
+                    <><span className="text-gray-200 dark:text-[#222]">·</span>
                     <span className="flex items-center gap-0.5"><MapPin className="w-2.5 h-2.5" />{lead.location}</span></>
                   )}
                   {lead.foundedYear && (
-                    <><span className="text-[#2a2a2a]">·</span><span>Est. {lead.foundedYear}</span></>
+                    <><span className="text-gray-200 dark:text-[#222]">·</span><span>Est. {lead.foundedYear}</span></>
                   )}
                   {lead.annualRevenue && (
-                    <><span className="text-[#2a2a2a]">·</span><span className="text-[#666]">{lead.annualRevenue}</span></>
+                    <><span className="text-gray-200 dark:text-[#222]">·</span><span className="text-gray-500 dark:text-[#555]">{lead.annualRevenue}</span></>
                   )}
                 </div>
               </div>
@@ -158,7 +151,7 @@ function LeadCard({
                   whileTap={{ scale: 0.9 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                   onClick={onRemove}
-                  className="text-[#2e2e2e] hover:text-red-400 transition-colors p-1 rounded-md hover:bg-red-400/5"
+                  className="text-gray-300 dark:text-[#333] hover:text-red-500 dark:hover:text-red-400 transition-colors p-1 rounded-md hover:bg-red-50 dark:hover:bg-red-500/5"
                   title="Skip this lead"
                 >
                   <X className="w-4 h-4" />
@@ -168,14 +161,14 @@ function LeadCard({
 
             {/* Description */}
             {lead.description && (
-              <p className="text-xs text-[#666] mt-3 leading-relaxed line-clamp-2">{lead.description}</p>
+              <p className="text-xs text-gray-500 dark:text-[#555] mt-3 leading-relaxed line-clamp-2">{lead.description}</p>
             )}
 
             {/* Tech stack */}
             {lead.techStack && lead.techStack.length > 0 && (
               <div className="flex flex-wrap gap-1 mt-2.5">
                 {lead.techStack.map((tech) => (
-                  <span key={tech} className="text-[11px] bg-[#1a1a1a] text-[#555] border border-[#222] rounded px-1.5 py-0.5">
+                  <span key={tech} className="text-[11px] bg-gray-100 dark:bg-[#1a1a1a] text-gray-500 dark:text-[#555] border border-gray-200 dark:border-[#1e1e1e] rounded px-1.5 py-0.5">
                     {tech}
                   </span>
                 ))}
@@ -183,20 +176,20 @@ function LeadCard({
             )}
 
             {/* Rationale */}
-            <p className="text-xs text-[#3a3a3a] mt-2.5 leading-relaxed italic">{lead.rationale}</p>
+            <p className="text-xs text-gray-400 dark:text-[#444] mt-2.5 leading-relaxed italic">{lead.rationale}</p>
 
             {/* Contact + address */}
-            <div className="mt-4 pt-4 border-t border-[#1a1a1a]">
+            <div className="mt-4 pt-4 border-t border-gray-100 dark:border-[#181818]">
               {lead.contactName && (
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-3">
                   <div className="flex items-center gap-1.5">
-                    <User className="w-3 h-3 text-emerald-500 flex-shrink-0" />
-                    <span className="text-[13px] font-semibold text-white">{lead.contactName}</span>
-                    <span className="text-xs text-[#555]">{lead.contactTitle}</span>
+                    <User className="w-3 h-3 text-emerald-500 dark:text-emerald-400 flex-shrink-0" />
+                    <span className="text-[13px] font-semibold text-gray-900 dark:text-white">{lead.contactName}</span>
+                    <span className="text-xs text-gray-400 dark:text-[#444]">{lead.contactTitle}</span>
                   </div>
                   {lead.contactEmail && (
                     <a href={`mailto:${lead.contactEmail}`}
-                      className="flex items-center gap-1 text-xs text-[#555] hover:text-[#888] transition-colors"
+                      className="flex items-center gap-1 text-xs text-gray-400 dark:text-[#444] hover:text-gray-700 dark:hover:text-[#ccc] transition-colors"
                     >
                       <Mail className="w-3 h-3" />
                       {lead.contactEmail}
@@ -204,7 +197,7 @@ function LeadCard({
                   )}
                   {lead.contactLinkedIn && (
                     <a href={lead.contactLinkedIn} target="_blank" rel="noopener noreferrer"
-                      className="text-[10px] text-[#3a3a3a] hover:text-blue-400 transition-colors border border-[#2a2a2a] px-1.5 py-0.5 rounded"
+                      className="text-[10px] text-gray-400 dark:text-[#444] hover:text-blue-600 dark:hover:text-blue-400 transition-colors border border-gray-200 dark:border-[#1e1e1e] px-1.5 py-0.5 rounded"
                     >
                       in
                     </a>
@@ -213,9 +206,9 @@ function LeadCard({
               )}
 
               {lead.postalAddress && (
-                <div className="mb-3 bg-[#0d0d0d] rounded-lg px-3 py-2.5 border border-[#1a1a1a]">
-                  <p className="text-[10px] text-[#3a3a3a] mb-1.5 font-medium uppercase tracking-[0.1em]">Post to</p>
-                  <pre className="text-xs text-[#666] font-sans whitespace-pre-line leading-relaxed">
+                <div className="mb-3 bg-gray-50 dark:bg-[#0d0d0d] rounded-lg px-3 py-2.5 border border-gray-200 dark:border-[#1e1e1e]">
+                  <p className="text-[10px] text-gray-400 dark:text-[#444] mb-1.5 font-medium uppercase tracking-[0.1em]">Post to</p>
+                  <pre className="text-xs text-gray-600 dark:text-[#888] font-sans whitespace-pre-line leading-relaxed">
                     {lead.contactName ? `${lead.contactName}\n` : ''}{lead.contactTitle ? `${lead.contactTitle}\n` : ''}{lead.company}{'\n'}{lead.postalAddress}
                   </pre>
                 </div>
@@ -226,32 +219,32 @@ function LeadCard({
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={onGenerate}
-                  className="text-xs px-4 py-2 bg-white text-[#090909] rounded-lg font-semibold"
+                  className="text-xs px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-[#090909] rounded-lg font-semibold hover:bg-gray-800 dark:hover:bg-[#e8e8e8] transition-colors"
                 >
                   Generate letter →
                 </motion.button>
 
                 <div className="flex flex-wrap gap-4">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs text-[#3a3a3a]">Address to:</span>
+                    <span className="text-xs text-gray-400 dark:text-[#444]">Address to:</span>
                     {editingTitle ? (
                       <input
                         autoFocus value={lead.contactTitle}
                         onChange={(e) => onUpdateTitle(e.target.value)}
                         onBlur={() => setEditingTitle(false)}
                         onKeyDown={(e) => e.key === 'Enter' && setEditingTitle(false)}
-                        className="text-xs bg-[#0d0d0d] border border-[#333] rounded px-2 py-0.5 text-[#e8e8e8] focus:outline-none focus:border-[#555] w-44"
+                        className="text-xs bg-white dark:bg-[#1a1a1a] border border-gray-300 dark:border-[#2a2a2a] rounded px-2 py-0.5 text-gray-900 dark:text-white focus:outline-none focus:border-gray-500 dark:focus:border-[#444] w-44"
                       />
                     ) : (
                       <button onClick={() => setEditingTitle(true)}
-                        className="text-xs text-[#555] underline decoration-dotted hover:text-[#aaa] transition-colors"
+                        className="text-xs text-gray-500 dark:text-[#555] underline decoration-dotted hover:text-gray-800 dark:hover:text-[#ccc] transition-colors"
                       >
                         {lead.contactTitle}
                       </button>
                     )}
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs text-[#3a3a3a]">Name:</span>
+                    <span className="text-xs text-gray-400 dark:text-[#444]">Name:</span>
                     {editingName ? (
                       <input
                         autoFocus value={lead.recipientName}
@@ -259,11 +252,11 @@ function LeadCard({
                         onBlur={() => setEditingName(false)}
                         onKeyDown={(e) => e.key === 'Enter' && setEditingName(false)}
                         placeholder="e.g. Sarah Jennings"
-                        className="text-xs bg-[#0d0d0d] border border-[#333] rounded px-2 py-0.5 text-[#e8e8e8] focus:outline-none focus:border-[#555] w-44 placeholder-[#333]"
+                        className="text-xs bg-white dark:bg-[#1a1a1a] border border-gray-300 dark:border-[#2a2a2a] rounded px-2 py-0.5 text-gray-900 dark:text-white focus:outline-none focus:border-gray-500 dark:focus:border-[#444] w-44 placeholder-gray-300 dark:placeholder-[#333]"
                       />
                     ) : (
                       <button onClick={() => setEditingName(true)}
-                        className={`text-xs underline decoration-dotted transition-colors ${lead.recipientName ? 'text-[#555] hover:text-[#aaa]' : 'text-[#3a3a3a] hover:text-[#555]'}`}
+                        className={`text-xs underline decoration-dotted transition-colors ${lead.recipientName ? 'text-gray-500 dark:text-[#555] hover:text-gray-800 dark:hover:text-[#ccc]' : 'text-gray-300 dark:text-[#333] hover:text-gray-500 dark:hover:text-[#555]'}`}
                       >
                         {lead.recipientName || 'Add name'}
                       </button>
@@ -288,10 +281,8 @@ export default function LeadReview({ leads: allLeads, totalSearched, onGenerate,
   const [showBench, setShowBench] = useState(false)
   const [editingTitle, setEditingTitle] = useState<number | null>(null)
   const [editingName, setEditingName] = useState<number | null>(null)
-  // Track by rank ID — never by array index (index breaks if array is reordered)
   const processedRanks = useRef(new Set<number>())
 
-  // Accept incoming leads as streaming adds them
   useEffect(() => {
     const newLeads = allLeads.filter((l) => !processedRanks.current.has(l.rank))
     if (newLeads.length === 0) return
@@ -347,18 +338,18 @@ export default function LeadReview({ leads: allLeads, totalSearched, onGenerate,
             exit={{ opacity: 0, y: -8 }}
             className="mb-5 flex items-center gap-3"
           >
-            <Loader2 className="w-3.5 h-3.5 text-[#555] animate-spin flex-shrink-0" />
-            <span className="text-xs text-[#555]">{streamStatus || 'Finding leads…'}</span>
+            <Loader2 className="w-3.5 h-3.5 text-gray-400 dark:text-[#444] animate-spin flex-shrink-0" />
+            <span className="text-xs text-gray-500 dark:text-[#555]">{streamStatus || 'Finding leads…'}</span>
             {streamProgress && streamProgress.total > 0 && (
               <div className="flex items-center gap-2 ml-auto">
-                <div className="w-24 h-0.5 bg-[#1a1a1a] rounded-full overflow-hidden">
+                <div className="w-24 h-0.5 bg-gray-200 dark:bg-[#222] rounded-full overflow-hidden">
                   <motion.div
-                    className="h-full bg-white/20 rounded-full"
+                    className="h-full bg-gray-400 dark:bg-white rounded-full"
                     animate={{ width: `${(streamProgress.done / streamProgress.total) * 100}%` }}
                     transition={{ duration: 0.4 }}
                   />
                 </div>
-                <span className="text-[11px] text-[#333] tabular-nums">
+                <span className="text-[11px] text-gray-400 dark:text-[#444] tabular-nums">
                   {streamProgress.done}/{streamProgress.total}
                 </span>
               </div>
@@ -370,16 +361,16 @@ export default function LeadReview({ leads: allLeads, totalSearched, onGenerate,
       {/* Header */}
       <div className="mb-6 flex items-end justify-between">
         <div>
-          <h2 className="text-xl font-semibold text-white tracking-tight">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white tracking-tight">
             {active.length > 0 ? `${active.length} prospects` : isStreaming ? 'Searching…' : 'No results'}
           </h2>
-          <p className="text-sm text-[#444] mt-1">
+          <p className="text-sm text-gray-400 dark:text-[#444] mt-1">
             {totalSearched > 0 && <>Scored from {totalSearched.toLocaleString()} companies · </>}
             {totalRemaining > 0 && (
-              <span className="text-[#555]">{totalRemaining} more in reserve</span>
+              <span className="text-gray-400 dark:text-[#444]">{totalRemaining} more in reserve</span>
             )}
             {isStreaming && active.length === 0 && (
-              <span className="text-[#444]">First leads arriving shortly…</span>
+              <span className="text-gray-400 dark:text-[#444]">First leads arriving shortly…</span>
             )}
           </p>
         </div>
@@ -391,7 +382,7 @@ export default function LeadReview({ leads: allLeads, totalSearched, onGenerate,
             animate={{ opacity: 1, scale: 1 }}
             className="flex items-center gap-2"
           >
-            <span className="text-xs text-[#333] tabular-nums">
+            <span className="text-xs text-gray-400 dark:text-[#444] tabular-nums">
               {totalRemaining} in bench
             </span>
             <div className="flex gap-0.5">
@@ -401,19 +392,19 @@ export default function LeadReview({ leads: allLeads, totalSearched, onGenerate,
                   initial={{ opacity: 0, y: 4 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
-                  className="w-1 h-3 bg-[#222] rounded-sm"
+                  className="w-1 h-3 bg-gray-200 dark:bg-[#222] rounded-sm"
                 />
               ))}
-              {totalRemaining > 8 && <span className="text-[10px] text-[#333] ml-1">+{totalRemaining - 8}</span>}
+              {totalRemaining > 8 && <span className="text-[10px] text-gray-400 dark:text-[#444] ml-1">+{totalRemaining - 8}</span>}
             </div>
           </motion.div>
         )}
       </div>
 
-      {/* Active deck — sorted by data completeness: leads with a contact + address first */}
+      {/* Active deck — contact-complete leads first, then by GPT rank */}
       <div className="space-y-2 mb-6">
         <AnimatePresence mode="popLayout" initial={false}>
-          {[...active].sort((a, b) => b.dataScore - a.dataScore).map((lead, i) => (
+          {[...active].sort((a, b) => b.dataScore - a.dataScore || a.rank - b.rank).map((lead, i) => (
             <motion.div
               key={lead.rank}
               layout
@@ -455,7 +446,7 @@ export default function LeadReview({ leads: allLeads, totalSearched, onGenerate,
         <div className="mb-8">
           <button
             onClick={() => setShowBench((v) => !v)}
-            className="flex items-center gap-2 text-xs text-[#444] hover:text-[#888] transition-colors mb-3"
+            className="flex items-center gap-2 text-xs text-gray-400 dark:text-[#444] hover:text-gray-600 dark:hover:text-[#888] transition-colors mb-3"
           >
             {showBench ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
             {showBench ? 'Hide' : 'Show'} reserve pool ({bench.length} companies)
@@ -477,23 +468,23 @@ export default function LeadReview({ leads: allLeads, totalSearched, onGenerate,
                       initial={{ opacity: 0, x: -8 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: i * 0.025 }}
-                      className="flex items-center justify-between px-4 py-2.5 bg-[#0d0d0d] border border-[#181818] rounded-lg hover:border-[#252525] transition-colors group"
+                      className="flex items-center justify-between px-4 py-2.5 bg-white dark:bg-[#111] border border-gray-200 dark:border-[#1e1e1e] rounded-lg hover:border-gray-300 dark:hover:border-[#2a2a2a] transition-colors group"
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <span className="text-[11px] text-[#2a2a2a] tabular-nums w-4 flex-shrink-0">{i + ACTIVE_SIZE + 1}</span>
+                        <span className="text-[11px] text-gray-300 dark:text-[#333] tabular-nums w-4 flex-shrink-0">{i + ACTIVE_SIZE + 1}</span>
                         <div className="min-w-0">
-                          <span className="text-sm text-[#666] group-hover:text-[#999] transition-colors truncate block">{lead.company}</span>
-                          <span className="text-xs text-[#333]">{lead.industry} · {lead.employees} employees</span>
+                          <span className="text-sm text-gray-600 dark:text-[#888] group-hover:text-gray-900 dark:group-hover:text-white transition-colors truncate block">{lead.company}</span>
+                          <span className="text-xs text-gray-400 dark:text-[#444]">{lead.industry} · {lead.employees} employees</span>
                         </div>
                       </div>
                       <div className="flex items-center gap-3 flex-shrink-0">
-                        <span className={`text-sm font-bold tabular-nums ${lead.dataScore >= 75 ? 'text-emerald-500/50' : lead.dataScore >= 40 ? 'text-amber-500/50' : 'text-[#333]'}`}>
+                        <span className={`text-sm font-bold tabular-nums ${lead.dataScore >= 75 ? 'text-emerald-600 dark:text-emerald-400' : lead.dataScore >= 40 ? 'text-amber-600 dark:text-amber-400' : 'text-gray-300 dark:text-[#333]'}`}>
                           {lead.dataScore}
                         </span>
                         {active.length < ACTIVE_SIZE && (
                           <button
                             onClick={() => promoteFromBench(lead)}
-                            className="text-[10px] text-[#333] hover:text-white border border-[#222] hover:border-[#444] px-2 py-0.5 rounded transition-all"
+                            className="text-[10px] text-gray-400 dark:text-[#444] hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-[#1e1e1e] hover:border-gray-400 dark:hover:border-[#2a2a2a] px-2 py-0.5 rounded transition-all"
                           >
                             Add
                           </button>
@@ -518,11 +509,11 @@ export default function LeadReview({ leads: allLeads, totalSearched, onGenerate,
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => onGenerate(active)}
-            className="px-7 py-3 bg-white text-[#090909] text-sm font-semibold rounded-lg transition-colors"
+            className="px-7 py-3 bg-gray-900 dark:bg-white text-white dark:text-[#090909] text-sm font-semibold rounded-lg hover:bg-gray-800 dark:hover:bg-[#e8e8e8] transition-colors"
           >
             Generate all {active.length} packs →
           </motion.button>
-          <span className="text-xs text-[#333]">~{active.length * 45}s · one at a time</span>
+          <span className="text-xs text-gray-400 dark:text-[#444]">~{active.length * 45}s · one at a time</span>
         </motion.div>
       )}
     </div>
