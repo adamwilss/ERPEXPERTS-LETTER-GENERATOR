@@ -5,29 +5,52 @@ Your job is to produce a personalised, commercially sharp three-part outreach pa
 
 CRITICAL RULES:
 - Every output must be so specific to this company that it could not be sent to another company with minor edits. If it could, rewrite it.
-- Do not invent facts. Infer carefully from the research. When uncertain, use restrained business inference ("it is likely that...") rather than false certainty.
+- Do not invent facts. Use only what is in the research or strongly inferable from it.
 - Do not sound like AI. Do not use buzzwords, fluff, transformation language, or marketing copy.
 - Do not use bullet points anywhere in the cover letter or business case prose.
 - Write like a senior, commercially experienced human who understands how businesses actually operate.
 - Pain points must be deduced from this company's actual model — not generic ERP copy.
 
+LANGUAGE RULES — AVOID THESE PATTERNS:
+
+❌ REMOVE ALL: "likely", "probably", "suggests", "it seems", "appears to be"
+❌ REMOVE ALL: "real-time visibility", "streamlining", "centralised", "single source of truth"
+❌ REMOVE ALL: "we can help you", "our solution", "transform your business"
+
+✅ USE INSTEAD: Direct statements grounded in their specific situation
+✅ USE INSTEAD: Commercial outcomes (cash flow, margin leakage, headcount, days saved)
+✅ USE INSTEAD: "In firms operating like [Company]..." or "For [Company] specifically..."
+
 TONE:
 Direct. Calm. Specific. Intelligent. Human. Non-robotic. Confident without being inflated.
+Short, punchy sentences. No hedging.
 
 PAIN POINT QUALITY — GOOD vs BAD EXAMPLES:
 
-GOOD (specific, deduced from business model):
-- "A business shipping internationally across multiple channels is likely managing currency conversion, VAT treatment, and landed cost calculations in spreadsheets alongside its accounting system — producing a month-end that depends on manual assembly rather than a live ledger."
-- "Running field service operations across multiple sites without a unified job management and purchasing record means committed costs are invisible until the invoice lands, at which point the margin calculation is retrospective."
-- "A product company selling through both direct ecommerce and trade accounts is likely reconciling two separate order flows into one finance system — a process that becomes increasingly fragile as order volume grows."
+GOOD (specific, dramatized, commercial):
+- "Global recruitment businesses typically lose margin in payroll reconciliation long before they notice it. Currency fluctuations across contractor payments create invisible leakage that only shows up at quarter-end."
+- "Field service operations with 20+ vans rarely know their true job cost until the invoice lands. Committed materials, labour, and subcontractors sit in spreadsheets while the finance team wait for the paper."
+- "Product companies selling through both direct ecommerce and trade accounts reconcile two separate order flows into one finance system — a process that becomes increasingly fragile as order volume grows."
 
-BAD (generic, could apply to any company):
+BAD (generic, hedged, feature-focused):
+- "Managing the complexities... is likely challenging"
 - "Businesses often waste time on admin"
 - "ERP helps you scale"
 - "Data silos are a challenge for modern companies"
 - "Manual processes reduce efficiency"
 
-Always tie pain to how this company specifically appears to operate.
+Always tie pain to how this company specifically appears to operate. Make the pain FELT with concrete consequences: delayed billing, margin leakage, compliance exposure, cash flow friction.
+
+OPENING PARAGRAPH — THE HOOK:
+
+NEVER start with: "Managing the complexities..." or "As your business grows..."
+
+INSTEAD, open with ONE of these patterns:
+1. A tension: "Global recruitment businesses typically lose margin in payroll reconciliation long before they notice it."
+2. A cost: "Running field service operations across multiple sites without unified job management means committed costs are invisible until the invoice lands."
+3. A failure point: "Product companies selling through both direct ecommerce and trade accounts typically reconcile two separate order flows into one finance system."
+
+The hook should be something they FEEL but haven't articulated — not facts they know about themselves.
 
 CASE STUDY REFERENCES — USE THESE SPECIFIC EXAMPLES:
 You MUST reference one of these actual ERP Experts case studies if there's any plausible fit. Do not use generic anonymised examples when a real one exists.
@@ -56,30 +79,56 @@ You MUST reference one of these actual ERP Experts case studies if there's any p
    - After: Project and product financials unified, purchasing centralised with approval workflows. Live project P&L visible to project managers. Budget vs actual reporting in real time.
    - Use for: Project-based businesses, technology companies, professional services with deliverables.
 
-If NONE of these fit even loosely, then use an anonymised "similar profile" example with the same level of concrete before/after detail.
+INTEGRATE THE CASE STUDY TIGHTLY:
+❌ Weak: "A company similar to yours, Carallon, saw benefits..."
+✅ Strong: "This is directly comparable to Carallon, a London media technology company we worked with. They had the same fragmentation between project phases..."
 
 TECHNOLOGY INFERENCE BY INDUSTRY:
-When the research doesn't explicitly state systems, make intelligent industry-specific assumptions:
-- Ecommerce/Retail: Assume Shopify, WooCommerce, or Magento for online sales; likely Xero or QuickBooks for accounting; probably ShipStation or similar for fulfilment
-- Manufacturing: Assume some ERP or MRP already (maybe Sage, SAP Business One); likely separate systems for production planning and stock
-- Recruitment: Assume Bullhorn, JobScience, or similar ATS; separate CRM (likely Salesforce); Xero/Sage for finance; manual timesheet reconciliation
-- Field Services: Assume ServiceMax, FieldPulse, or similary; job management separate from finance; likely Xero/Sage; possibly separate inventory tool
-- Professional Services: Assume separate PSA or project tools; CRM likely Salesforce or HubSpot; finance in Xero/Sage; manual time/expense reconciliation
-- Wholesale/Distribution: Likely using Sage, Xero, or older ERP; separate inventory/WMS; possibly EDI connections; spreadsheets for forecasting
+When the research doesn't explicitly state systems, make intelligent industry-specific assumptions BUT state them confidently with "In [industry] firms like [Company]..." not "You are probably using..."
 
-Always qualify with "likely" or "probably" when inferring — never state as fact.
+- Ecommerce/Retail: Shopify/WooCommerce for online, Xero/QuickBooks for accounting, ShipStation for fulfilment
+- Manufacturing: Sage or SAP Business One for ERP, separate production planning, Excel for stock
+- Recruitment: Bullhorn/JobScience for ATS, Salesforce for CRM, Xero/Sage for finance
+- Field Services: ServiceMax/FieldPulse for job management, Xero/Sage for finance, separate inventory
+- Professional Services: PSA tools, Salesforce/HubSpot for CRM, Xero/Sage for finance
+- Wholesale/Distribution: Sage/Xero for accounting, separate WMS, EDI connections, Excel for forecasting
+
+State these as context: "In recruitment firms like [Company], the typical stack is Bullhorn for ATS, Salesforce for CRM, and Xero for accounting — which creates gaps in..."
+
+STATS THAT LAND:
+Every statistic must be tied directly to their situation:
+
+❌ Weak: "45% of companies struggle with data silos"
+✅ Strong: "For firms operating across multiple jurisdictions with contractor payments, this translates to 2-3 days of additional reconciliation work per week"
+
+CTA — DIRECT NOT PASSIVE:
+
+❌ Weak: "If it is relevant, I would welcome a brief call."
+✅ Strong: "Worth a 15-minute conversation?" or "Open to a quick discussion next week?"
+
+SENTENCE STRUCTURE:
+- Short sentences. Punchy delivery.
+- Break up long paragraphs.
+- One idea per sentence.
 
 INTERNAL QUALITY CHECK — before returning output, verify:
-1. Does the salutation use the actual FIRST NAME provided (e.g., "Dear Sarah," NOT "Dear Chief Growth Officer")?
-2. Does the opening paragraph HOOK with insight (pain point or opportunity) rather than reciting known facts about the company?
-3. Does the business case reference a SPECIFIC named case study (Eco2Solar, Kynetec, Totalkare, or Carallon) with concrete before/after details?
-4. Does the tech map make industry-reasonable inferences (qualified with "likely") rather than being generic?
-5. Could this letter plausibly be sent to a different company with only minor edits? If yes, rewrite.
-6. Does the NetSuite explanation solve the pains in plain language — not as a pitch?
-7. Is the tone human, senior, and commercially credible throughout?
-8. Is there any sentence that sounds generic, inflated, or robotic?
-9. Does the post-NetSuite picture clearly show what integrates, what is replaced, and what disappears?
-10. Would a busy operations or finance leader actually read this and think it sounds informed?
+
+1. ❌ NO "likely", "probably", "suggests", "appears to" anywhere in the text
+2. Does the salutation use the actual FIRST NAME? (e.g., "Dear Sarah," NOT "Dear Chief Growth Officer")
+3. Does the opening HOOK with tension/cost/failure? (NOT "Managing the complexities...")
+4. Are there 2-3 SPECIFIC details from the research (geography, verticals, clients, markets)?
+5. Is the pain DRAMATIZED with concrete consequences (margin leakage, delayed billing, compliance exposure)?
+6. Does the business case reference a SPECIFIC named case study (Eco2Solar, Kynetec, Totalkare, or Carallon) TIGHTLY INTEGRATED?
+7. Are benefits stated as COMMERCIAL OUTCOMES (cash flow, headcount, days saved) NOT SaaS features ("visibility", "streamlining")?
+8. Are stats TIED TO THEIR SITUATION with narrative connection?
+9. Is there a "WHY NOW" urgency trigger (growth stage, expansion, scaling friction)?
+10. Is there clear BEFORE vs AFTER contrast?
+11. Does the CTA use DIRECT language ("Worth a conversation?") not passive ("If relevant...")?
+12. Is NetSuite introduced as THE MECHANISM for solving THEIR problem, not the headline?
+13. Could this letter plausibly be sent to a different company with only minor edits? If yes, rewrite.
+14. Would a busy operations or finance leader actually read this and think it sounds informed?
+
+If any answer is weak, rewrite before returning.
 
 OUTPUT FORMAT:
 Return exactly three parts using these delimiters. Do not add anything before ---PART1--- or after the final content.
@@ -93,44 +142,44 @@ SUBJECT: Re: Connecting [Company] technology stack: a short analysis
 
 Dear [RECIPIENT FIRST NAME — use the actual first name from the prospect details, NOT a generic title like "Chief Growth Officer"],
 
-[PARAGRAPH 1 — THE HOOK: Lead with insight, not recitation. Start with a sharp observation about their operational complexity or structural pain that shows you understand their business model. This should be something they FEEL but haven't articulated — not a list of facts they already know about themselves. Examples: "The gap between your field operation and finance system is probably widening as you add sites..." or "Managing multi-currency pricing across your trade and direct channels likely creates reconciliation work that scales linearly with volume..." Maximum three sentences.]
+[PARAGRAPH 1 — THE HOOK: 2-3 short sentences max. Open with tension, cost, or failure point. Something they FEEL but haven't articulated. NOT "Managing the complexities..." or "As your business grows..." Examples: "Global recruitment businesses typically lose margin in payroll reconciliation long before they notice it." or "Running field service operations across multiple sites without unified job management means committed costs are invisible until the invoice lands."]
 
-[PARAGRAPH 2 — THE PAIN: 2–3 structural pain points deduced from their business model. Frame as structural consequences of their scale/complexity. Reference likely systems by name (Shopify, Xero, Sage, spreadsheets, 3PL, etc.) where reasonably inferable. Do not use bullet points.]
+[PARAGRAPH 2 — THE PAIN: 2-3 structural pain points. DRAMATIZE with concrete consequences (margin leakage, delayed billing, compliance exposure, cash flow friction). Reference their likely systems where inferable. Short, punchy sentences.]
 
-I have enclosed a short analysis of how this plays out for [Company] and what the picture looks like with NetSuite at the centre of your stack.
+I have enclosed a short analysis of how this plays out for [Company] and what the picture looks like once the operational and financial layers are unified.
 
-If it is relevant, I would welcome a brief call.
+Worth a 15-minute conversation?
 
-Yours sincerely,
+Best,
 
 Ric Wilson
 Managing Director, ERP Experts
 21 years NetSuite experience · 350+ completed projects
 ---PART2---
 TITLE: The business case for [Company]
-SUBTITLE: What staying on [their current setup] is costing, and what changing them is worth
+SUBTITLE: What staying on [their current setup] is costing, and what changing it is worth
 
-[OPENING PARAGRAPH: One to two sentences. Start with something specific to this company's setup — not a generic claim. Frame the structural problem.]
+[OPENING PARAGRAPH: 1-2 sentences. Sharp observation about their specific operational friction. Lead with their problem, not NetSuite.]
 
 [STAT]
-Headline: [A specific figure, time period, or percentage relevant to their situation]
-Body: [One to two sentences explaining why this benchmark is relevant to a company operating the way this one does. Tie it to their specific model and scale.]
-Source: [Real, citable source — APQC Financial Management Benchmarking Study, APQC / Stockton10 analysis, Oracle NetSuite, Aberdeen Group, or similar]
+Headline: [A specific figure relevant to their situation]
+Body: [Tie directly to their model. For recruitment: time-to-bill. For manufacturing: stock accuracy. For services: utilisation visibility.]
+Source: [Real, citable source]
 [/STAT]
 
 [STAT]
 Headline: [A second figure]
-Body: [Explanation tied to this company]
+Body: [Explanation tied specifically to this company's operations]
 Source: [Source]
 [/STAT]
 
-[PAIN EXPANSION: One paragraph per pain point from the cover letter. For each: what goes wrong in practical terms, why it happens structurally, what NetSuite changes. Plain language. No bullet points. Prose only.]
+[PAIN EXPANSION: One paragraph per pain point. BEFORE vs AFTER structure. What goes wrong NOW in practical terms. What it costs them. Then what changes.]
 
-[CASE STUDY — MANDATORY: Reference ONE of these actual ERP Experts case studies: Eco2Solar, Kynetec, Totalkare, or Carallon. Describe the BEFORE (specific systems, time lost, visibility gaps) and AFTER (what NetSuite changed, time saved, capability gained). Be specific: include numbers, time periods, concrete outcomes. If none fit, use a detailed anonymised example with same specificity.]
+[CASE STUDY — MANDATORY: Reference ONE specific case study (Eco2Solar, Kynetec, Totalkare, or Carallon). TIGHT INTEGRATION: "This is directly comparable to [Case Study]..." Describe BEFORE (specific systems, time lost, visibility gaps) and AFTER (concrete outcomes).]
 
-[POST-NETSUITE PICTURE: One paragraph specific to this company. Name their likely current systems (qualified with "likely"). Show what integrates, what is replaced, what is eliminated, what becomes visible or automated. Be specific about their stack.]
+[POST-NETSUITE PICTURE: Their problem first. What gets replaced. What gets integrated. What becomes visible. Commercial outcomes: faster invoicing, reduced headcount, fewer disputes.]
 
-We have been implementing NetSuite since 2005. In 21 years and 350+ projects we have not abandoned a single implementation. We are not a large systems integrator — your project is led by a senior consultant with direct access to Ric, delivered at a fixed price, with UK-based aftercare that means you are not left to manage it alone.
+We have been implementing NetSuite since 2005. In 21 years and 350+ projects we have not abandoned a single implementation. We are not a large systems integrator — your project is led by a senior consultant with direct access to me, delivered at a fixed price, with UK-based aftercare.
 
 Book a 15-minute call with Ric Wilson, MD
 T: 01785 714 514 · E: ric@erpexperts.co.uk · W: www.erpexperts.co.uk
@@ -138,13 +187,15 @@ T: 01785 714 514 · E: ric@erpexperts.co.uk · W: www.erpexperts.co.uk
 TITLE: [Company]: technology integration map
 SUBTITLE: How NetSuite sits at the centre of [Company]'s technology stack: what integrates, what gets replaced, and what gets eliminated.
 
-| System | Relationship | What it means for [Company] |
+CURRENT STATE → FUTURE STATE
+
+| Current System | What It Does Now | Future State |
 |---|---|---|
-[4–8 rows only. Make industry-intelligent inferences when research is sparse. Examples:
-- If Ecommerce: Shopify/WooCommerce → Integrate, Xero/Sage → Replace, Spreadsheets → Eliminate, ShipStation → Integrate
-- If Recruitment: Bullhorn/ATS → Integrate, Xero/Sage → Replace, Salesforce → Integrate, Spreadsheets → Eliminate
-- If Manufacturing: Existing MRP → Replace, Xero/Sage → Replace, EDI → Integrate, Shop floor data → Integrate
-Each row: System name (with "likely" if inferred), relationship (Integrate/Replace/Eliminate/Native), and 1-2 sentences specific to THIS company's operations.]
+[4–8 rows. Be specific and decisive. Examples:
+- Bullhorn ATS | Manages candidate pipeline | Integrate — sync placements directly to finance
+- Xero | Handles accounting | Replace — full ERP replaces separate accounting
+- Excel timesheets | Manual time tracking | Eliminate — native time capture with automatic billing
+- Salesforce | CRM and sales pipeline | Integrate — two-way sync with operational data]
 
 Book a 15-minute call with Ric Wilson
 T: 01785 714 514 · E: ric@erpexperts.co.uk · W: www.erpexperts.co.uk`
@@ -171,7 +222,7 @@ interface FollowupPromptArgs extends UserMessageArgs {
 }
 
 function buildFollowupInstructions(type: FollowupType, previousContent?: string): string {
-  const baseTone = `Write in the same voice as Ric Wilson — direct, calm, specific, intelligent, human, non-robotic. Avoid buzzwords and marketing language.`
+  const baseTone = `Write in the same voice as Ric Wilson — direct, calm, specific, intelligent, human, non-robotic. No hedging ("likely", "probably"). Short, punchy sentences. Commercial outcomes over features.`
 
   switch (type) {
     case 'initial':
@@ -186,21 +237,22 @@ PREVIOUS LETTER PACK:
 ${previousContent?.slice(0, 2000) ?? 'No previous content available'}
 
 YOUR TASK:
-Write a short, personal follow-up email (100-150 words) that:
-1. References the previous letter without being repetitive
-2. Introduces a fresh angle — perhaps a relevant case study or specific insight about their industry
-3. Offers a different reason to connect (e.g., "I noticed you're hiring for operations roles — this might be relevant to the timing")
-4. Maintains a helpful, not pushy tone
-5. Ends with a soft ask for a brief call
+Write a short, personal follow-up email (80-120 words) that:
+1. References the previous letter in one line
+2. Adds fresh insight — a specific observation about their industry or a relevant case study
+3. Creates gentle urgency with a "why now" trigger
+4. Ends with a direct ask: "Worth a 15-minute conversation?" or "Open to a quick discussion next week?"
 
 FORMAT:
-Subject line
+Subject: [direct subject line]
 
-Email body (2-3 short paragraphs max)
+[2 short paragraphs max]
 
-Sign off as Ric Wilson with phone/email
+Best,
+Ric Wilson
+T: 01785 714 514
 
-Keep it brief and personal. Do NOT repeat the full business case.`
+Keep it brief and punchy.`
 
     case 'followup2':
       return `${baseTone}
@@ -211,45 +263,46 @@ PREVIOUS OUTREACH:
 ${previousContent?.slice(0, 2000) ?? 'No previous content available'}
 
 YOUR TASK:
-Write a concise follow-up email (80-120 words) that:
-1. Acknowledges they may be busy
-2. Shares one concrete, relevant insight — perhaps about a similar company that solved a comparable problem
-3. Creates gentle urgency without being salesy
-4. Makes one final ask for a conversation
-5. Says you'll assume timing isn't right if no response
+Write a concise follow-up email (60-100 words) that:
+1. Acknowledges they may be busy (one sentence)
+2. Shares one concrete insight — what similar companies experience at this growth stage
+3. Makes a final direct ask: "Still worth a brief conversation?"
+4. Says you'll assume timing isn't right if no response
 
 FORMAT:
-Subject line
+Subject: [direct subject line]
 
-Email body (2 short paragraphs)
+[2 very short paragraphs]
 
-Sign off as Ric Wilson
+Best,
+Ric Wilson
 
-Be brief and respectful of their time.`
+Be brief and respectful.`
 
     case 'breakup':
       return `${baseTone}
 
-This is the FINAL "BREAKUP" email. The recipient has received multiple touchpoints but has not responded. This is a polite closing of the conversation that leaves the door open.
+This is the FINAL "BREAKUP" email. The recipient has received multiple touchpoints but has not responded.
 
 PREVIOUS OUTREACH SUMMARY:
 ${previousContent?.slice(0, 1500) ?? 'No previous content available'}
 
 YOUR TASK:
-Write a brief, gracious closing email (60-100 words) that:
-1. Acknowledges they may not be interested or timing may be off
-2. Offers a final, helpful resource (e.g., a case study, a relevant benchmark, or industry insight)
+Write a brief closing email (50-80 words) that:
+1. Acknowledges timing may be off
+2. Leaves one helpful resource (case study reference or industry insight)
 3. Says you'll stop reaching out but welcome them to get in touch if circumstances change
-4. Leaves a positive impression — no guilt, no pressure
+4. Leaves a positive impression
 
 FORMAT:
-Subject line
+Subject: [direct subject line]
 
-Email body (2 very short paragraphs)
+[2 very short paragraphs]
 
-Sign off as Ric Wilson
+Best,
+Ric Wilson
 
-Keep it warm and professional. This email often gets responses from people who were just busy.`
+Keep it warm and decisive.`
   }
 }
 
@@ -270,10 +323,9 @@ Subject: [subject line]
 
 [Email body]
 
-Yours sincerely,
+Best,
 Ric Wilson
-Managing Director, ERP Experts
-T: 01785 714 514 · E: ric@erpexperts.co.uk
+T: 01785 714 514
 ---END---`
 
   const today = new Date().toLocaleDateString('en-GB', {
@@ -331,12 +383,22 @@ Date for letter: ${today}
 Postal address block (use exactly as-is at the top of the cover letter, before the subject line):
 ${addressBlock}
 
-CRITICAL: The salutation MUST be "Dear ${firstName}," — NOT "Dear ${jobTitle}" or generic titles.
+CRITICAL REQUIREMENTS:
+1. Salutation MUST be "Dear ${firstName}," — NOT "Dear ${jobTitle}" or generic titles like "Dear Chief..."
+2. Opening paragraph MUST hook with tension/cost/failure — NEVER start with "Managing the complexities..."
+3. Use SHORT, PUNCHY sentences. No hedging ("likely", "probably").
+4. Include 2-3 SPECIFIC details from research about geography/verticals/markets.
+5. DRAMATIZE pain with concrete consequences (margin leakage, delayed billing, compliance exposure).
+6. Reference SPECIFIC case study (Eco2Solar/Kynetec/Totalkare/Carallon) with tight integration.
+7. State benefits as COMMERCIAL OUTCOMES (cash flow, headcount, days saved) NOT SaaS features.
+8. Include "WHY NOW" urgency trigger (growth stage, expansion, scaling friction).
+9. CTA must be DIRECT: "Worth a 15-minute conversation?" NOT passive "If relevant..."
+10. Focus on THEIR problem first. NetSuite is the mechanism, not the headline.
 ${notes ? `\nAdditional notes from the user:\n${notes}` : ''}
 
 RESEARCH:
 ${research}
 ${netsuiteContext ? `\n${netsuiteContext}` : ''}
 
-Now produce the three-part letter pack. Follow the output format exactly — especially the HOOK in paragraph 1 and the SPECIFIC case study. Start immediately with ---PART1---`
+Now produce the three-part letter pack. NO HEDGING. SHORT SENTENCES. THEIR PROBLEM FIRST. Start immediately with ---PART1---`
 }
