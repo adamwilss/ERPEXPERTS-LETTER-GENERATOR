@@ -1,10 +1,13 @@
 'use client'
 
 import { useState } from 'react'
+import { Plus } from 'lucide-react'
 import CopyButton from './CopyButton'
 import CalloutStat from './CalloutStat'
 import TechMap from './TechMap'
 import DownloadMenu from './DownloadMenu'
+import SaveTemplateModal from './SaveTemplateModal'
+import { saveTemplate } from '@/lib/templates'
 import { parseStats } from '@/lib/parse'
 
 interface Props {
@@ -169,6 +172,7 @@ export default function LetterOutput({
   coverLetter, businessCase, techMap, companyName, isStreaming,
 }: Props) {
   const [activeTab, setActiveTab] = useState<TabId>('letter')
+  const [showSaveModal, setShowSaveModal] = useState(false)
 
   return (
     <div>
@@ -198,12 +202,21 @@ export default function LetterOutput({
           {activeTab === 'case' && businessCase && <CopyButton text={businessCase} label="Copy" />}
           {activeTab === 'map' && techMap && <CopyButton text={techMap} label="Copy" />}
           {!isStreaming && coverLetter && businessCase && techMap && (
-            <DownloadMenu
-              coverLetter={coverLetter}
-              businessCase={businessCase}
-              techMap={techMap}
-              companyName={companyName}
-            />
+            <>
+              <button
+                onClick={() => setShowSaveModal(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-[#1e1e1e] rounded-lg hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors"
+              >
+                <Plus className="w-3 h-3" />
+                Save Template
+              </button>
+              <DownloadMenu
+                coverLetter={coverLetter}
+                businessCase={businessCase}
+                techMap={techMap}
+                companyName={companyName}
+              />
+            </>
           )}
         </div>
       </div>
@@ -214,6 +227,23 @@ export default function LetterOutput({
         {activeTab === 'case' && (businessCase ? <BusinessCaseView content={businessCase} /> : <Placeholder />)}
         {activeTab === 'map' && (techMap ? <TechMap content={techMap} /> : <Placeholder />)}
       </div>
+
+      <SaveTemplateModal
+        isOpen={showSaveModal}
+        onClose={() => setShowSaveModal(false)}
+        initialContent={`${coverLetter}\n\n---\n\n${businessCase}\n\n---\n\n${techMap}`}
+        onSave={({ name, description, industry, tags }) => {
+          saveTemplate({
+            name,
+            description,
+            industry,
+            preview: `${coverLetter}\n\n${businessCase}`.slice(0, 200),
+            fullContent: `${coverLetter}\n\n---\n\n${businessCase}\n\n---\n\n${techMap}`,
+            createdBy: 'User',
+            tags,
+          })
+        }}
+      />
     </div>
   )
 }

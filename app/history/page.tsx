@@ -1,10 +1,15 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { Trash2, ChevronDown, ChevronRight, Printer } from 'lucide-react'
-import { loadHistory, deletePack, clearHistory, updatePackStatus, type SavedPack, type PackStatus } from '@/lib/history'
+import { Trash2, ChevronDown, ChevronRight, Printer, Mail, Calendar, Plus } from 'lucide-react'
+import {
+  loadHistory, deletePack, clearHistory, updatePackStatus, initializeSequence,
+  updatePackOutcome, markAsSent, type SavedPack, type PackStatus, type OutcomeData
+} from '@/lib/history'
 import LetterOutput from '@/components/LetterOutput'
+import SequenceManager from '@/components/SequenceManager'
 import { parseOutput } from '@/lib/parse'
 
 const STATUS_OPTIONS: { value: PackStatus; label: string; color: string; darkColor: string }[] = [
@@ -12,6 +17,7 @@ const STATUS_OPTIONS: { value: PackStatus; label: string; color: string; darkCol
   { value: 'responded', label: 'Responded', color: 'bg-amber-50 text-amber-600 border-amber-200', darkColor: 'dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20' },
   { value: 'meeting', label: 'Meeting', color: 'bg-emerald-50 text-emerald-600 border-emerald-200', darkColor: 'dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' },
   { value: 'not_interested', label: 'No interest', color: 'bg-gray-100 text-gray-400 border-gray-200', darkColor: 'dark:bg-[#1a1a1a] dark:text-[#444] dark:border-[#1e1e1e]' },
+  { value: 'no_response', label: 'No response', color: 'bg-gray-100 text-gray-400 border-gray-200', darkColor: 'dark:bg-[#1a1a1a] dark:text-[#444] dark:border-[#1e1e1e]' },
 ]
 
 function StatusBadge({ status, onChange }: { status?: PackStatus; onChange: (s: PackStatus | undefined) => void }) {
@@ -52,13 +58,118 @@ function StatusBadge({ status, onChange }: { status?: PackStatus; onChange: (s: 
   )
 }
 
+// ── Outcome Modal ──────────────────────────────────────────────────────────────
+
+function OutcomeModal({
+  pack, isOpen, onClose, onSave
+}: {
+  pack: SavedPack
+  isOpen: boolean
+  onClose: () => void
+  onSave: (outcome: Partial<OutcomeData>) => void
+}) {
+  const [responseType, setResponseType] = useState<OutcomeData['responseType']>(pack.outcomes?.responseType)
+  const [meetingBooked, setMeetingBooked] = useState(pack.outcomes?.meetingBooked ?? false)
+  const [notes, setNotes] = useState(pack.outcomes?.notes ?? '')
+
+  if (!isOpen) return null
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="bg-white dark:bg-[#1a1a1a] rounded-xl border border-gray-200 dark:border-[#1e1e1e] shadow-xl max-w-md w-full p-6"
+      >
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          Record Outcome — {pack.company}
+        </h3>
+
+        <div className="space-y-4">
+          <div>
+            <label className="text-xs font-medium text-gray-500 dark:text-[#555] mb-2 block">
+              Response type
+            </label>
+            <div className="flex gap-2">
+              {(['positive', 'neutral', 'negative'] as const).map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setResponseType(t)}
+                  className={`flex-1 px-3 py-2 rounded-lg text-xs font-medium border transition-colors ${
+                    responseType === t
+                      ? t === 'positive'
+                        ? 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400'
+                        : t === 'neutral'
+                        ? 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-500/10 dark:border-amber-500/20 dark:text-amber-400'
+                        : 'bg-red-50 border-red-200 text-red-700 dark:bg-red-500/10 dark:border-red-500/20 dark:text-red-400'
+                      : 'bg-gray-50 border-gray-200 text-gray-600 dark:bg-[#1a1a1a] dark:border-[#1e1e1e] dark:text-[#555]'
+                  }`}
+                >
+                  {t.charAt(0).toUpperCase() + t.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="meeting"
+              checked={meetingBooked}
+              onChange={(e) => setMeetingBooked(e.target.checked)}
+              className="rounded border-gray-300 dark:border-[#1e1e1e] dark:bg-[#111]"
+            />
+            <label htmlFor="meeting" className="text-sm text-gray-700 dark:text-gray-300">
+              Meeting booked
+            </label>
+          </div>
+
+          <div>
+            <label className="text-xs font-medium text-gray-500 dark:text-[#555] mb-2 block">
+              Notes
+            </label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="e.g., Wants to see demo, Budget approved in Q2..."
+              className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-[#1e1e1e] rounded-lg bg-white dark:bg-[#111] text-gray-900 dark:text-white focus:outline-none focus:border-gray-400 dark:focus:border-[#2a2a2a]"
+              rows={3}
+            />
+          </div>
+        </div>
+
+        <div className="mt-6 flex gap-3">
+          <button
+            onClick={onClose}
+            className="flex-1 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => {
+              onSave({ responseType, meetingBooked, notes })
+              onClose()
+            }}
+            className="flex-1 px-4 py-2 text-sm font-medium bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
+          >
+            Save Outcome
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  )
+}
+
 export default function HistoryPage() {
   const [packs, setPacks] = useState<SavedPack[]>([])
   const [expanded, setExpanded] = useState<string | null>(null)
+  const [outcomePack, setOutcomePack] = useState<SavedPack | null>(null)
 
   useEffect(() => {
     setPacks(loadHistory())
   }, [])
+
+  const refresh = () => setPacks(loadHistory())
 
   const handleDelete = (id: string) => {
     deletePack(id)
@@ -68,7 +179,23 @@ export default function HistoryPage() {
 
   const handleStatus = (id: string, status: PackStatus | undefined) => {
     updatePackStatus(id, status)
+    if (status === 'sent') {
+      initializeSequence(id)
+    }
     setPacks(loadHistory())
+  }
+
+  const handleMarkSent = (id: string) => {
+    markAsSent(id)
+    initializeSequence(id)
+    setPacks(loadHistory())
+  }
+
+  const handleOutcome = (outcome: Partial<OutcomeData>) => {
+    if (outcomePack) {
+      updatePackOutcome(outcomePack.id, outcome)
+      setPacks(loadHistory())
+    }
   }
 
   const handleClear = () => {
@@ -164,14 +291,51 @@ export default function HistoryPage() {
                   </div>
 
                   {isExpanded && (
-                    <div className="border-t border-gray-100 dark:border-[#181818] p-6">
-                      <LetterOutput
-                        coverLetter={parsed.part1}
-                        businessCase={parsed.part2}
-                        techMap={parsed.part3}
-                        companyName={pack.company}
-                        isStreaming={false}
-                      />
+                    <div className="border-t border-gray-100 dark:border-[#181818] p-6 space-y-6">
+                      {/* Actions Bar */}
+                      <div className="flex items-center gap-2 pb-4 border-b border-gray-200 dark:border-[#1e1e1e]">
+                        {!pack.sequenceStatus && (
+                          <button
+                            onClick={() => handleMarkSent(pack.id)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-100 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20 dark:hover:bg-blue-500/20 transition-colors"
+                          >
+                            <Mail className="w-3 h-3" />
+                            Start Sequence
+                          </button>
+                        )}
+                        {pack.status === 'responded' || pack.status === 'meeting' ? (
+                          <button
+                            onClick={() => setOutcomePack(pack)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg hover:bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20 dark:hover:bg-emerald-500/20 transition-colors"
+                          >
+                            <Plus className="w-3 h-3" />
+                            Record Outcome
+                          </button>
+                        ) : null}
+                        <button
+                          onClick={() => window.open(`/print?id=${pack.id}`, '_blank')}
+                          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
+                        >
+                          <Printer className="w-3 h-3" />
+                          Print
+                        </button>
+                      </div>
+
+                      {/* Sequence Manager */}
+                      {pack.sequenceStatus && (
+                        <SequenceManager pack={pack} onUpdate={refresh} />
+                      )}
+
+                      {/* Original Letter Output */}
+                      <div className="pt-4 border-t border-gray-200 dark:border-[#1e1e1e]">
+                        <LetterOutput
+                          coverLetter={parsed.part1}
+                          businessCase={parsed.part2}
+                          techMap={parsed.part3}
+                          companyName={pack.company}
+                          isStreaming={false}
+                        />
+                      </div>
                     </div>
                   )}
                 </div>
@@ -184,6 +348,16 @@ export default function HistoryPage() {
       <footer className="mt-auto py-6 text-center text-[11px] text-gray-300 dark:text-[#333] border-t border-gray-200 dark:border-[#1e1e1e]">
         ERP Experts Ltd · Internal Outreach Generation Portal
       </footer>
+
+      {/* Outcome Modal */}
+      {outcomePack && (
+        <OutcomeModal
+          pack={outcomePack}
+          isOpen={true}
+          onClose={() => setOutcomePack(null)}
+          onSave={handleOutcome}
+        />
+      )}
     </main>
   )
 }

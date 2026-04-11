@@ -73,6 +73,9 @@ export async function POST(req: Request) {
     organization_locations: [location],
     organization_num_employees_ranges: [employeeRange],
   }
+  if (industry && industry.trim()) {
+    baseBody.organization_industry_tag = [industry]
+  }
 
   const userKeywords = keywords.split(',').map((k: string) => k.trim()).filter(Boolean)
   if (userKeywords.length > 0) {

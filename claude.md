@@ -126,7 +126,7 @@ Use **Edge Runtime** on the `/api/generate` route (`export const runtime = 'edge
 
 | Service | Usage per letter | Cost per letter | Monthly estimate (50 letters) |
 |---|---|---|---|
-| Claude API (Sonnet) | ~8,000 tokens in + ~2,000 out | ~$0.03 | ~$1.50 |
+| openapi | ~8,000 tokens in + ~2,000 out | ~$0.03 | ~$1.50 |
 | Tavily Search | 1 search call | $0.001 | ~$0.05 |
 | Jina Reader | Free (no API key) | $0 | $0 |
 | Vercel Pro | Required for password protection | $20/month flat | $20 |

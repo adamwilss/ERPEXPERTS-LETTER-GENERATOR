@@ -1,16 +1,53 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Bell, BarChart3, LayoutTemplate } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 import { useDiscoverStore } from '@/lib/discover-store'
+import { getReminderCount, getOverdueReminders } from '@/lib/reminders'
 
 const nav = [
   { href: '/', label: 'Single letter' },
   { href: '/discover', label: 'Discover leads' },
   { href: '/history', label: 'History' },
 ]
+
+function ReminderBadge() {
+  const [count, setCount] = useState(0)
+  const [overdue, setOverdue] = useState(0)
+  const pathname = usePathname()
+
+  useEffect(() => {
+    const update = () => {
+      setCount(getReminderCount())
+      setOverdue(getOverdueReminders().length)
+    }
+    update()
+    const interval = setInterval(update, 60000) // Refresh every minute
+    return () => clearInterval(interval)
+  }, [])
+
+  if (pathname === '/reminders' || count === 0) return null
+
+  return (
+    <Link
+      href="/reminders"
+      className={`relative flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-md border transition-colors hover:opacity-80 ${
+        overdue > 0
+          ? 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20'
+          : 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20'
+      }`}
+    >
+      <Bell className="w-3 h-3" />
+      {overdue > 0 ? `${overdue} overdue` : `${count} reminder${count !== 1 ? 's' : ''}`}
+      {overdue > 0 && (
+        <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full" />
+      )}
+    </Link>
+  )
+}
 
 function SessionPill() {
   const phase = useDiscoverStore((s) => s.phase)
@@ -96,7 +133,30 @@ export default function Header() {
         </div>
 
         <div className="flex items-center gap-3">
+          <ReminderBadge />
           <SessionPill />
+          <Link
+            href="/analytics"
+            className={`p-2 rounded-md transition-colors ${
+              pathname === '/analytics'
+                ? 'bg-gray-100 text-gray-900 dark:bg-[#1a1a1a] dark:text-white'
+                : 'text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+            }`}
+            title="Analytics"
+          >
+            <BarChart3 className="w-4 h-4" />
+          </Link>
+          <Link
+            href="/templates"
+            className={`p-2 rounded-md transition-colors ${
+              pathname === '/templates'
+                ? 'bg-gray-100 text-gray-900 dark:bg-[#1a1a1a] dark:text-white'
+                : 'text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+            }`}
+            title="Templates"
+          >
+            <LayoutTemplate className="w-4 h-4" />
+          </Link>
           <ThemeToggle />
           <span className="text-[10px] text-gray-300 dark:text-[#333] uppercase tracking-[0.2em] font-medium select-none">
             Internal

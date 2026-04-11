@@ -328,6 +328,9 @@ export async function POST(req: Request) {
     organization_locations: [location],
     organization_num_employees_ranges: [employeeRange],
   }
+  if (industry && industry.trim()) {
+    apolloBody.organization_industry_tag = [industry]
+  }
   const kw = keywords.split(',').map((k: string) => k.trim()).filter(Boolean)
   if (kw.length) apolloBody.q_organization_keyword_tags = kw
 
