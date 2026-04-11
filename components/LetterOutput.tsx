@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { Plus } from 'lucide-react'
 import CopyButton from './CopyButton'
 import CalloutStat from './CalloutStat'
@@ -51,12 +52,21 @@ function CoverLetterView({ content }: { content: string }) {
 
   return (
     <div>
-      {/* Letterhead */}
+      {/* Letterhead with Logo */}
       <div className="flex items-start justify-between pb-7 mb-7 border-b border-gray-200">
-        <div>
-          <div className="text-[13px] font-bold tracking-[0.06em] text-gray-900">ERP EXPERTS</div>
-          <div className="text-[11px] text-gray-400 mt-1 tracking-wide">
-            NetSuite Implementation · Manchester, UK
+        <div className="flex items-start gap-4">
+          <Image
+            src="/erpexperts-logo.png"
+            alt="ERP Experts"
+            width={80}
+            height={28}
+            className="h-7 w-auto object-contain"
+          />
+          <div>
+            <div className="text-[13px] font-bold tracking-[0.06em] text-gray-900">ERP EXPERTS</div>
+            <div className="text-[11px] text-gray-400 mt-1 tracking-wide">
+              NetSuite Implementation · Manchester, UK
+            </div>
           </div>
         </div>
         <div className="text-[12px] text-gray-400 text-right leading-relaxed">
@@ -130,6 +140,25 @@ function BusinessCaseView({ content }: { content: string }) {
 
   return (
     <div>
+      {/* Letterhead with Logo */}
+      <div className="flex items-start justify-between pb-7 mb-7 border-b border-gray-200">
+        <div className="flex items-start gap-4">
+          <Image
+            src="/erpexperts-logo.png"
+            alt="ERP Experts"
+            width={80}
+            height={28}
+            className="h-7 w-auto object-contain"
+          />
+          <div>
+            <div className="text-[13px] font-bold tracking-[0.06em] text-gray-900">ERP EXPERTS</div>
+            <div className="text-[11px] text-gray-400 mt-1 tracking-wide">
+              NetSuite Implementation · Manchester, UK
+            </div>
+          </div>
+        </div>
+      </div>
+
       {title && (
         <h2 className="text-[22px] font-semibold text-gray-900 tracking-[-0.02em] leading-tight mb-3">{title}</h2>
       )}

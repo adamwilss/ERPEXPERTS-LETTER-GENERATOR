@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { Loader2, Bell, BarChart3, LayoutTemplate } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
@@ -100,6 +101,14 @@ export default function Header() {
       <div className="max-w-5xl mx-auto px-6 h-13 flex items-center justify-between" style={{ height: '52px' }}>
         <div className="flex items-center gap-7">
           <Link href="/" className="flex items-center gap-3 group">
+            <Image
+              src="/erpexperts-logo.png"
+              alt="ERP Experts"
+              width={100}
+              height={32}
+              className="h-8 w-auto object-contain"
+              priority
+            />
             <div className="flex flex-col">
               <span className="text-gray-900 dark:text-white font-semibold tracking-[-0.02em] text-[13px] leading-none">
                 ERP EXPERTS

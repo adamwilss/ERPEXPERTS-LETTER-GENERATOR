@@ -82,4 +82,20 @@
   body { background: white !important; color: #111 !important; }
   .print-page { margin: 0; padding: 18mm 20mm; max-width: 100%; }
   @page { size: A4; margin: 0; }
+
+  /* Ensure images print well */
+  img { max-width: 100% !important; height: auto !important; }
+
+  /* Force backgrounds to print (for logos/boxes) */
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+  /* Letter paper styles */
+  .letter-paper {
+    box-shadow: none !important;
+    border: none !important;
+    background: white !important;
+  }
+
+  /* Page breaks */
+  .letter-paper + .letter-paper { page-break-before: always; }
 }
