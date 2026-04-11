@@ -92,6 +92,7 @@ export const useDiscoverStore = create<DiscoverState>((set, get) => ({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(params),
+        cache: 'no-store',
       })
 
       if (!res.ok || !res.body) {
@@ -187,6 +188,7 @@ export const useDiscoverStore = create<DiscoverState>((set, get) => ({
             industry: lead.industry,
             notes: `Size: ${lead.employees}. ${lead.description}`.slice(0, 400),
           }),
+          cache: 'no-store',
         })
         if (!res.ok) throw new Error(await res.text())
 
