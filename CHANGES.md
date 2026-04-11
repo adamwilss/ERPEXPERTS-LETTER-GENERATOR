@@ -153,6 +153,12 @@ Behavior:
    - [ ] Charts render correctly
    - [ ] Top templates section shows data
 
+## Bug Fixes (Post-Deployment)
+
+### Build Errors Fixed
+1. **Missing `industry` property** - Added `industry?: string` to `SavedPack` interface in `lib/history.ts`
+2. **Incorrect import** - Fixed `FollowupType` import in `components/SequenceManager.tsx` to import from `@/lib/prompt` instead of `@/lib/history`
+
 ## Migration Notes
 
 - Existing history entries will work but won't have sequence data

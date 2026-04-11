@@ -328,11 +328,42 @@ export async function POST(req: Request) {
     organization_locations: [location],
     organization_num_employees_ranges: [employeeRange],
   }
+
+  // Apollo industry filtering via keyword tags - more reliable than tag IDs
+  // Combine user keywords with industry for better filtering
+  const searchTerms: string[] = []
+
   if (industry && industry.trim()) {
-    apolloBody.organization_industry_tag = [industry]
+    // Map to Apollo-recognized industry keywords
+    const industryMap: Record<string, string[]> = {
+      'Manufacturing': ['manufacturing'],
+      'Wholesale Distribution': ['wholesale', 'distribution'],
+      'Ecommerce': ['ecommerce', 'e-commerce', 'online retail'],
+      'Field Services': ['field service', 'services'],
+      'Construction': ['construction', 'contractor'],
+      'Specialty Retail': ['retail', 'specialty retail'],
+      'Professional Services': ['professional services', 'consulting'],
+      'Technology': ['technology', 'software', 'saas'],
+      'Healthcare': ['healthcare', 'health care', 'medical'],
+      'Food & Beverage': ['food', 'beverage', 'food and beverage'],
+      'Automotive': ['automotive', 'auto'],
+      'Aerospace & Defence': ['aerospace', 'defense'],
+    }
+    const industryTerms = industryMap[industry.trim()] || [industry.trim().toLowerCase()]
+    searchTerms.push(...industryTerms)
   }
-  const kw = keywords.split(',').map((k: string) => k.trim()).filter(Boolean)
-  if (kw.length) apolloBody.q_organization_keyword_tags = kw
+
+  // Add user keywords
+  const userKeywords = keywords.split(',').map((k: string) => k.trim()).filter(Boolean)
+  searchTerms.push(...userKeywords)
+
+  // Apply keyword filter
+  if (searchTerms.length > 0) {
+    apolloBody.q_organization_keyword_tags = searchTerms
+    console.log(`[Apollo Search] Keywords: ${searchTerms.join(', ')}`)
+  }
+
+  console.log('[Apollo Search] Full body:', JSON.stringify(apolloBody, null, 2))
 
   const encoder = new TextEncoder()
 

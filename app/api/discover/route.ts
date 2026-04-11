@@ -73,13 +73,34 @@ export async function POST(req: Request) {
     organization_locations: [location],
     organization_num_employees_ranges: [employeeRange],
   }
+
+  // Build keyword tags from industry + user keywords
+  const searchTerms: string[] = []
+
   if (industry && industry.trim()) {
-    baseBody.organization_industry_tag = [industry]
+    const industryMap: Record<string, string[]> = {
+      'Manufacturing': ['manufacturing'],
+      'Wholesale Distribution': ['wholesale', 'distribution'],
+      'Ecommerce': ['ecommerce', 'e-commerce', 'online retail'],
+      'Field Services': ['field service', 'services'],
+      'Construction': ['construction', 'contractor'],
+      'Specialty Retail': ['retail', 'specialty retail'],
+      'Professional Services': ['professional services', 'consulting'],
+      'Technology': ['technology', 'software', 'saas'],
+      'Healthcare': ['healthcare', 'health care', 'medical'],
+      'Food & Beverage': ['food', 'beverage', 'food and beverage'],
+      'Automotive': ['automotive', 'auto'],
+      'Aerospace & Defence': ['aerospace', 'defense'],
+    }
+    const industryTerms = industryMap[industry.trim()] || [industry.trim().toLowerCase()]
+    searchTerms.push(...industryTerms)
   }
 
   const userKeywords = keywords.split(',').map((k: string) => k.trim()).filter(Boolean)
-  if (userKeywords.length > 0) {
-    baseBody.q_organization_keyword_tags = userKeywords
+  searchTerms.push(...userKeywords)
+
+  if (searchTerms.length > 0) {
+    baseBody.q_organization_keyword_tags = searchTerms
   }
 
   // Fetch 2 pages in parallel — up to 200 companies
