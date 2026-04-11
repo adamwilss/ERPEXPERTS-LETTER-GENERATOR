@@ -159,6 +159,25 @@ Behavior:
 1. **Missing `industry` property** - Added `industry?: string` to `SavedPack` interface in `lib/history.ts`
 2. **Incorrect import** - Fixed `FollowupType` import in `components/SequenceManager.tsx` to import from `@/lib/prompt` instead of `@/lib/history`
 
+### Search Not Filtering by Industry
+**Problem:** All industry presets returned the same results (starting with "McGreggory Boyall")
+
+**Root Cause:** Apollo's `organization_industry_tag` parameter requires exact tag IDs, not friendly names. Using `organization_industry_tag = ['Manufacturing']` doesn't work because Apollo expects numeric IDs or specific internal tag names.
+
+**Fix:** Switched to `q_organization_keyword_tags` which accepts flexible search terms:
+- Manufacturing → `['manufacturing']`
+- Wholesale Distribution → `['wholesale', 'distribution']`
+- Ecommerce → `['ecommerce', 'e-commerce', 'online retail']`
+- Field Services → `['field service', 'services']`
+- Construction → `['construction', 'contractor']`
+- Specialty Retail → `['retail', 'specialty retail']`
+- Professional Services → `['professional services', 'consulting']`
+- Technology → `['technology', 'software', 'saas']`
+- Healthcare → `['healthcare', 'health care', 'medical']`
+- Food & Beverage → `['food', 'beverage', 'food and beverage']`
+- Automotive → `['automotive', 'auto']`
+- Aerospace & Defence → `['aerospace', 'defense']`
+
 ## Migration Notes
 
 - Existing history entries will work but won't have sequence data

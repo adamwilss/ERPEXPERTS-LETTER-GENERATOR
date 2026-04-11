@@ -39,22 +39,51 @@ The standard for tone, structure, specificity, and commercial sharpness is the G
 ├── app/
 │   ├── page.tsx                  # Input form — five fields, submit button, loading state
 │   ├── layout.tsx                # Root layout, fonts, metadata
+│   ├── discover/
+│   │   └── page.tsx              # Lead discovery with 8 industry presets
+│   ├── history/
+│   │   └── page.tsx              # Letter history with sequences & outcomes
+│   ├── analytics/
+│   │   └── page.tsx              # Performance dashboard & conversion metrics
+│   ├── templates/
+│   │   └── page.tsx              # Template library for reusable letters
+│   ├── reminders/
+│   │   └── page.tsx              # Follow-up reminder management
 │   └── api/
-│       └── generate/
-│           └── route.ts          # Core API route — research + Claude generation + streaming
+│       ├── generate/
+│       │   └── route.ts          # Core API — research + letter generation + streaming
+│       ├── discover/
+│       │   └── route.ts          # Apollo search (legacy)
+│       ├── discover-stream/
+│       │   └── route.ts          # Streaming Apollo search with AI ranking
+│       └── score/
+│           └── route.ts          # Lead scoring endpoint
 ├── components/
 │   ├── LetterForm.tsx            # Controlled form component
 │   ├── LetterOutput.tsx          # Three-tab output display (cover letter / business case / tech map)
-│   ├── TechMapTable.tsx          # Renders Part 3 markdown table as a styled HTML table
-│   ├── CalloutStat.tsx           # Renders a single highlighted statistic box
-│   ├── CopyButton.tsx            # Clipboard copy with confirmation state
-│   └── DownloadButton.tsx        # PDF and DOCX export triggers
+│   ├── SequenceManager.tsx       # 4-stage follow-up sequence UI
+│   ├── SaveTemplateModal.tsx     # Save letter as template modal
+│   ├── LeadReview.tsx            # Lead discovery results with review/approve
+│   ├── BatchOutput.tsx           # Batch generation progress display
+│   ├── TechMap.tsx               # Tech integration map table
+│   ├── CalloutStat.tsx           # Highlighted statistic box
+│   ├── AnalyticsCharts.tsx       # Simple bar/line charts for dashboard
+│   ├── CopyButton.tsx            # Clipboard copy with confirmation
+│   ├── DownloadMenu.tsx          # PDF/DOCX export triggers
+│   ├── Header.tsx                # Navigation with reminder badge
+│   └── ThemeToggle.tsx           # Dark/light mode toggle
 ├── lib/
-│   ├── research.ts               # Jina Reader fetch + Tavily search + content cleaning
-│   ├── prompt.ts                 # System prompt and user message construction
-│   └── parse.ts                  # Splits Claude output into Part 1 / Part 2 / Part 3
+│   ├── research.ts               # Jina Reader fetch + Tavily search
+│   ├── prompt.ts                 # System prompt + follow-up prompts
+│   ├── parse.ts                  # Output parsing (part1/2/3)
+│   ├── history.ts                # localStorage history with sequences/outcomes
+│   ├── templates.ts              # Template library storage
+│   ├── reminders.ts              # Reminder storage & management
+│   ├── discover-store.ts         # Zustand store for discover flow
+│   ├── exportDocx.ts             # DOCX generation
+│   └── netsuite-context.ts       # Industry-specific NetSuite context
 ├── public/
-│   └── logo.svg                  # ERP Experts logo for PDF header and letterhead
+│   └── logo.svg                  # ERP Experts logo
 ├── .env.local                    # API keys — not committed
 └── CLAUDE.md                     # This file
 ```
@@ -72,9 +101,15 @@ POST /api/generate
         └── 4. Stream Claude API call
                     │  system prompt: condensed CLAUDE.md output rules + Ric persona
                     │  user message: inputs + research context + output format instructions
+                    │  maxOutputTokens: 6000 (initial) / 2000 (follow-ups)
                     ▼
         Streaming tokens → Vercel AI SDK → React UI
-        Frontend splits on `---PART2---` delimiter → populates two tabs in real time
+        Frontend splits on `---PART1---`, `---PART2---`, `---PART3---` delimiters → populates tabs
+
+Follow-up sequences:
+        ├── type: 'followup1' | 'followup2' | 'breakup'
+        ├── previousContent: prior letters for context
+        └── Output: Shorter emails (100-150 words) that reference previous touchpoints
 ```
 
 ### Output format Claude must return
@@ -92,12 +127,40 @@ The API route instructs Claude to return output in this exact structure:
 
 The `parse.ts` utility splits on these delimiters and passes each section to the display component. The UI renders all three as separate tabs or pages. The tech map table (Part 3) must be rendered as an actual HTML table, not raw markdown.
 
+### Lead Discovery Pipeline
+
+```
+User clicks preset (e.g., "Manufacturing")
+        │
+        ▼
+POST /api/discover-stream
+        ├── 1. Build Apollo search body
+        │      ├── organization_locations: ["United Kingdom"]
+        │      ├── organization_num_employees_ranges: ["51,200"]
+        │      └── q_organization_keyword_tags: ["manufacturing"]  ← Industry as keywords
+        ├── 2. Fetch 2 pages from Apollo API (up to 200 companies)
+        ├── 3. Pre-sort by data richness, enrich top 60 with contacts
+        ├── 4. Score by ERP fit (keywords, size, tech stack, revenue)
+        ├── 5. AI rank top 30 by operational complexity (GPT-4o)
+        └── 6. Stream results with ranking + data completeness scores
+```
+
+**Industry Filtering:** Uses `q_organization_keyword_tags` instead of `organization_industry_tag` (which requires exact Apollo tag IDs). Each industry maps to relevant search terms:
+- Manufacturing → `['manufacturing']`
+- Technology → `['technology', 'software', 'saas']`
+- Ecommerce → `['ecommerce', 'e-commerce', 'online retail']`
+
+This approach provides more reliable filtering across Apollo's database.
+
 ### Environment variables
 
-| Key | Where to get it |
-|---|---|
-| `OPENAI_API_KEY` | platform.openai.com |
-| `TAVILY_API_KEY` | app.tavily.com — free tier is sufficient |
+| Key | Where to get it | Purpose |
+|---|---|---|
+| `OPENAI_API_KEY` | platform.openai.com | Letter generation & lead ranking |
+| `TAVILY_API_KEY` | app.tavily.com | Supplementary company research |
+| `APOLLO_API_KEY` | apollo.io | Lead discovery (people + company data) |
+
+**Note:** Apollo API is required for lead discovery to function. Without it, the /discover page will show errors.
 
 ### Hosting
 
@@ -172,6 +235,52 @@ If the team grows or access needs to be more granular, add Clerk or NextAuth in 
 - A queue or background job system (streaming handles perceived latency)
 - A design system beyond Tailwind + shadcn
 - Multi-tenant or role-based access
+
+---
+
+## New Features (v2 - Added 2025)
+
+### Follow-up Sequence Generator
+
+The system now supports automated follow-up sequences. When a letter is marked "sent", a 4-stage sequence is unlocked:
+
+1. **Initial Letter** — Full three-part letter pack (already generated)
+2. **Follow-up #1** — References previous letter, adds fresh angle/case study (7 days after)
+3. **Follow-up #2** — Brief acknowledgment + gentle urgency (14 days after)
+4. **Final Email** — Polite "breakup" that leaves door open (21 days after)
+
+Each follow-up is generated with context from previous touchpoints to maintain continuity. The SequenceManager component in history shows progress and handles generation.
+
+### Analytics Dashboard
+
+Access via `/analytics`:
+
+- **Conversion Funnel**: Generated → Sent → Responded → Meeting
+- **Industry Performance**: Response rates by industry
+- **Activity Over Time**: Weekly generation trends
+- **Top Templates**: Best performing saved templates
+- **Response Rate Tracking**: Weighted scoring (meetings count double)
+
+### Template Library
+
+Access via `/templates`:
+
+- Save any generated letter as a reusable template
+- Tag templates by industry (Manufacturing, Ecommerce, etc.)
+- Tag by content type ("Strong Opening", "Great Case Study", etc.)
+- Track usage count and response rates per template
+- Search and filter templates
+- "Use Template" pre-fills the generator with context
+
+### Follow-up Reminders
+
+Access via `/reminders`:
+
+- Auto-created when letters are marked "sent"
+- Configurable intervals (default: +7, +14, +21 days)
+- Snooze, complete, or dismiss actions
+- Overdue reminder highlighting in header
+- Suggested actions based on industry
 
 ---
 
@@ -543,16 +652,18 @@ These cues are part of why the reference letter lands credibly.
 
 Before returning output, check:
 
-1. Does the first paragraph contain real company specific observations
-2. Are the pain points consequences of this company's actual model
-3. Could this letter plausibly be sent to a different company with minor edits
-4. Does the NetSuite explanation solve the pains in plain language
-5. Does the business case sharpen the argument rather than just repeating the cover letter
-6. Is the tone human, senior, and commercially credible
-7. Is there any sentence that sounds generic, inflated, or robotic
-8. If systems are named, are they known or strongly inferred rather than guessed wildly
-9. Does the post NetSuite picture clearly show what integrates, what is replaced, and what disappears
-10. Would a busy operations or finance leader actually read this and think it sounds informed
+1. **Does the salutation use the actual first name?** (e.g., "Dear Sarah," NOT "Dear Chief Growth Officer,")
+2. **Does the opening paragraph HOOK with insight?** Lead with operational pain the prospect feels, not facts they already know
+3. **Does the first paragraph contain real company specific observations?**
+4. **Are the pain points consequences of this company's actual model?**
+5. **Does the business case reference a SPECIFIC named case study?** (Eco2Solar, Kynetec, Totalkare, or Carallon) with concrete before/after
+6. **Could this letter plausibly be sent to a different company with minor edits?**
+7. **Does the NetSuite explanation solve the pains in plain language?**
+8. **Does the tech map make industry-reasonable inferences?** ("likely using Xero" not "definitely using Xero")
+9. **Does the post NetSuite picture clearly show what integrates, what is replaced, and what disappears?**
+10. **Is the tone human, senior, and commercially credible?**
+11. **Is there any sentence that sounds generic, inflated, or robotic?**
+12. **Would a busy operations or finance leader actually read this and think it sounds informed?**
 
 If any answer is weak, rewrite before returning.
 
