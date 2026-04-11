@@ -27,6 +27,7 @@ export interface SavedPack {
   erpScore?: number
   website?: string
   location?: string
+  industry?: string
   status?: PackStatus
   // Sequence tracking
   sequenceStatus?: SequenceStatus

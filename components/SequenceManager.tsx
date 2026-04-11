@@ -20,9 +20,9 @@ import {
   updateSequenceStatus,
   updateSequenceContent,
   unlockNextStage,
-  markAsSent,
-  type FollowupType
+  markAsSent
 } from '@/lib/history'
+import type { FollowupType } from '@/lib/prompt'
 import CopyButton from './CopyButton'
 
 // ── Types ────────────────────────────────────────────────────────────────────
