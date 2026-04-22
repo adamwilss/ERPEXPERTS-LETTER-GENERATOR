@@ -29,14 +29,17 @@ export async function POST(request: Request) {
       );
     }
 
+    console.log('[API] Saving search with', body.leads.length, 'leads');
     const result = await saveSearchWithLeads(body.params, body.leads);
+    console.log('[API] Saved search:', result.search.id, 'with', result.leads.length, 'leads');
+
     return NextResponse.json({
       success: true,
       search: result.search,
       leadCount: result.leads.length
     });
   } catch (error) {
-    console.error('Failed to save search:', error);
+    console.error('[API] Failed to save search:', error);
     return NextResponse.json(
       { error: 'Failed to save search', details: String(error) },
       { status: 500 }

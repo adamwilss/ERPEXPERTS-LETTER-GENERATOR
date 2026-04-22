@@ -67,33 +67,41 @@ export async function saveSearchWithLeads(
 
   // Insert all leads
   const savedLeads: SavedLead[] = [];
+  console.log('[DB] Inserting', leads.length, 'leads for search', searchId);
 
   for (const lead of leads) {
-    const leadResult = await sql`
-      INSERT INTO search_leads (
-        search_id, company, website, industry, employees, description,
-        erp_score, location, contact_name, contact_title, contact_email,
-        contact_linkedin, postal_address
-      )
-      VALUES (
-        ${searchId}, ${lead.company}, ${lead.website}, ${lead.industry},
-        ${lead.employees}, ${lead.description}, ${lead.erpScore},
-        ${lead.location ?? null}, ${lead.contactName ?? null}, ${lead.contactTitle},
-        ${lead.contactEmail ?? null}, ${lead.contactLinkedIn ?? null}, ${lead.postalAddress ?? null}
-      )
-      RETURNING id, created_at
-    `;
+    try {
+      const leadResult = await sql`
+        INSERT INTO search_leads (
+          search_id, company, website, industry, employees, description,
+          erp_score, location, contact_name, contact_title, contact_email,
+          contact_linkedin, postal_address
+        )
+        VALUES (
+          ${searchId}, ${lead.company}, ${lead.website}, ${lead.industry},
+          ${lead.employees}, ${lead.description}, ${lead.erpScore},
+          ${lead.location ?? null}, ${lead.contactName ?? null}, ${lead.contactTitle},
+          ${lead.contactEmail ?? null}, ${lead.contactLinkedIn ?? null}, ${lead.postalAddress ?? null}
+        )
+        RETURNING id, created_at
+      `;
 
-    const leadRow = getFirstRow<{ id: number; created_at: string }>(leadResult);
-    if (!leadRow) continue;
+      const leadRow = getFirstRow<{ id: number; created_at: string }>(leadResult);
+      if (!leadRow) {
+        console.warn('[DB] Failed to get ID for lead:', lead.company);
+        continue;
+      }
 
-    savedLeads.push({
-      ...lead,
-      id: leadRow.id.toString(),
-      searchId,
-      createdAt: leadRow.created_at,
-      generated: false,
-    });
+      savedLeads.push({
+        ...lead,
+        id: leadRow.id.toString(),
+        searchId,
+        createdAt: leadRow.created_at,
+        generated: false,
+      });
+    } catch (err) {
+      console.error('[DB] Failed to insert lead:', lead.company, err);
+    }
   }
 
   return { search, leads: savedLeads };
