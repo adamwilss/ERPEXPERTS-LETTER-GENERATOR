@@ -100,7 +100,7 @@ function SessionPill() {
 export default function Header() {
   const pathname = usePathname()
   return (
-    <header className="sticky top-0 z-50 border-b border-gray-200/60 dark:border-[#1e1e1e]/60 bg-white/75 dark:bg-[#0a0a0a]/75 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-gray-200/40 dark:border-[#1e1e1e]/40 bg-white/60 dark:bg-[#0a0a0a]/60 backdrop-blur-2xl">
       <div className="max-w-5xl mx-auto px-6 flex items-center justify-between" style={{ height: '52px' }}>
         <div className="flex items-center gap-6">
           <Link href="/" className="flex items-center gap-2.5 group">

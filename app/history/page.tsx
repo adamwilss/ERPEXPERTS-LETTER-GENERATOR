@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import { Trash2, ChevronDown, ChevronRight, Printer, Mail, Plus, Database, History, Search } from 'lucide-react'
 import EmptyState from '@/components/EmptyState'
@@ -215,11 +215,12 @@ export default function HistoryPage() {
   }
 
   return (
-    <main className="page-shell">
-      <div className="page-container">
+    <main className="page-shell relative overflow-hidden">
+      <div className="absolute inset-0 gradient-mesh pointer-events-none z-0" />
+      <div className="relative z-10 page-container">
         <div className="flex items-end justify-between mb-8">
           <div>
-            <div className="page-badge mb-4">
+            <div className="page-badge-glow mb-4">
               <History className="w-3.5 h-3.5 text-emerald-500" />
               Persistent Storage
             </div>
@@ -231,18 +232,20 @@ export default function HistoryPage() {
             </p>
           </div>
           {packs.length > 0 && (
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={handleClear}
               className="text-xs text-gray-400 dark:text-[#444] hover:text-red-500 dark:hover:text-red-400 transition-colors px-3 py-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-500/5 font-semibold"
             >
               Clear all
-            </button>
+            </motion.button>
           )}
         </div>
 
         {loading ? (
           <div className="empty-state">
-            <div className="empty-state-icon">
+            <div className="empty-state-icon glow-green">
               <Database className="w-5 h-5 text-gray-400 dark:text-[#444] animate-pulse" />
             </div>
             <p className="text-sm text-gray-500 dark:text-[#555]">Loading history from database…</p>
@@ -268,8 +271,9 @@ export default function HistoryPage() {
               })
 
               return (
-                <div
+                <motion.div
                   key={pack.id}
+                  layout
                   className="card card-hover overflow-hidden"
                 >
                   <div className="flex items-center justify-between px-5 py-4">
@@ -277,12 +281,13 @@ export default function HistoryPage() {
                       onClick={() => setExpanded(isExpanded ? null : pack.id)}
                       className="flex items-center gap-3 flex-1 text-left"
                     >
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors ${isExpanded ? 'bg-gray-100 dark:bg-[#1a1a1a]' : 'bg-gray-50 dark:bg-[#111]'}`}>
-                        {isExpanded
-                          ? <ChevronDown className="w-4 h-4 text-gray-500 dark:text-[#666] flex-shrink-0" />
-                          : <ChevronRight className="w-4 h-4 text-gray-300 dark:text-[#333] flex-shrink-0" />
-                        }
-                      </div>
+                      <motion.div
+                        animate={{ rotate: isExpanded ? 90 : 0 }}
+                        transition={{ duration: 0.2 }}
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors ${isExpanded ? 'bg-emerald-50 dark:bg-emerald-500/10' : 'bg-gray-50 dark:bg-[#111]'}`}
+                      >
+                        <ChevronRight className={`w-4 h-4 flex-shrink-0 transition-colors ${isExpanded ? 'text-emerald-500' : 'text-gray-300 dark:text-[#333]'}`} />
+                      </motion.div>
                       <div className="min-w-0">
                         <div className="text-sm font-semibold text-gray-950 dark:text-white truncate">{pack.company}</div>
                         <div className="text-xs text-gray-400 dark:text-[#444] mt-1 flex flex-wrap gap-2">
@@ -297,7 +302,7 @@ export default function HistoryPage() {
                           </span>
                           {pack.erpScore && (
                             <span className="inline-flex items-center gap-1">
-                              <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-[#333]" />
+                              <span className="w-1 h-1 rounded-full bg-emerald-400" />
                               <span className="text-emerald-600 dark:text-emerald-400 font-bold">{pack.erpScore}</span>
                             </span>
                           )}
@@ -323,8 +328,16 @@ export default function HistoryPage() {
                     </div>
                   </div>
 
-                  {isExpanded && (
-                    <div className="border-t border-gray-100 dark:border-[#181818] p-6 space-y-6">
+                  <AnimatePresence>
+                    {isExpanded && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: 'easeInOut' }}
+                        className="overflow-hidden"
+                      >
+                        <div className="border-t border-gray-100 dark:border-[#181818] p-6 space-y-6">
                       {/* Actions Bar */}
                       <div className="flex items-center gap-2 pb-4 border-b border-gray-200 dark:border-[#1e1e1e]">
                         {!pack.sequenceStatus && (
@@ -369,9 +382,11 @@ export default function HistoryPage() {
                           isStreaming={false}
                         />
                       </div>
-                    </div>
-                  )}
-                </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
               )
             })}
           </div>
