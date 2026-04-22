@@ -1,13 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { Search, Zap } from 'lucide-react'
+import { Search, Zap, Sparkles } from 'lucide-react'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import LeadReview, { ReviewedLead } from '@/components/LeadReview'
 import BatchOutput from '@/components/BatchOutput'
 import { useDiscoverStore } from '@/lib/discover-store'
-
-// ── Presets ────────────────────────────────────────────────────────────────────
 
 const PRESETS = [
   { label: 'Manufacturing', sub: '50–200 · UK', industry: 'Manufacturing', range: '51,200', loc: 'United Kingdom' },
@@ -34,8 +32,6 @@ const INDUSTRIES = [
   'Healthcare', 'Food & Beverage', 'Automotive', 'Aerospace & Defence',
 ]
 
-// ── Component ──────────────────────────────────────────────────────────────────
-
 export default function DiscoverPage() {
   const store = useDiscoverStore()
 
@@ -60,112 +56,131 @@ export default function DiscoverPage() {
   }
 
   return (
-    <main className="min-h-[calc(100vh-52px)]">
-      <div className="max-w-5xl mx-auto px-6 py-10">
-
+    <main className="page-shell">
+      <div className="page-container">
         {/* ── Form ────────────────────────────────────────────────────────── */}
         {store.phase === 'form' && (
-          <div className="max-w-2xl animate-in fade-in duration-150"
-          >
-              <h1 className="text-[22px] font-semibold text-gray-900 dark:text-white tracking-tight mb-1">Discover leads</h1>
-              <p className="text-sm text-gray-500 dark:text-[#555] mb-8 leading-relaxed">
-                Pick a preset to search instantly, or customise your own criteria below.
-              </p>
-
-              {/* Preset chips */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
-                {PRESETS.map((preset) => (
-                  <button
-                    key={preset.label}
-                    onClick={() => handlePreset(preset)}
-                    className="bg-white dark:bg-[#111] border border-gray-200 dark:border-[#1e1e1e] hover:border-gray-300 dark:hover:border-[#2a2a2a] hover:bg-gray-50 dark:hover:bg-white/[0.02] rounded-xl px-4 py-3 text-left transition-colors group shadow-sm dark:shadow-none active:scale-[0.98]"
-                  >
-                    <div className="text-[13px] font-medium text-gray-700 dark:text-[#ccc] group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
-                      {preset.label}
-                    </div>
-                    <div className="text-[11px] text-gray-400 dark:text-[#444] mt-0.5">{preset.sub}</div>
-                  </button>
-                ))}
+          <div className="max-w-2xl animate-fade-up">
+            <div className="page-header">
+              <div className="page-badge mb-4">
+                <Zap className="w-3.5 h-3.5 text-blue-500" />
+                Apollo + AI Ranking
               </div>
+              <h1 className="page-title">Discover leads</h1>
+              <p className="page-description">
+                Pick a preset to search instantly, or customise your own criteria. Results are ranked by ERP fit and data completeness.
+              </p>
+            </div>
 
-              {/* Custom search toggle */}
-              <button
-                onClick={() => store.setShowCustom(!store.showCustom)}
-                className="flex items-center gap-2 text-xs text-gray-400 dark:text-[#444] hover:text-gray-600 dark:hover:text-[#888] transition-colors mb-4"
-              >
-                {store.showCustom ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-                Custom search
-              </button>
-
-              {store.showCustom && (
-                <div className="overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
+            {/* Presets */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8 stagger-children">
+              {PRESETS.map((preset) => (
+                <button
+                  key={preset.label}
+                  onClick={() => handlePreset(preset)}
+                  className="group card card-hover px-4 py-3.5 text-left active:scale-[0.97]"
                 >
-                    <div className="bg-white dark:bg-[#111] border border-gray-200 dark:border-[#1e1e1e] rounded-xl p-6 space-y-4 shadow-sm dark:shadow-none">
-                      <div className="grid grid-cols-2 gap-4">
-                        <SelectField label="Industry" value={store.industry} onChange={(v) => store.setFormField('industry', v)}
-                          options={INDUSTRIES.map((i) => ({ label: i, value: i }))} />
-                        <SelectField label="Company size" value={store.employeeRange} onChange={(v) => store.setFormField('employeeRange', v)}
-                          options={EMPLOYEE_RANGES} />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-[11px] font-medium text-gray-400 dark:text-[#444] mb-1.5 uppercase tracking-[0.1em]">Location</label>
-                          <input type="text" value={store.location} onChange={(e) => store.setFormField('location', e.target.value)}
-                            className="w-full border border-gray-200 dark:border-[#1e1e1e] bg-white dark:bg-[#1a1a1a] rounded-lg px-3 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-gray-400 dark:focus:border-[#2a2a2a] focus:ring-1 focus:ring-gray-200 dark:focus:ring-[#1e1e1e] transition-colors" />
-                        </div>
-                        <div>
-                          <label className="block text-[11px] font-medium text-gray-400 dark:text-[#444] mb-1.5 uppercase tracking-[0.1em]">
-                            Keywords <span className="normal-case font-normal text-gray-300 dark:text-[#333]">(optional)</span>
-                          </label>
-                          <input type="text" value={store.keywords} onChange={(e) => store.setFormField('keywords', e.target.value)}
-                            placeholder="e.g. multi-site, ecommerce"
-                            className="w-full border border-gray-200 dark:border-[#1e1e1e] bg-white dark:bg-[#1a1a1a] rounded-lg px-3 py-2.5 text-sm text-gray-900 dark:text-white placeholder:text-gray-300 dark:placeholder:text-[#333] focus:outline-none focus:border-gray-400 dark:focus:border-[#2a2a2a] focus:ring-1 focus:ring-gray-200 dark:focus:ring-[#1e1e1e] transition-colors" />
-                        </div>
-                      </div>
-                      <button
-                        onClick={handleCustomSearch}
-                        className="w-full px-5 py-3 bg-gray-900 dark:bg-white text-white dark:text-[#090909] text-sm font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 hover:bg-gray-800 dark:hover:bg-[#e8e8e8] active:scale-[0.98]"
-                      >
-                        <Search className="w-4 h-4" />
-                        Search
-                      </button>
+                  <div className="flex items-start justify-between mb-1">
+                    <span className="text-[13px] font-semibold text-gray-800 dark:text-[#ddd] group-hover:text-gray-950 dark:group-hover:text-white transition-colors">
+                      {preset.label}
+                    </span>
+                    <Sparkles className="w-3.5 h-3.5 text-gray-300 dark:text-[#333] group-hover:text-blue-400 transition-colors opacity-0 group-hover:opacity-100" />
+                  </div>
+                  <div className="text-[11px] text-gray-400 dark:text-[#444] font-medium">{preset.sub}</div>
+                </button>
+              ))}
+            </div>
+
+            {/* Custom search */}
+            <button
+              onClick={() => store.setShowCustom(!store.showCustom)}
+              className="flex items-center gap-2 text-xs text-gray-400 dark:text-[#444] hover:text-gray-600 dark:hover:text-[#888] transition-colors mb-4 font-semibold"
+            >
+              {store.showCustom ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+              Custom search
+            </button>
+
+            {store.showCustom && (
+              <div className="overflow-hidden animate-fade-up"
+              >
+                <div className="card p-7 space-y-5">
+                  <div className="grid grid-cols-2 gap-4">
+                    <SelectField label="Industry" value={store.industry} onChange={(v) => store.setFormField('industry', v)}
+                      options={INDUSTRIES.map((i) => ({ label: i, value: i }))} />
+                    <SelectField label="Company size" value={store.employeeRange} onChange={(v) => store.setFormField('employeeRange', v)}
+                      options={EMPLOYEE_RANGES} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="label">Location</label>
+                      <input type="text" value={store.location} onChange={(e) => store.setFormField('location', e.target.value)}
+                        className="input" />
+                    </div>
+                    <div>
+                      <label className="label">
+                        Keywords <span className="normal-case font-normal text-gray-300 dark:text-[#333]">(optional)</span>
+                      </label>
+                      <input type="text" value={store.keywords} onChange={(e) => store.setFormField('keywords', e.target.value)}
+                        placeholder="e.g. multi-site, ecommerce"
+                        className="input" />
                     </div>
                   </div>
-                )}
-
-              {store.searchError && (
-                <div className="mt-4 bg-red-50 dark:bg-red-500/5 border border-red-200 dark:border-red-500/20 rounded-lg p-4 text-sm text-red-600 dark:text-red-400 animate-in fade-in duration-200"
-                >
-                  {store.searchError}
+                  <button
+                    onClick={handleCustomSearch}
+                    className="btn-primary w-full"
+                  >
+                    <Search className="w-4 h-4" />
+                    Search
+                  </button>
                 </div>
-              )}
+              </div>
+            )}
+
+            {store.searchError && (
+              <div className="mt-4 bg-red-50 dark:bg-red-500/5 border border-red-200 dark:border-red-500/20 rounded-xl p-4 text-sm text-red-600 dark:text-red-400 animate-fade-up flex items-start gap-3"
+              >
+                <div className="mt-0.5 w-5 h-5 rounded-full bg-red-100 dark:bg-red-500/10 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-3 h-3 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </div>
+                {store.searchError}
+              </div>
+            )}
           </div>
         )}
 
         {/* ── Streaming / Results ─────────────────────────────────────────── */}
         {(store.phase === 'streaming' || store.phase === 'results') && (
           <>
-            <div className="mb-6 flex items-center justify-between">
+            <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 {store.activePreset && (
                   <div className="flex items-center gap-2">
                     <Zap className="w-3.5 h-3.5 text-gray-400 dark:text-[#444]" />
-                    <span className="text-xs text-gray-500 dark:text-[#555]">{store.activePreset}</span>
+                    <span className="text-xs font-medium text-gray-500 dark:text-[#555]">{store.activePreset}</span>
                   </div>
                 )}
               </div>
-              <button onClick={store.reset} className="text-xs text-gray-400 dark:text-[#444] hover:text-gray-600 dark:hover:text-[#888] underline underline-offset-2 transition-colors">
+              <button onClick={store.reset} className="btn-ghost text-xs underline underline-offset-2">
                 ← New search
               </button>
             </div>
 
-            <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-lg flex items-center justify-between">
-              <span className="text-sm text-blue-700 dark:text-blue-400">
-                Search saved automatically
-              </span>
+            <div className="mb-6 p-4 bg-blue-50/80 dark:bg-blue-500/[0.07] border border-blue-200/80 dark:border-blue-500/15 rounded-xl flex items-center justify-between backdrop-blur-sm animate-fade-up">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-500/10 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <span className="text-sm font-semibold text-blue-800 dark:text-blue-300">
+                  Search saved automatically
+                </span>
+              </div>
               <Link
                 href="/searches"
-                className="text-sm font-medium text-blue-700 dark:text-blue-400 hover:underline underline-offset-2"
+                className="text-sm font-semibold text-blue-700 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
               >
                 View saved searches →
               </Link>
@@ -182,11 +197,11 @@ export default function DiscoverPage() {
           </>
         )}
 
-        {/* ── Generating / Done ────────────────────────────────────────────── */}
+        {/* ── Generating / Done ──────────────────────────────────────────── */}
         {(store.phase === 'generating' || store.phase === 'done') && (
           <>
             {store.phase === 'done' && (
-              <button onClick={store.reset} className="mb-6 text-xs text-gray-400 dark:text-[#444] hover:text-gray-600 dark:hover:text-[#888] underline underline-offset-2 transition-colors">
+              <button onClick={store.reset} className="mb-6 btn-ghost text-xs underline underline-offset-2">
                 ← New search
               </button>
             )}
@@ -195,7 +210,7 @@ export default function DiscoverPage() {
         )}
       </div>
 
-      <footer className="mt-auto py-6 text-center text-[11px] text-gray-300 dark:text-[#333] border-t border-gray-200 dark:border-[#1e1e1e]">
+      <footer className="page-footer">
         ERP Experts Ltd · Internal Outreach Generation Portal
       </footer>
     </main>
@@ -208,10 +223,10 @@ function SelectField({ label, value, onChange, options }: {
 }) {
   return (
     <div>
-      <label className="block text-[11px] font-medium text-gray-400 dark:text-[#444] mb-1.5 uppercase tracking-[0.1em]">{label}</label>
+      <label className="label">{label}</label>
       <div className="relative">
         <select value={value} onChange={(e) => onChange(e.target.value)}
-          className="w-full appearance-none border border-gray-200 dark:border-[#1e1e1e] bg-white dark:bg-[#1a1a1a] rounded-lg px-3 py-2.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-gray-400 dark:focus:border-[#2a2a2a] focus:ring-1 focus:ring-gray-200 dark:focus:ring-[#1e1e1e] transition-colors cursor-pointer"
+          className="input appearance-none pr-10 cursor-pointer"
         >
           {options.map((opt) => (
             <option key={opt.value} value={opt.value}>{opt.label}</option>

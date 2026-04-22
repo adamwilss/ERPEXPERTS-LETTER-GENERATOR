@@ -4,7 +4,7 @@ import Header from '@/components/Header'
 
 export const metadata: Metadata = {
   title: 'ERP Experts — Letter Portal',
-  description: 'Internal outreach letter generator',
+  description: 'Internal outreach letter generator for the ERP Experts sales team',
   robots: 'noindex, nofollow',
 }
 

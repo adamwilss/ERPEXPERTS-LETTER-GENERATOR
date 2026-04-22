@@ -60,11 +60,12 @@ export async function saveSearchWithLeads(
   if (!searchRow) {
     throw new Error('Failed to create search - no row returned');
   }
-  const searchId = searchRow.id.toString();
+  // Keep as INTEGER for Postgres foreign key column — do NOT convert to string
+  const searchId = searchRow.id;
   console.log('[DB] Created search with ID:', searchId);
 
   const search: SavedSearch = {
-    id: searchId,
+    id: searchId.toString(),
     industry: params.industry,
     employeeRange: params.employeeRange,
     location: params.location,
@@ -72,16 +73,14 @@ export async function saveSearchWithLeads(
     createdAt: searchRow.created_at,
   };
 
-  // Insert all leads
+  // Insert all leads in parallel for reliability
   const savedLeads: SavedLead[] = [];
-  console.log('[DB] Starting to insert', leads.length, 'leads');
+  console.log('[DB] Starting to insert', leads.length, 'leads in parallel');
 
-  for (let i = 0; i < leads.length; i++) {
-    const lead = leads[i];
-    console.log(`[DB] Processing lead ${i + 1}/${leads.length}:`, lead.company);
+  const insertPromises = leads.map(async (lead) => {
+    console.log('[DB] Preparing INSERT for:', lead.company, '| erpScore:', lead.erpScore, '| contact:', lead.contactName || '(none)');
 
     try {
-      console.log('[DB] Executing INSERT for:', lead.company);
       const leadResult = await sql`
         INSERT INTO search_leads (
           search_id, company, website, industry, employees, description,
@@ -90,8 +89,8 @@ export async function saveSearchWithLeads(
         )
         VALUES (
           ${searchId}, ${lead.company}, ${lead.website}, ${lead.industry},
-          ${lead.employees}, ${lead.description}, ${lead.erpScore},
-          ${lead.location ?? null}, ${lead.contactName ?? null}, ${lead.contactTitle},
+          ${lead.employees}, ${lead.description}, ${lead.erpScore ?? 0},
+          ${lead.location ?? null}, ${lead.contactName ?? null}, ${lead.contactTitle ?? null},
           ${lead.contactEmail ?? null}, ${lead.contactLinkedIn ?? null}, ${lead.postalAddress ?? null}
         )
         RETURNING id, created_at
@@ -102,22 +101,27 @@ export async function saveSearchWithLeads(
       const leadRow = getFirstRow<{ id: number; created_at: string }>(leadResult);
       if (!leadRow) {
         console.error('[DB] Failed to get ID for lead:', lead.company, 'result was:', leadResult);
-        continue;
+        return null;
       }
 
       console.log('[DB] Created lead with ID:', leadRow.id);
 
-      savedLeads.push({
+      return {
         ...lead,
         id: leadRow.id.toString(),
-        searchId,
+        searchId: searchId.toString(),
         createdAt: leadRow.created_at,
         generated: false,
-      });
-      console.log('[DB] Successfully saved lead:', lead.company);
+      } as SavedLead;
     } catch (err) {
       console.error('[DB] Failed to insert lead:', lead.company, 'Error:', err);
+      return null;
     }
+  });
+
+  const results = await Promise.all(insertPromises);
+  for (const lead of results) {
+    if (lead) savedLeads.push(lead);
   }
 
   console.log('[DB] Finished. Saved', savedLeads.length, 'out of', leads.length, 'leads');
@@ -196,15 +200,23 @@ export async function loadLeadsForSearch(searchId: string): Promise<SavedLead[]>
 // Mark lead as generated
 export async function markLeadAsGenerated(leadId: string): Promise<void> {
   const sql = getSql();
+  const numericId = parseInt(leadId, 10);
+  if (isNaN(numericId)) {
+    throw new Error(`Invalid lead ID: ${leadId}`);
+  }
   await sql`
     UPDATE search_leads
     SET generated = true
-    WHERE id = ${leadId}
+    WHERE id = ${numericId}
   `;
 }
 
 // Delete a search and its leads
 export async function deleteSearch(searchId: string): Promise<void> {
   const sql = getSql();
-  await sql`DELETE FROM searches WHERE id = ${searchId}`;
+  const numericId = parseInt(searchId, 10);
+  if (isNaN(numericId)) {
+    throw new Error(`Invalid search ID: ${searchId}`);
+  }
+  await sql`DELETE FROM searches WHERE id = ${numericId}`;
 }

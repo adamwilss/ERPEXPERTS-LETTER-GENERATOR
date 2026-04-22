@@ -164,11 +164,14 @@ export const useDiscoverStore = create<DiscoverState>((set, get) => ({
                 })
                 const data = await res.json()
                 if (data.success) {
-                  console.log('[Discover] Search saved:', data.search.id)
+                  const savedCount = data.leadCount ?? currentLeads.length
+                  console.log('[Discover] Search saved:', data.search.id, 'with', savedCount, 'leads')
                   set({
                     totalSearched: event.total as number,
                     phase: 'results',
-                    streamStatus: `Saved ${currentLeads.length} leads`,
+                    streamStatus: savedCount === currentLeads.length
+                      ? `Saved ${savedCount} leads`
+                      : `Saved ${savedCount} of ${currentLeads.length} leads`,
                   })
                 } else {
                   throw new Error(data.error || 'Save failed')

@@ -1,11 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { ChevronRight, Database, Eye, Search, Trash2, Users } from 'lucide-react'
+import { ChevronRight, Database, Eye, Search, Trash2, Users, Rocket } from 'lucide-react'
 import type { SavedSearch, SavedLead } from '@/lib/db/search-db'
-// Removed useRouter import
 
 interface SearchWithLeads extends SavedSearch {
   leads?: SavedLead[]
@@ -18,7 +16,6 @@ export default function SearchesPage() {
 
   useEffect(() => {
     loadSearches()
-    // Auto-refresh every 10 seconds to catch new searches
     const interval = setInterval(loadSearches, 10000)
     return () => clearInterval(interval)
   }, [])
@@ -42,12 +39,10 @@ export default function SearchesPage() {
     if (!search) return
 
     if (search.leads) {
-      // Toggle collapsed
       setSearches(searches.map(s =>
         s.id === searchId ? { ...s, expanded: !s.expanded } : s
       ))
     } else {
-      // Load leads via API
       try {
         const res = await fetch(`/api/searches/${searchId}/leads`)
         const data = await res.json()
@@ -76,11 +71,13 @@ export default function SearchesPage() {
 
   if (loading) {
     return (
-      <main className="min-h-[calc(100vh-52px)]">
-        <div className="max-w-5xl mx-auto px-6 py-10">
-          <div className="text-center py-24 text-gray-400 dark:text-[#555]">
-            <Database className="w-8 h-8 mx-auto mb-4 animate-pulse" />
-            <p className="text-sm">Loading saved searches…</p>
+      <main className="page-shell">
+        <div className="page-container">
+          <div className="empty-state">
+            <div className="empty-state-icon">
+              <Database className="w-7 h-7 text-gray-400 dark:text-[#444] animate-pulse" />
+            </div>
+            <p className="text-sm text-gray-500 dark:text-[#555]">Loading saved searches…</p>
           </div>
         </div>
       </main>
@@ -88,82 +85,89 @@ export default function SearchesPage() {
   }
 
   return (
-    <main className="min-h-[calc(100vh-52px)]">
-      <div className="max-w-5xl mx-auto px-6 py-10">
+    <main className="page-shell">
+      <div className="page-container">
         <div className="flex items-end justify-between mb-8">
           <div>
-            <h1 className="text-[22px] font-semibold text-gray-900 dark:text-white tracking-tight">
-              Saved Searches
-            </h1>
-            <p className="text-sm text-gray-500 dark:text-[#555] mt-1">
+            <div className="page-badge mb-4">
+              <Rocket className="w-3.5 h-3.5 text-blue-500" />
+              Apollo Database
+            </div>
+            <h1 className="page-title">Saved Searches</h1>
+            <p className="page-description">
               {searches.length === 0
                 ? 'No saved searches yet.'
                 : `${searches.length} Apollo search${searches.length !== 1 ? 'es' : ''} saved`}
             </p>
           </div>
-          <Link
-            href="/discover"
-            className="text-sm text-gray-700 dark:text-[#ccc] underline underline-offset-2 hover:text-gray-900 dark:hover:text-white transition-colors"
-          >
+          <Link href="/discover" className="btn-secondary">
             New Search →
           </Link>
         </div>
 
         {searches.length === 0 ? (
-          <div className="text-center py-24 text-gray-300 dark:text-[#333]">
-            <Search className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p className="text-sm">Your Apollo searches will appear here automatically.</p>
-            <Link
-              href="/discover"
-              className="mt-4 inline-block text-sm text-gray-700 dark:text-[#ccc] underline underline-offset-2 hover:text-gray-900 dark:hover:text-white transition-colors"
-            >
+          <div className="empty-state animate-fade-up">
+            <div className="empty-state-icon">
+              <Search className="w-7 h-7 text-gray-400 dark:text-[#444]" />
+            </div>
+            <p className="text-sm text-gray-500 dark:text-[#555] mb-1">Your Apollo searches will appear here automatically.</p>
+            <p className="text-xs text-gray-400 dark:text-[#444] mb-6">Run a discovery search to save leads for later.</p>
+            <Link href="/discover" className="btn-secondary">
               Discover leads →
             </Link>
           </div>
         ) : (
-          <div className="space-y-1.5">
+          <div className="space-y-2 stagger-children">
             {searches.map((search) => (
               <div
                 key={search.id}
-                className="bg-white dark:bg-[#111] border border-gray-200 dark:border-[#1e1e1e] rounded-xl overflow-hidden hover:border-gray-300 dark:hover:border-[#2a2a2a] transition-colors duration-150 shadow-sm dark:shadow-none"
+                className="card card-hover overflow-hidden"
               >
                 <div className="flex items-center justify-between px-5 py-4">
                   <button
                     onClick={() => toggleExpand(search.id)}
                     className="flex items-center gap-3 flex-1 text-left"
                   >
-                    {search.expanded ? (
-                      <ChevronRight className="w-4 h-4 text-gray-400 dark:text-[#444] rotate-90 flex-shrink-0 transition-transform" />
-                    ) : (
-                      <ChevronRight className="w-4 h-4 text-gray-300 dark:text-[#333] flex-shrink-0 transition-transform" />
-                    )}
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors ${search.expanded ? 'bg-gray-100 dark:bg-[#1a1a1a]' : 'bg-gray-50 dark:bg-[#111]'}`}>
+                      <ChevronRight className={`w-4 h-4 text-gray-400 dark:text-[#555] flex-shrink-0 transition-transform duration-200 ${search.expanded ? 'rotate-90' : ''}`} />
+                    </div>
                     <div>
-                      <div className="text-sm font-medium text-gray-900 dark:text-white">
+                      <div className="text-sm font-semibold text-gray-950 dark:text-white">
                         {search.industry}
                       </div>
-                      <div className="text-xs text-gray-400 dark:text-[#444] mt-0.5 flex flex-wrap gap-2">
-                        <span>{search.employeeRange} employees</span>
-                        <span>·</span>
-                        <span>{search.location}</span>
+                      <div className="text-xs text-gray-400 dark:text-[#444] mt-1 flex flex-wrap gap-x-3 gap-y-1">
+                        <span className="inline-flex items-center gap-1.5">
+                          <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-[#333]" />
+                          {search.employeeRange} employees
+                        </span>
+                        <span className="inline-flex items-center gap-1.5">
+                          <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-[#333]" />
+                          {search.location}
+                        </span>
                         {search.keywords && (
-                          <><span>·</span><span>{search.keywords}</span></>
+                          <span className="inline-flex items-center gap-1.5">
+                            <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-[#333]" />
+                            {search.keywords}
+                          </span>
                         )}
-                        <span>·</span>
-                        <span>{new Date(search.createdAt).toLocaleDateString('en-GB')}</span>
+                        <span className="inline-flex items-center gap-1.5">
+                          <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-[#333]" />
+                          {new Date(search.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </span>
                       </div>
                     </div>
                   </button>
                   <div className="ml-4 flex items-center gap-2 flex-shrink-0">
                     <Link
                       href={`/searches/${search.id}`}
-                      className="flex items-center gap-1 text-xs px-3 py-1.5 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 rounded-md hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors"
+                      className="btn-sm badge-info hover:opacity-80"
                     >
                       <Eye className="w-3 h-3" />
                       View Leads
                     </Link>
                     <button
                       onClick={() => handleDelete(search.id)}
-                      className="text-gray-300 dark:text-[#333] hover:text-red-500 dark:hover:text-red-400 transition-colors p-1"
+                      className="p-2 rounded-lg text-gray-300 dark:text-[#333] hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/5 transition-all"
                       title="Delete"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -172,27 +176,29 @@ export default function SearchesPage() {
                 </div>
 
                 {search.expanded && search.leads && (
-                  <div className="border-t border-gray-100 dark:border-[#181818] p-4">
-                    <div className="flex items-center gap-2 mb-3 text-xs text-gray-500 dark:text-[#555]">
-                      <Users className="w-3 h-3" />
-                      <span>{search.leads.length} leads found</span>
+                  <div className="border-t border-gray-100 dark:border-[#181818] p-5">
+                    <div className="flex items-center gap-2 mb-4 text-xs font-semibold text-gray-500 dark:text-[#555]">
+                      <div className="w-6 h-6 rounded-md bg-gray-100 dark:bg-[#1a1a1a] flex items-center justify-center">
+                        <Users className="w-3.5 h-3.5" />
+                      </div>
+                      <span>{search.leads.length} lead{search.leads.length !== 1 ? 's' : ''} found</span>
                     </div>
                     <div className="space-y-2">
                       {search.leads.slice(0, 10).map((lead) => (
                         <div
                           key={lead.id}
-                          className="flex items-center justify-between p-3 bg-gray-50 dark:bg-[#1a1a1a] rounded-lg"
+                          className="flex items-center justify-between p-3.5 bg-gray-50 dark:bg-[#1a1a1a] rounded-xl border border-transparent hover:border-gray-200 dark:hover:border-[#222] transition-all"
                         >
-                          <div>
-                            <div className="text-sm font-medium text-gray-900 dark:text-white">
+                          <div className="min-w-0">
+                            <div className="text-sm font-semibold text-gray-950 dark:text-white truncate">
                               {lead.company}
                             </div>
-                            <div className="text-xs text-gray-500 dark:text-[#555]">
+                            <div className="text-xs text-gray-500 dark:text-[#555] mt-0.5">
                               {lead.contactName || lead.contactTitle} · {lead.employees} employees
                             </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <span className={`text-xs px-2 py-1 rounded ${
+                          <div className="flex items-center gap-2 flex-shrink-0 ml-3">
+                            <span className={`text-[11px] px-2 py-1 rounded-md font-bold ${
                               lead.erpScore >= 70
                                 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
                                 : lead.erpScore >= 40
@@ -202,15 +208,18 @@ export default function SearchesPage() {
                               {lead.erpScore}
                             </span>
                             {lead.generated && (
-                              <span className="text-xs text-gray-400 dark:text-[#555]">Generated</span>
+                              <span className="text-[11px] text-gray-400 dark:text-[#555] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-[#222] font-medium">Generated</span>
                             )}
                           </div>
                         </div>
                       ))}
                       {search.leads.length > 10 && (
-                        <p className="text-xs text-gray-400 text-center py-2">
-                          +{search.leads.length - 10} more leads
-                        </p>
+                        <Link
+                          href={`/searches/${search.id}`}
+                          className="block text-center py-3 text-xs font-semibold text-gray-500 dark:text-[#555] hover:text-gray-950 dark:hover:text-white transition-colors"
+                        >
+                          +{search.leads.length - 10} more leads →
+                        </Link>
                       )}
                     </div>
                   </div>
@@ -221,7 +230,7 @@ export default function SearchesPage() {
         )}
       </div>
 
-      <footer className="mt-auto py-6 text-center text-[11px] text-gray-300 dark:text-[#333] border-t border-gray-200 dark:border-[#1e1e1e]">
+      <footer className="page-footer">
         ERP Experts Ltd · Saved Apollo Searches
       </footer>
     </main>

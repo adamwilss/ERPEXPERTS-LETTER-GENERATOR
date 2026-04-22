@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { Plus } from 'lucide-react'
+import { Plus, FileText, BarChart3, Table2 } from 'lucide-react'
 import CopyButton from './CopyButton'
 import CalloutStat from './CalloutStat'
 import TechMap from './TechMap'
@@ -20,10 +20,10 @@ interface Props {
 }
 
 const tabs = [
-  { id: 'letter', label: 'Cover letter' },
-  { id: 'case', label: 'Business case' },
-  { id: 'map', label: 'Tech map' },
-] as const
+  { id: 'letter' as const, label: 'Cover letter', icon: FileText },
+  { id: 'case' as const, label: 'Business case', icon: BarChart3 },
+  { id: 'map' as const, label: 'Tech map', icon: Table2 },
+]
 
 type TabId = (typeof tabs)[number]['id']
 
@@ -52,7 +52,7 @@ function CoverLetterView({ content }: { content: string }) {
 
   return (
     <div>
-      {/* Letterhead with Logo */}
+      {/* Letterhead */}
       <div className="flex items-start justify-between pb-7 mb-7 border-b border-gray-200">
         <div className="flex items-start gap-4">
           <Image
@@ -74,7 +74,7 @@ function CoverLetterView({ content }: { content: string }) {
         </div>
       </div>
 
-      {/* Recipient address block */}
+      {/* Recipient address */}
       {preLines.length > 0 && (
         <div className="mb-7 text-[13px] text-gray-600 leading-[1.7] space-y-0.5 font-sans">
           {preLines.map((line, i) => (
@@ -90,7 +90,7 @@ function CoverLetterView({ content }: { content: string }) {
         </div>
       )}
 
-      {/* Letter body */}
+      {/* Body */}
       <div className="font-letter text-[16px] leading-[1.9] text-gray-800 space-y-7">
         {paragraphs
           .filter((_, i) => {
@@ -140,7 +140,6 @@ function BusinessCaseView({ content }: { content: string }) {
 
   return (
     <div>
-      {/* Letterhead with Logo */}
       <div className="flex items-start justify-between pb-7 mb-7 border-b border-gray-200">
         <div className="flex items-start gap-4">
           <Image
@@ -160,7 +159,7 @@ function BusinessCaseView({ content }: { content: string }) {
       </div>
 
       {title && (
-        <h2 className="text-[22px] font-semibold text-gray-900 tracking-[-0.02em] leading-tight mb-3">{title}</h2>
+        <h2 className="text-[22px] font-bold text-gray-900 tracking-[-0.02em] leading-tight mb-3">{title}</h2>
       )}
       {subtitle && (
         <p className="text-[14px] text-gray-500 italic mb-9 pb-7 border-b border-gray-200 leading-relaxed">{subtitle}</p>
@@ -205,25 +204,29 @@ export default function LetterOutput({
 
   return (
     <div>
-      {/* Tab bar — adaptive light/dark */}
+      {/* Tab bar */}
       <div className="flex items-center gap-0.5 mb-6">
-        <div className="flex items-center gap-0.5 bg-gray-100 dark:bg-[#111] border border-gray-200 dark:border-[#1e1e1e] rounded-lg p-1">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-1.5 text-[13px] font-medium rounded-md transition-all duration-150 ${
-                activeTab === tab.id
-                  ? 'bg-white dark:bg-white text-gray-900 dark:text-[#090909] shadow-sm'
-                  : 'text-gray-400 dark:text-[#555] hover:text-gray-700 dark:hover:text-[#ccc]'
-              }`}
-            >
-              {tab.label}
-              {isStreaming && tab.id === activeTab && (
-                <span className="ml-1.5 inline-block w-1 h-1 bg-current rounded-full animate-pulse" />
-              )}
-            </button>
-          ))}
+        <div className="flex items-center gap-0.5 bg-gray-100 dark:bg-[#111] border border-gray-200 dark:border-[#1e1e1e] rounded-xl p-1">
+          {tabs.map((tab) => {
+            const Icon = tab.icon
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-2 px-4 py-2 text-[13px] font-semibold rounded-lg transition-all duration-150 ${
+                  activeTab === tab.id
+                    ? 'bg-white dark:bg-white text-gray-900 dark:text-[#090909] shadow-sm'
+                    : 'text-gray-400 dark:text-[#555] hover:text-gray-700 dark:hover:text-[#ccc]'
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                {tab.label}
+                {isStreaming && tab.id === activeTab && (
+                  <span className="ml-0.5 inline-block w-1.5 h-1.5 bg-current rounded-full animate-pulse" />
+                )}
+              </button>
+            )
+          })}
         </div>
 
         <div className="ml-auto flex items-center gap-2">
@@ -234,7 +237,7 @@ export default function LetterOutput({
             <>
               <button
                 onClick={() => setShowSaveModal(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-[#1e1e1e] rounded-lg hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors"
+                className="btn-secondary btn-sm"
               >
                 <Plus className="w-3 h-3" />
                 Save Template
@@ -250,8 +253,8 @@ export default function LetterOutput({
         </div>
       </div>
 
-      {/* Document — light paper surface */}
-      <div className={`letter-paper rounded-xl ${activeTab === 'map' ? 'max-w-4xl' : 'max-w-2xl'} px-12 py-11`}>
+      {/* Document */}
+      <div className={`letter-paper rounded-2xl ${activeTab === 'map' ? 'max-w-4xl' : 'max-w-2xl'} px-12 py-11`}>
         {activeTab === 'letter' && (coverLetter ? <CoverLetterView content={coverLetter} /> : <Placeholder />)}
         {activeTab === 'case' && (businessCase ? <BusinessCaseView content={businessCase} /> : <Placeholder />)}
         {activeTab === 'map' && (techMap ? <TechMap content={techMap} /> : <Placeholder />)}
@@ -279,6 +282,9 @@ export default function LetterOutput({
 
 function Placeholder() {
   return (
-    <div className="py-12 text-center text-sm text-gray-300">Generating…</div>
+    <div className="py-16 text-center">
+      <div className="loading-ring mx-auto mb-4" />
+      <p className="text-sm text-gray-400 dark:text-[#444]">Generating…</p>
+    </div>
   )
 }

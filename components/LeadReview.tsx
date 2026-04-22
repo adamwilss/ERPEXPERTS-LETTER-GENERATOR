@@ -42,10 +42,10 @@ interface Props {
 }
 
 function contactBadge(dataScore: number): { label: string; className: string } {
-  if (dataScore >= 100) return { label: 'Full', className: 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 ring-1 ring-emerald-200 dark:ring-emerald-500/20' }
-  if (dataScore >= 65) return { label: 'Email', className: 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 ring-1 ring-amber-200 dark:ring-amber-500/20' }
-  if (dataScore >= 35) return { label: 'Name', className: 'bg-gray-100 dark:bg-[#1a1a1a] text-gray-500 dark:text-[#555] ring-1 ring-gray-200 dark:ring-[#2a2a2a]' }
-  return { label: 'None', className: 'bg-gray-50 dark:bg-[#111] text-gray-300 dark:text-[#333] ring-1 ring-gray-100 dark:ring-[#1e1e1e]' }
+  if (dataScore >= 100) return { label: 'Full', className: 'badge-success' }
+  if (dataScore >= 65) return { label: 'Email', className: 'badge-warning' }
+  if (dataScore >= 35) return { label: 'Name', className: 'badge-neutral' }
+  return { label: 'None', className: 'badge-neutral opacity-60' }
 }
 
 function ScoreDisplay({ erpScore, dataScore }: { erpScore: number; dataScore: number }) {
@@ -94,7 +94,7 @@ function LeadCard({
   setEditingName: (v: boolean) => void
 }) {
   return (
-    <div className="bg-white dark:bg-[#111] border border-gray-200 dark:border-[#1e1e1e] rounded-xl overflow-hidden hover:border-gray-300 dark:hover:border-[#2a2a2a] transition-colors duration-200 shadow-sm dark:shadow-none">
+    <div className="card card-hover overflow-hidden">
       <div className="p-5">
         <div className="flex gap-4 items-start">
           {/* Rank */}
@@ -218,7 +218,7 @@ function LeadCard({
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={onGenerate}
-                  className="text-xs px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-[#090909] rounded-lg font-semibold hover:bg-gray-800 dark:hover:bg-[#e8e8e8] transition-colors"
+                  className="btn-primary btn-sm"
                 >
                   Generate letter →
                 </motion.button>

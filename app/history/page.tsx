@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { Trash2, ChevronDown, ChevronRight, Printer, Mail, Calendar, Plus, Database } from 'lucide-react'
+import { Trash2, ChevronDown, ChevronRight, Printer, Mail, Plus, Database, History } from 'lucide-react'
 import {
   loadHistory, deletePack, clearHistory, updatePackStatus, initializeSequence,
   updatePackOutcome, markAsSent, type SavedPack, type PackStatus, type OutcomeData
@@ -27,7 +27,7 @@ function StatusBadge({ status, onChange }: { status?: PackStatus; onChange: (s: 
     <div className="relative">
       <button
         onClick={(e) => { e.stopPropagation(); setOpen((o) => !o) }}
-        className={`text-[11px] px-2 py-1 rounded-md border font-medium transition-colors ${
+        className={`text-[11px] px-2 py-1 rounded-lg border font-semibold transition-all ${
           current
             ? `${current.color} ${current.darkColor}`
             : 'bg-transparent text-gray-400 border-gray-200 hover:border-gray-300 hover:text-gray-600 dark:text-[#444] dark:border-[#1e1e1e] dark:hover:border-[#2a2a2a] dark:hover:text-[#888]'
@@ -36,7 +36,7 @@ function StatusBadge({ status, onChange }: { status?: PackStatus; onChange: (s: 
         {current?.label ?? '+ Status'}
       </button>
       {open && (
-        <div className="absolute right-0 top-full mt-1 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-[#1e1e1e] rounded-lg shadow-lg dark:shadow-none z-10 py-1 min-w-[130px]">
+        <div className="absolute right-0 top-full mt-1 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-[#1e1e1e] rounded-xl shadow-lg dark:shadow-none z-10 py-1 min-w-[140px]">
           {STATUS_OPTIONS.map((opt) => (
             <button
               key={opt.value}
@@ -46,7 +46,7 @@ function StatusBadge({ status, onChange }: { status?: PackStatus; onChange: (s: 
                 setOpen(false)
               }}
               className={`w-full text-left px-3 py-1.5 text-xs hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors ${
-                status === opt.value ? 'font-semibold text-gray-900 dark:text-white' : 'text-gray-500 dark:text-[#555]'
+                status === opt.value ? 'font-semibold text-gray-950 dark:text-white' : 'text-gray-500 dark:text-[#555]'
               }`}
             >
               {opt.label}
@@ -57,8 +57,6 @@ function StatusBadge({ status, onChange }: { status?: PackStatus; onChange: (s: 
     </div>
   )
 }
-
-// ── Outcome Modal ──────────────────────────────────────────────────────────────
 
 function OutcomeModal({
   pack, isOpen, onClose, onSave
@@ -79,23 +77,21 @@ function OutcomeModal({
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-white dark:bg-[#1a1a1a] rounded-xl border border-gray-200 dark:border-[#1e1e1e] shadow-xl max-w-md w-full p-6"
+        className="bg-white dark:bg-[#1a1a1a] rounded-2xl border border-gray-200 dark:border-[#1e1e1e] shadow-xl max-w-md w-full p-6"
       >
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        <h3 className="text-lg font-bold text-gray-950 dark:text-white mb-4">
           Record Outcome — {pack.company}
         </h3>
 
         <div className="space-y-4">
           <div>
-            <label className="text-xs font-medium text-gray-500 dark:text-[#555] mb-2 block">
-              Response type
-            </label>
+            <label className="label mb-2">Response type</label>
             <div className="flex gap-2">
               {(['positive', 'neutral', 'negative'] as const).map((t) => (
                 <button
                   key={t}
                   onClick={() => setResponseType(t)}
-                  className={`flex-1 px-3 py-2 rounded-lg text-xs font-medium border transition-colors ${
+                  className={`flex-1 px-3 py-2 rounded-xl text-xs font-semibold border transition-all ${
                     responseType === t
                       ? t === 'positive'
                         ? 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400'
@@ -125,14 +121,12 @@ function OutcomeModal({
           </div>
 
           <div>
-            <label className="text-xs font-medium text-gray-500 dark:text-[#555] mb-2 block">
-              Notes
-            </label>
+            <label className="label mb-2">Notes</label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="e.g., Wants to see demo, Budget approved in Q2..."
-              className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-[#1e1e1e] rounded-lg bg-white dark:bg-[#111] text-gray-900 dark:text-white focus:outline-none focus:border-gray-400 dark:focus:border-[#2a2a2a]"
+              className="input"
               rows={3}
             />
           </div>
@@ -141,7 +135,7 @@ function OutcomeModal({
         <div className="mt-6 flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+            className="flex-1 px-4 py-2.5 text-sm font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-950 dark:hover:text-white transition-colors rounded-xl"
           >
             Cancel
           </button>
@@ -150,7 +144,7 @@ function OutcomeModal({
               onSave({ responseType, meetingBooked, notes })
               onClose()
             }}
-            className="flex-1 px-4 py-2 text-sm font-medium bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
+            className="btn-primary flex-1"
           >
             Save Outcome
           </button>
@@ -220,21 +214,25 @@ export default function HistoryPage() {
   }
 
   return (
-    <main className="min-h-[calc(100vh-52px)]">
-      <div className="max-w-5xl mx-auto px-6 py-10">
+    <main className="page-shell">
+      <div className="page-container">
         <div className="flex items-end justify-between mb-8">
           <div>
-            <h1 className="text-[22px] font-semibold text-gray-900 dark:text-white tracking-tight">Letter history</h1>
-            <p className="text-sm text-gray-500 dark:text-[#555] mt-1">
+            <div className="page-badge mb-4">
+              <History className="w-3.5 h-3.5 text-emerald-500" />
+              Persistent Storage
+            </div>
+            <h1 className="page-title">Letter history</h1>
+            <p className="page-description">
               {packs.length === 0
                 ? 'No saved letters yet.'
-                : `${packs.length} letter pack${packs.length !== 1 ? 's' : ''} saved in this browser`}
+                : `${packs.length} letter pack${packs.length !== 1 ? 's' : ''} saved`}
             </p>
           </div>
           {packs.length > 0 && (
             <button
               onClick={handleClear}
-              className="text-xs text-gray-400 dark:text-[#444] hover:text-red-500 dark:hover:text-red-400 transition-colors"
+              className="text-xs text-gray-400 dark:text-[#444] hover:text-red-500 dark:hover:text-red-400 transition-colors px-3 py-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-500/5 font-semibold"
             >
               Clear all
             </button>
@@ -242,19 +240,25 @@ export default function HistoryPage() {
         </div>
 
         {loading ? (
-          <div className="text-center py-24 text-gray-400 dark:text-[#555]">
-            <Database className="w-8 h-8 mx-auto mb-4 animate-pulse" />
-            <p className="text-sm">Loading history from database…</p>
+          <div className="empty-state">
+            <div className="empty-state-icon">
+              <Database className="w-5 h-5 text-gray-400 dark:text-[#444] animate-pulse" />
+            </div>
+            <p className="text-sm text-gray-500 dark:text-[#555]">Loading history from database…</p>
           </div>
         ) : packs.length === 0 ? (
-          <div className="text-center py-24 text-gray-300 dark:text-[#333]">
-            <p className="text-sm">Generated letter packs will appear here automatically.</p>
-            <Link href="/discover" className="mt-4 inline-block text-sm text-gray-700 dark:text-[#ccc] underline underline-offset-2 hover:text-gray-900 dark:hover:text-white transition-colors">
+          <div className="empty-state animate-fade-up">
+            <div className="empty-state-icon">
+              <Mail className="w-7 h-7 text-gray-400 dark:text-[#444]" />
+            </div>
+            <p className="text-sm text-gray-500 dark:text-[#555] mb-1">Generated letter packs will appear here automatically.</p>
+            <p className="text-xs text-gray-400 dark:text-[#444] mb-6">Start by generating a letter or discovering leads.</p>
+            <Link href="/discover" className="btn-secondary">
               Discover leads →
             </Link>
           </div>
         ) : (
-          <div className="space-y-1.5">
+          <div className="space-y-2 stagger-children">
             {packs.map((pack) => {
               const isExpanded = expanded === pack.id
               const parsed = parseOutput(pack.completion)
@@ -265,42 +269,52 @@ export default function HistoryPage() {
               return (
                 <div
                   key={pack.id}
-                  className="bg-white dark:bg-[#111] border border-gray-200 dark:border-[#1e1e1e] rounded-xl overflow-hidden hover:border-gray-300 dark:hover:border-[#2a2a2a] transition-colors duration-150 shadow-sm dark:shadow-none"
+                  className="card card-hover overflow-hidden"
                 >
                   <div className="flex items-center justify-between px-5 py-4">
                     <button
                       onClick={() => setExpanded(isExpanded ? null : pack.id)}
                       className="flex items-center gap-3 flex-1 text-left"
                     >
-                      {isExpanded
-                        ? <ChevronDown className="w-4 h-4 text-gray-400 dark:text-[#444] flex-shrink-0" />
-                        : <ChevronRight className="w-4 h-4 text-gray-300 dark:text-[#333] flex-shrink-0" />
-                      }
-                      <div>
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">{pack.company}</div>
-                        <div className="text-xs text-gray-400 dark:text-[#444] mt-0.5 flex flex-wrap gap-2">
-                          <span>{pack.recipientName || pack.contactTitle}</span>
-                          {pack.location && <><span>·</span><span>{pack.location}</span></>}
-                          <span>·</span>
-                          <span>{date}</span>
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors ${isExpanded ? 'bg-gray-100 dark:bg-[#1a1a1a]' : 'bg-gray-50 dark:bg-[#111]'}`}>
+                        {isExpanded
+                          ? <ChevronDown className="w-4 h-4 text-gray-500 dark:text-[#666] flex-shrink-0" />
+                          : <ChevronRight className="w-4 h-4 text-gray-300 dark:text-[#333] flex-shrink-0" />
+                        }
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-sm font-semibold text-gray-950 dark:text-white truncate">{pack.company}</div>
+                        <div className="text-xs text-gray-400 dark:text-[#444] mt-1 flex flex-wrap gap-2">
+                          <span className="inline-flex items-center gap-1">
+                            <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-[#333]" />
+                            {pack.recipientName || pack.contactTitle}
+                          </span>
+                          {pack.location && <span className="inline-flex items-center gap-1"><span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-[#333]" /><span>{pack.location}</span></span>}
+                          <span className="inline-flex items-center gap-1">
+                            <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-[#333]" />
+                            <span>{date}</span>
+                          </span>
                           {pack.erpScore && (
-                            <><span>·</span><span className="text-emerald-600 dark:text-emerald-400 font-medium">{pack.erpScore}</span></>
+                            <span className="inline-flex items-center gap-1">
+                              <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-[#333]" />
+                              <span className="text-emerald-600 dark:text-emerald-400 font-bold">{pack.erpScore}</span>
+                            </span>
                           )}
                         </div>
                       </div>
                     </button>
-                    <div className="ml-4 flex items-center gap-2 flex-shrink-0">
+                    <div className="ml-4 flex items-center gap-1 flex-shrink-0">
                       <StatusBadge status={pack.status} onChange={(s) => handleStatus(pack.id, s)} />
                       <button
                         onClick={() => window.open(`/print?id=${pack.id}`, '_blank')}
-                        className="text-gray-300 dark:text-[#333] hover:text-gray-600 dark:hover:text-[#888] transition-colors"
+                        className="p-2 rounded-lg text-gray-300 dark:text-[#333] hover:text-gray-600 dark:hover:text-[#888] transition-all hover:bg-gray-50 dark:hover:bg-white/[0.02]"
                         title="Print letter"
                       >
                         <Printer className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(pack.id)}
-                        className="text-gray-300 dark:text-[#333] hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                        className="p-2 rounded-lg text-gray-300 dark:text-[#333] hover:text-red-500 dark:hover:text-red-400 transition-all hover:bg-red-50 dark:hover:bg-red-500/5"
                         title="Delete"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -315,24 +329,24 @@ export default function HistoryPage() {
                         {!pack.sequenceStatus && (
                           <button
                             onClick={() => handleMarkSent(pack.id)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-100 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20 dark:hover:bg-blue-500/20 transition-colors"
+                            className="btn-sm badge-info hover:opacity-80"
                           >
                             <Mail className="w-3 h-3" />
                             Start Sequence
                           </button>
                         )}
-                        {pack.status === 'responded' || pack.status === 'meeting' ? (
+                        {(pack.status === 'responded' || pack.status === 'meeting') && (
                           <button
                             onClick={() => setOutcomePack(pack)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg hover:bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20 dark:hover:bg-emerald-500/20 transition-colors"
+                            className="btn-sm badge-success hover:opacity-80"
                           >
                             <Plus className="w-3 h-3" />
                             Record Outcome
                           </button>
-                        ) : null}
+                        )}
                         <button
                           onClick={() => window.open(`/print?id=${pack.id}`, '_blank')}
-                          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
+                          className="btn-ghost text-xs font-semibold px-3 py-1.5"
                         >
                           <Printer className="w-3 h-3" />
                           Print
@@ -344,7 +358,7 @@ export default function HistoryPage() {
                         <SequenceManager pack={pack} onUpdate={refresh} />
                       )}
 
-                      {/* Original Letter Output */}
+                      {/* Letter Output */}
                       <div className="pt-4 border-t border-gray-200 dark:border-[#1e1e1e]">
                         <LetterOutput
                           coverLetter={parsed.part1}
@@ -363,7 +377,7 @@ export default function HistoryPage() {
         )}
       </div>
 
-      <footer className="mt-auto py-6 text-center text-[11px] text-gray-300 dark:text-[#333] border-t border-gray-200 dark:border-[#1e1e1e]">
+      <footer className="page-footer">
         ERP Experts Ltd · Internal Outreach Generation Portal
       </footer>
 
