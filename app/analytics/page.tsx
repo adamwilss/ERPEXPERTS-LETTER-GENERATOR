@@ -123,7 +123,7 @@ export default function AnalyticsPage() {
   const [period, setPeriod] = useState<7 | 30 | 90>(30)
 
   useEffect(() => {
-    setPacks(loadHistory())
+    loadHistory().then(setPacks).catch(console.error)
   }, [])
 
   const analytics = useMemo(() => {
