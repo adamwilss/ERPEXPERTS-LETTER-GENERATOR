@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { ChevronRight, Database, Search, Trash2, Users } from 'lucide-react'
-import { loadSavedSearches, loadLeadsForSearch, deleteSearch, type SavedSearch, type SavedLead } from '@/lib/db/search-db'
+import type { SavedSearch, SavedLead } from '@/lib/db/search-db'
 import { useRouter } from 'next/navigation'
 
 interface SearchWithLeads extends SavedSearch {
@@ -26,8 +26,11 @@ export default function SearchesPage() {
 
   const loadSearches = async () => {
     try {
-      const saved = await loadSavedSearches()
-      setSearches(saved.map(s => ({ ...s, expanded: false })))
+      const res = await fetch('/api/searches')
+      const data = await res.json()
+      if (data.searches) {
+        setSearches(data.searches.map((s: SavedSearch) => ({ ...s, expanded: false })))
+      }
     } catch (err) {
       console.error('Failed to load searches:', err)
     } finally {
@@ -45,12 +48,15 @@ export default function SearchesPage() {
         s.id === searchId ? { ...s, expanded: !s.expanded } : s
       ))
     } else {
-      // Load leads
+      // Load leads via API
       try {
-        const leads = await loadLeadsForSearch(searchId)
-        setSearches(searches.map(s =>
-          s.id === searchId ? { ...s, leads, expanded: true } : s
-        ))
+        const res = await fetch(`/api/searches/${searchId}/leads`)
+        const data = await res.json()
+        if (data.leads) {
+          setSearches(searches.map(s =>
+            s.id === searchId ? { ...s, leads: data.leads, expanded: true } : s
+          ))
+        }
       } catch (err) {
         console.error('Failed to load leads:', err)
       }
@@ -60,8 +66,10 @@ export default function SearchesPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this search and all its leads?')) return
     try {
-      await deleteSearch(id)
-      setSearches(searches.filter(s => s.id !== id))
+      const res = await fetch(`/api/searches/${id}`, { method: 'DELETE' })
+      if (res.ok) {
+        setSearches(searches.filter(s => s.id !== id))
+      }
     } catch (err) {
       console.error('Failed to delete:', err)
     }

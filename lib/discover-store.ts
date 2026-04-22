@@ -2,7 +2,6 @@ import { create } from 'zustand'
 import type { Lead, ReviewedLead } from '@/components/LeadReview'
 import type { PackStatus } from '@/components/BatchOutput'
 import { savePack } from '@/lib/history'
-import { saveSearchWithLeads } from '@/lib/db/search-db'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -136,38 +135,50 @@ export const useDiscoverStore = create<DiscoverState>((set, get) => ({
               streamProgress: { done: event.count as number, total: event.total as number },
             }))
           } else if (event.type === 'done') {
-            // Save search BEFORE changing phase
+            // Save search via API
             const currentLeads = get().leads
             console.log('[Discover] Stream done, saving', currentLeads.length, 'leads')
 
             if (currentLeads.length > 0) {
               try {
-                const result = await saveSearchWithLeads(params, currentLeads.map(l => ({
-                  company: l.company,
-                  website: l.website,
-                  industry: l.industry,
-                  employees: l.employees,
-                  description: l.description,
-                  erpScore: l.erpScore,
-                  location: l.location,
-                  contactName: l.contactName,
-                  contactTitle: l.contactTitle,
-                  contactEmail: l.contactEmail,
-                  contactLinkedIn: l.contactLinkedIn,
-                  postalAddress: l.postalAddress,
-                })))
-                console.log('[Discover] Search saved:', result.search.id)
-                set({
-                  totalSearched: event.total as number,
-                  phase: 'results',
-                  streamStatus: `Saved ${currentLeads.length} leads`,
+                const res = await fetch('/api/searches', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    params,
+                    leads: currentLeads.map(l => ({
+                      company: l.company,
+                      website: l.website,
+                      industry: l.industry,
+                      employees: l.employees,
+                      description: l.description,
+                      erpScore: l.erpScore,
+                      location: l.location,
+                      contactName: l.contactName,
+                      contactTitle: l.contactTitle,
+                      contactEmail: l.contactEmail,
+                      contactLinkedIn: l.contactLinkedIn,
+                      postalAddress: l.postalAddress,
+                    }))
+                  })
                 })
+                const data = await res.json()
+                if (data.success) {
+                  console.log('[Discover] Search saved:', data.search.id)
+                  set({
+                    totalSearched: event.total as number,
+                    phase: 'results',
+                    streamStatus: `Saved ${currentLeads.length} leads`,
+                  })
+                } else {
+                  throw new Error(data.error || 'Save failed')
+                }
               } catch (err) {
                 console.error('[Discover] Failed to save search:', err)
                 set({
                   totalSearched: event.total as number,
                   phase: 'results',
-                  streamStatus: `Found ${currentLeads.length} leads (save failed)`,
+                  streamStatus: `Found ${currentLeads.length} leads`,
                 })
               }
             } else {
