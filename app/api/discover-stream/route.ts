@@ -392,7 +392,7 @@ export async function POST(req: Request) {
           if (seen.has(key)) continue
           seen.add(key)
           allOrgs.push(org)
-          if (allOrgs.length >= 10) break // Hard limit: 10 companies max
+          if (allOrgs.length >= 5) break // Hard limit: 5 companies max
         }
 
         if (allOrgs.length === 0) {
@@ -402,10 +402,10 @@ export async function POST(req: Request) {
           return
         }
 
-        // Phase 1b: Pre-sort by org data richness, enrich top 10
+        // Phase 1b: Pre-sort by org data richness, enrich top 5
         const candidates = allOrgs
           .sort((a, b) => preScore(b) - preScore(a))
-          .slice(0, 10)
+          .slice(0, 5)
 
         send({ type: 'status', message: `Found ${allOrgs.length} companies — enriching all ${candidates.length}…`, total: candidates.length })
 

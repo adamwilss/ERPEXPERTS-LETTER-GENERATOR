@@ -58,7 +58,7 @@ const INITIAL_SESSION = {
   leads: [] as Lead[],
   totalSearched: 0,
   streamStatus: '',
-  streamProgress: { done: 0, total: 10 },
+  streamProgress: { done: 0, total: 5 },
   searchError: null as string | null,
   packs: [] as PackStatus[],
   activePreset: null as string | null,
@@ -82,7 +82,7 @@ export const useDiscoverStore = create<DiscoverState>((set, get) => ({
       leads: [],
       totalSearched: 0,
       streamStatus: 'Searching Apollo…',
-      streamProgress: { done: 0, total: 10 },
+      streamProgress: { done: 0, total: 5 },
       phase: 'streaming',
       activePreset: preset ?? null,
     })
