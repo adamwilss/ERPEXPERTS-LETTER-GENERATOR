@@ -136,13 +136,13 @@ export const useDiscoverStore = create<DiscoverState>((set, get) => ({
               streamProgress: { done: event.count as number, total: event.total as number },
             }))
           } else if (event.type === 'done') {
-            set({ totalSearched: event.total as number, phase: 'results' })
-
-            // Save search and leads to database
+            // Save search BEFORE changing phase
             const currentLeads = get().leads
+            console.log('[Discover] Stream done, saving', currentLeads.length, 'leads')
+
             if (currentLeads.length > 0) {
               try {
-                await saveSearchWithLeads(params, currentLeads.map(l => ({
+                const result = await saveSearchWithLeads(params, currentLeads.map(l => ({
                   company: l.company,
                   website: l.website,
                   industry: l.industry,
@@ -156,10 +156,22 @@ export const useDiscoverStore = create<DiscoverState>((set, get) => ({
                   contactLinkedIn: l.contactLinkedIn,
                   postalAddress: l.postalAddress,
                 })))
-                console.log('[Discover] Search saved to database')
+                console.log('[Discover] Search saved:', result.search.id)
+                set({
+                  totalSearched: event.total as number,
+                  phase: 'results',
+                  streamStatus: `Saved ${currentLeads.length} leads`,
+                })
               } catch (err) {
-                console.warn('[Discover] Failed to save search:', err)
+                console.error('[Discover] Failed to save search:', err)
+                set({
+                  totalSearched: event.total as number,
+                  phase: 'results',
+                  streamStatus: `Found ${currentLeads.length} leads (save failed)`,
+                })
               }
+            } else {
+              set({ totalSearched: event.total as number, phase: 'results' })
             }
           } else if (event.type === 'error') {
             throw new Error(event.message as string)

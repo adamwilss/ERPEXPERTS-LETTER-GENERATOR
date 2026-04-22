@@ -19,6 +19,9 @@ export default function SearchesPage() {
 
   useEffect(() => {
     loadSearches()
+    // Auto-refresh every 10 seconds to catch new searches
+    const interval = setInterval(loadSearches, 10000)
+    return () => clearInterval(interval)
   }, [])
 
   const loadSearches = async () => {
