@@ -162,7 +162,7 @@ Example of FLUFF (bad — will get you fired):
 "Profits slipping through the cracks" — vague, metaphorical, meaningless.
 
 FORBIDDEN PHRASES — THESE WORDS AND PHRASES ARE BANNED. NEVER USE THEM:
-at the helm, lurking behind, creative success, harmonious, latent disconnection, amidst this discord, elbows freed, laborious manual tasks, profits slipping through the cracks, alignment disruptions, commercial outcomes reflect, real-time visibility, streamlining, centralised, single source of truth, transform your business, our solution, we can help you, digital transformation, unlocking potential, future-proof, scalable architecture, driving growth, empowering teams, seamless integration, optimised processes, holistic view, end-to-end, best-in-class, world-class, cutting-edge, next-generation, leveraging, utilising, synergies, paradigm, ecosystem, journey, landscape, space, actionable insights, robust, agile, dynamic, innovative, strategic, impactful, game-changing, disruptive, revolutionary.
+at the helm, lurking behind, creative success, harmonious, latent disconnection, amidst this discord, elbows freed, laborious manual tasks, profits slipping through the cracks, alignment disruptions, commercial outcomes reflect, real-time visibility, streamlining, centralised, single source of truth, transform your business, our solution, we can help you, digital transformation, unlocking potential, future-proof, scalable architecture, driving growth, empowering teams, seamless integration, optimised processes, holistic view, end-to-end, best-in-class, world-class, cutting-edge, next-generation, leveraging, utilising, synergies, paradigm, ecosystem, journey, landscape, space, actionable insights, robust, agile, dynamic, innovative, strategic, impactful, game-changing, disruptive, revolutionary, manual drag, seamlessly, instant visibility, instantaneous, systems replace processes.
 
 TONE INSTRUCTIONS:
 Direct. Calm. Specific. Intelligent. Human. Non-robotic. Confident without being inflated.
@@ -171,9 +171,9 @@ NO ornamental language. NO consultancy fluff. NO poetic metaphors.
 Write like someone who has solved this exact problem 50 times and doesn't need to impress anyone.
 
 SALUTATION — ZERO TOLERANCE:
-If the recipient name is a job title ("Chief Growth Officer", "Director", "Manager"), use "Hello," or "Hello there,"
-NEVER "Dear Chief," NEVER "Dear Growth," NEVER "Dear Director,"
 If a real first name IS provided, use "Dear [First Name],"
+If NO real first name was provided (only a job title like "Chief Growth Officer" or "Finance Director"), use "Dear [Job Title]," — e.g. "Dear Chief Growth Officer," or "Dear Finance Director,"
+NEVER "Dear Chief," NEVER "Dear Growth," NEVER "Dear Director," NEVER "Hello," — "Hello," signals you didn't try.
 
 OPENING PARAGRAPH — THE HOOK:
 NEVER start with: "Managing the complexities..." or "As your business grows..."
@@ -198,6 +198,15 @@ BAD (generic, hedged, feature-focused):
 
 Always tie pain to how THIS company operates. Make it FELT with concrete consequences: delayed billing, margin leakage, compliance exposure, cash flow friction, stockouts, rework, missed deadlines.
 
+PAIN POINT PRIORITY — what board-level readers care about:
+1. Revenue recognition errors and quarter-end surprises
+2. Margin leakage from invisible costs
+3. Cash flow friction from delayed invoicing or reconciliation
+4. Reporting accuracy and timeliness
+5. Headcount wasted on manual work
+
+AVOID soft angles like "lost relationship building time" or "admin drags down morale." These don't land with senior decision makers.
+
 STATS — CREDIBLE OR ILLUSTRATIVE:
 Every statistic must be either:
 A) Properly sourced with a real benchmark (APQC, Aberdeen, Gartner, company annual report)
@@ -205,36 +214,40 @@ B) Clearly framed as illustrative: "For a company operating at this scale, the t
 
 NEVER present a made-up number as fact. If you don't have a solid source, say "In firms like [Company], the typical pattern is..." instead.
 
+BE CONSERVATIVE. Big unsupported numbers destroy credibility. A skeptical board reader will dismiss 15% margin leakage instantly. Better to use a smaller, defensible figure or frame it as illustrative.
+
 ❌ BAD: "Manual reconciliation costs 2–3 days per month" (unsourced, sounds made up)
+❌ BAD: "15% margin leakage" (too big, unsupported, will trigger skepticism)
 ✅ GOOD: "At ~200 employees, APQC benchmarks show month-end close cycles of 6–10 days for fragmented systems versus under 5 for unified ERP."
 ✅ GOOD (illustrative): "For a company of this scale, a typical pattern is 1–2 FTE days lost to manual reconciliation each week."
+✅ GOOD (conservative): "In firms like [Company], the typical pattern is 1–2% margin pressure from reconciliation delays and currency mismatches."
 
 CASE STUDIES — MANDATORY AND TIGHT:
-Reference ONE specific case study. Integrate it like this:
+Reference ONE specific case study. Make it a PROOF ANCHOR — not a teaser. It should do significant heavy lifting in the business case.
 
 1. ECO2SOLAR (Renewable Energy / Field Operations)
-   Before: Job costing across spreadsheets. Field teams and finance rarely saw the same data. Month-end: manual assembly from multiple sources. 10 days to close.
-   After: Live job margin from day one. Purchasing integrated with field schedules. Month-end: 4 days.
+   Before: Job costing tracked across spreadsheets and disconnected tools. Field teams and finance rarely saw the same data. Month-end required manual assembly of job costs from multiple sources. Close took 10 days.
+   After: Live job margin visibility from day one. Purchasing integrated with field schedules. Field and finance aligned in one record. Month-end close reduced from 10 days to 4.
    Use for: field service, installation, job costing, multi-site.
 
 2. KYNETEC (Agricultural Data / Multi-Entity)
-   Before: 5 countries in Excel. Manual consolidation. Different currencies, tax treatments. Month-end: 15+ days. Board reports assembled by hand.
-   After: Group reporting automated. Real-time consolidation. Month-end: under 5 days. Board reports instant.
+   Before: Fragmented entity reporting across 5 countries. Manual consolidation in Excel. Different currencies and tax treatments causing reconciliation nightmares. Month-end took 15+ days. Board reports assembled by hand.
+   After: Group reporting automated. Real-time consolidation. Currency and tax handling native. Month-end close accelerated to under 5 days. Board reports generated instantly.
    Use for: multi-entity, international, complex reporting.
 
 3. TOTALKARE (Manufacturing + Servicing)
-   Before: Separate BOMs, stock, finance, service contracts. No true product profitability visibility. Service scheduling disconnected from parts inventory.
-   After: Single platform from order to service contract. Real-time product and service margins. Engineers see stock before dispatch.
+   Before: Separate systems for manufacturing BOMs, stock management, finance, and service contracts. No visibility of true product profitability. Service scheduling disconnected from parts inventory.
+   After: Single platform from order through production to service contract. Real-time visibility of product and service margins. Service engineers see stock availability instantly.
    Use for: manufacturing, equipment dealers, product + service.
 
 4. CARALLON (Media Technology / Project-Based)
-   Before: Project profitability hard to track across development and installation phases. Purchasing fragmented. No committed cost vs budget view.
-   After: Project and product financials unified. Purchasing centralised with approval workflows. Live project P&L. Budget vs actual in real time.
+   Before: Project profitability hard to track across development and installation phases. Purchasing fragmented across project managers. No single view of committed costs vs budget.
+   After: Project and product financials unified. Purchasing centralised with approval workflows. Live project P&L visible to project managers. Budget vs actual reporting in real time.
    Use for: project-based, technology, professional services.
 
-INTEGRATION RULE:
+INTEGRATION RULE — DO NOT SKIMP:
 ❌ Weak: "A company similar to yours, Carallon, saw benefits..."
-✅ Strong: "This is directly comparable to Carallon, a London media technology company we worked with. They had the same fragmentation between development and installation phases..."
+✅ Strong: "This is directly comparable to Carallon, a London media technology company we worked with. They had the same fragmentation between development and installation phases. Before NetSuite, their project managers tracked costs in separate spreadsheets and the finance team rebuilt the numbers every month. After implementation, project P&L was live, purchasing had approval workflows, and budget vs actual was visible in real time. Month-end went from 12 days to 5."
 
 TECHNOLOGY INFERENCE — DIAGNOSTIC NOT PRESCRIPTIVE:
 The tech map must NOT claim certainty about their systems unless research explicitly confirms them.
@@ -245,20 +258,31 @@ Use these framing patterns:
 - For systems that are clearly inferable from research: state confidently but briefly
 - For unknown systems: phrase as "[System type] — whether Xero, Sage, or QuickBooks — typically handles..."
 
-The technology map should look like a DIAGNOSIS, not a prescription.
+CRITICAL TECH MAP RULES:
+1. Process-centric, not system-centric. Show the WORKFLOW, not just the tool list.
+   Good: Show how a placement flows from CRM → finance → reporting
+   Bad: Just listing "Shopify, Xero, Spreadsheets"
+2. For spreadsheets: say "reduce" or "consolidate" — NEVER "eliminate" (they never fully disappear)
+3. For custom CRMs: say "integrate" or "rationalise" — NEVER "replace" (triggers resistance)
+4. For accounting systems: say "replace with unified finance" — this IS safe
+5. Use parallel structure in every row. Each row should follow the same grammatical pattern.
+6. NO broken characters, NO soft hyphens, NO unicode artefacts anywhere in the table.
 
-ERP EXPERTS POSITIONING — EMPHASISE DIFFERENTIATORS:
-The pack is strongest when it positions ERP Experts against large SIs. Spend MORE space on this:
+The technology map should show HOW WORK FLOWS, not just WHAT TOOLS EXIST.
+
+ERP EXPERTS POSITIONING — EMPHASISE DIFFERENTIATORS EARLY:
+The pack is strongest when it positions ERP Experts against large SIs. These differentiators should appear EARLY in the business case (not just at the end) AND be woven into the narrative:
 - Senior-led delivery (not junior churn)
 - Fixed price (not time-and-materials ballooning)
 - Direct access to Ric
 - UK-based aftercare
 - 21 years, 350+ projects, zero abandoned
 
-These should appear in the business case credentials block AND be woven into the narrative where relevant.
+Why this matters: ERP buyers are terrified of implementation risk. These points directly address that fear. Weave them into the case study and pain expansion sections where relevant, not just as a block at the end.
 
-CTA — DIRECT:
+CTA — DIRECT WITH URGENCY:
 "Worth a 15-minute conversation?" or "Open to a quick discussion next week?"
+ALWAYS include a "WHY NOW" trigger before the CTA: growth stage, expansion complexity, reporting delays, or month-end pain.
 NEVER: "If it is relevant, I would welcome a brief call."
 
 FORMATTING — CLEAN OUTPUT:
@@ -269,20 +293,22 @@ FORMATTING — CLEAN OUTPUT:
 
 INTERNAL QUALITY CHECK:
 Before returning, verify EVERY item:
-1. Salutation uses actual first name OR "Hello," — NEVER a job title
+1. Salutation: "Dear [First Name]," if real name exists. "Dear [Job Title]," if only a title. NEVER "Hello," NEVER "Dear Chief,"
 2. Hook references their specific model, not generic growth language
-3. 4–6 concrete facts from research are woven into the text
-4. Pain points are dramatized with specific consequences
-5. Stats are properly sourced OR clearly framed as illustrative
-6. Case study is tightly integrated with concrete before/after numbers
-7. Benefits stated as commercial outcomes (cash, days, headcount)
-8. Tech map is diagnostic ("In firms like...") not presumptive ("You use...")
-9. ERP Experts differentiators are prominent
-10. CTA is direct
+3. 4–6 concrete facts from research woven into the text as evidence, not decoration
+4. Pain points dramatized with specific consequences: revenue, margin, cash flow, reporting
+5. Stats are defensible OR clearly framed as illustrative. NO unsupported big numbers like 15%.
+6. Case study is a PROOF ANCHOR with concrete before/after numbers, not a teaser
+7. Benefits stated as commercial outcomes (cash, days, headcount) — NOT SaaS features
+8. Tech map is process-centric showing workflows, not just tool lists. Parallel structure.
+9. ERP Experts differentiators appear EARLY, not just at the end
+10. CTA is direct with a "WHY NOW" urgency trigger
 11. ZERO forbidden phrases used
 12. NetSuite is the mechanism, not the headline
-13. Could this letter be sent to another company? If yes → REWRITE
-14. Does it sound like a busy ops director wrote it? If no → REWRITE
+13. Post-NetSuite wording: "systems automate processes" not "systems replace processes"
+14. NO broken characters, NO soft hyphens, NO unicode artefacts, NO duplicate date
+15. Could this letter be sent to another company? If yes → REWRITE
+16. Does it sound like a senior operator wrote it? If no → REWRITE
 
 OUTPUT FORMAT:
 Return exactly three parts. Nothing before ---PART1---, nothing after final content.
@@ -294,7 +320,7 @@ Return exactly three parts. Nothing before ---PART1---, nothing after final cont
 
 SUBJECT: Re: Connecting [Company] technology stack: a short analysis
 
-[Salutation: Dear [First Name], OR Hello,]
+[Salutation: Dear [First Name], if real name exists. Dear [Job Title], if only a title was provided. NEVER "Hello,"]
 
 [PARAGRAPH 1 — HOOK: 2-3 short sentences. Tension/cost/failure. Their specific model.]
 
@@ -331,7 +357,8 @@ Source: [Source or "illustrative"]
 
 [CASE STUDY: Tight integration. "This is directly comparable to [Name]..." BEFORE (systems, time lost) → AFTER (concrete outcomes with numbers).]
 
-[POST-NETSUITE: Their problem first. What gets replaced. What integrates. What becomes visible. Commercial outcomes: faster invoicing, reduced headcount, fewer disputes.]
+[POST-NETSUITE: Their problem first. What gets replaced. What integrates. What becomes visible. Commercial outcomes: faster invoicing, reduced headcount, fewer disputes.
+NEVER say "systems replace processes." Say "systems automate processes" or "processes move from spreadsheets into the platform."]
 
 We have been implementing NetSuite since 2005. In 21 years and 350+ projects we have not abandoned a single implementation. We are not a large systems integrator — your project is led by a senior consultant with direct access to me, delivered at a fixed price, with UK-based aftercare that means you are not left to manage it alone.
 
@@ -343,9 +370,9 @@ SUBTITLE: How NetSuite sits at the centre of [Company]'s technology stack: what 
 
 CURRENT STATE → FUTURE STATE
 
-| Current System | What It Does Now | Future State | Impact for [Company] |
+| Current Process / System | What Happens Now | Future State | Impact for [Company] |
 |---|---|---|---|
-[4–8 rows. DIAGNOSTIC language. Use "In [industry] firms like [Company]..." for uncertain systems. For confirmed systems, state confidently. 4th column = one sentence commercial consequence.]
+[4–8 rows. Process-centric, not just tool listings. Show how WORK FLOWS. Use "In [industry] firms like [Company]..." for uncertain systems. For confirmed systems, state confidently. 4th column = one sentence commercial consequence. Parallel structure in every row. NO broken characters.]
 
 Book a 15-minute call with Ric Wilson
 T: 01785 714 514 · E: ric@erpexperts.co.uk · W: www.erpexperts.co.uk`
@@ -420,20 +447,22 @@ ${sizeSection}
 ${revenueSection}
 
 CRITICAL REQUIREMENTS:
-1. ${hasRealName ? `Salutation MUST be "Dear ${firstName}," — NEVER a job title` : 'Salutation MUST be "Hello," because no real first name was provided. NEVER "Dear Chief," NEVER "Dear Growth," NEVER "Dear Director,"'}
+1. ${hasRealName ? `Salutation MUST be "Dear ${firstName},"` : `Salutation MUST be "Dear ${jobTitle}," — e.g. "Dear Chief Growth Officer," or "Dear Finance Director,". NEVER "Hello,". "Hello," signals you didn't try.`}
 2. Opening paragraph MUST hook with tension/cost/failure — NEVER start with "Managing the complexities..." or "As your business grows..."
 3. Use SHORT, PUNCHY sentences. No hedging. No ornamental language.
 4. Include 4–6 SPECIFIC facts from research (products, channels, geographies, clients, sectors, scale indicators).
-5. DRAMATIZE pain with concrete consequences: delayed billing, margin leakage, compliance exposure, cash flow friction, stockouts, rework.
-6. Reference SPECIFIC case study (Eco2Solar/Kynetec/Totalkare/Carallon) with tight integration and concrete before/after numbers.
+5. DRAMATIZE pain with concrete consequences: revenue recognition errors, margin leakage, cash flow friction, delayed reporting. AVOID soft angles like "lost relationship building time."
+6. Reference SPECIFIC case study (Eco2Solar/Kynetec/Totalkare/Carallon) as a PROOF ANCHOR with concrete before/after numbers.
 7. State benefits as COMMERCIAL OUTCOMES (cash, days, headcount) NOT SaaS features.
-8. Stats must be PROPERLY SOURCED or clearly framed as illustrative ("the typical pattern is...").
-9. Include "WHY NOW" urgency trigger.
+8. Stats must be DEFENSIBLE or clearly framed as illustrative. NO unsupported big numbers like 15%.
+9. Include "WHY NOW" urgency trigger before the CTA.
 10. CTA must be DIRECT: "Worth a 15-minute conversation?" NOT passive.
-11. Tech map must be DIAGNOSTIC ("In firms like...") NOT presumptive ("You use...").
-12. Emphasise ERP Experts differentiators: senior-led, fixed price, direct access to Ric, UK aftercare, 21 years, 350+ projects, zero abandoned.
-13. ZERO forbidden phrases: at the helm, lurking, harmonious, latent, profits slipping, alignment disruptions, real-time visibility, streamlining, transform your business, etc.
-14. Focus on THEIR problem first. NetSuite is the mechanism, not the headline.
+11. Tech map must be PROCESS-CENTRIC showing workflows, not just tool lists. Use parallel structure.
+12. Emphasise ERP Experts differentiators EARLY in the business case: senior-led, fixed price, direct access to Ric, UK aftercare, 21 years, 350+ projects, zero abandoned.
+13. ZERO forbidden phrases: at the helm, lurking, harmonious, latent, profits slipping, alignment disruptions, real-time visibility, streamlining, transform your business, manual drag, seamlessly, instant visibility, etc.
+14. Post-NetSuite wording: "systems automate processes" NOT "systems replace processes."
+15. NO broken characters, NO soft hyphens, NO unicode artefacts, NO duplicate date.
+16. Focus on THEIR problem first. NetSuite is the mechanism, not the headline.
 ${erpSection}
 ${notes ? `\nAdditional notes from the user:\n${notes}` : ''}
 
@@ -578,11 +607,11 @@ Company: ${company}
 Website: ${url}
 Recipient full name: ${recipientName}
 ${hasRealName
-    ? `Recipient FIRST NAME (use this in the salutation): ${firstName}`
-    : 'WARNING: No real first name provided. Use "Hello," — NEVER a job title as salutation.'}
+    ? `Recipient FIRST NAME (use this in the salutation "Dear ${firstName},"): ${firstName}`
+    : `WARNING: No real first name provided. Use "Dear ${jobTitle}," — e.g. "Dear Chief Growth Officer,". NEVER "Hello,".`}
 Job title: ${jobTitle}
 
-${hasRealName ? `CRITICAL: The salutation MUST be "Dear ${firstName}," — NOT a generic title.` : 'CRITICAL: The salutation MUST be "Hello," because only a job title was provided.'}
+${hasRealName ? `CRITICAL: The salutation MUST be "Dear ${firstName}," — NOT a generic title.` : `CRITICAL: The salutation MUST be "Dear ${jobTitle}," because only a job title was provided. NEVER "Hello,".`}
 ${notes ? `\nAdditional notes:\n${notes}` : ''}
 
 RESEARCH:
