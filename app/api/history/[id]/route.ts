@@ -12,13 +12,18 @@ import {
 
 export const dynamic = 'force-dynamic';
 
+// Next.js 15+ route handler types - params is now a Promise
+interface RouteContext {
+  params: Promise<{ id: string }>;
+}
+
 // PATCH /api/history/[id] - Update pack status, outcome, or sequence
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: RouteContext
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
 
     // Handle status update
@@ -63,10 +68,10 @@ export async function PATCH(
 // DELETE /api/history/[id] - Delete pack
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: RouteContext
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     await deletePackFromDB(id);
     return NextResponse.json({ success: true });
   } catch (error) {
