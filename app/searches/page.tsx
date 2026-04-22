@@ -15,7 +15,6 @@ interface SearchWithLeads extends SavedSearch {
 export default function SearchesPage() {
   const [searches, setSearches] = useState<SearchWithLeads[]>([])
   const [loading, setLoading] = useState(true)
-  const router = useRouter()
 
   useEffect(() => {
     loadSearches()
