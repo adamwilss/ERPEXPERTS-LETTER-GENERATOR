@@ -13,11 +13,12 @@ function PrintContent() {
 
   useEffect(() => {
     if (!id) return
-    const history = loadHistory()
-    const pack = history.find((p) => p.id === id)
-    if (!pack) return
-    setCompany(pack.company)
-    setContent(parseOutput(pack.completion))
+    loadHistory().then((history) => {
+      const pack = history.find((p) => p.id === id)
+      if (!pack) return
+      setCompany(pack.company)
+      setContent(parseOutput(pack.completion))
+    }).catch(console.error)
   }, [id])
 
   useEffect(() => {
