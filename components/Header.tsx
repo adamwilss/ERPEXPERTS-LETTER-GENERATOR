@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { Loader2, Bell, BarChart3, LayoutTemplate } from 'lucide-react'
+import { Loader2, Bell, BarChart3, LayoutTemplate, HelpCircle } from 'lucide-react'
+import { startTour } from './OnboardingTour'
 import ThemeToggle from './ThemeToggle'
 import { useDiscoverStore } from '@/lib/discover-store'
 import { getReminderCount, getOverdueReminders } from '@/lib/reminders'
@@ -124,9 +125,18 @@ export default function Header() {
           <nav className="hidden sm:flex items-center gap-0.5">
             {nav.map((item) => {
               const active = pathname === item.href
+              const tourId =
+                item.href === '/discover'
+                  ? 'tour-nav-discover'
+                  : item.href === '/searches'
+                    ? 'tour-nav-searches'
+                    : item.href === '/history'
+                      ? 'tour-nav-history'
+                      : undefined
               return (
                 <Link
                   key={item.href}
+                  id={tourId}
                   href={item.href}
                   className={`px-3 py-1.5 text-[13px] font-medium rounded-lg transition-all duration-150 ${
                     active
@@ -167,6 +177,14 @@ export default function Header() {
           >
             <LayoutTemplate className="w-4 h-4" />
           </Link>
+          <button
+            id="tour-theme-toggle"
+            onClick={() => startTour(true)}
+            className="p-2 rounded-lg text-gray-400 hover:text-gray-700 dark:text-[#555] dark:hover:text-[#ccc] transition-all"
+            title="Replay tutorial"
+          >
+            <HelpCircle className="w-4 h-4" />
+          </button>
           <ThemeToggle />
           <span className="hidden md:inline text-[9px] text-gray-300 dark:text-[#333] uppercase tracking-[0.2em] font-semibold select-none ml-1">
             Internal

@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import type { Lead, ReviewedLead } from '@/components/LeadReview'
 import type { PackStatus } from '@/components/BatchOutput'
 import { savePack } from '@/lib/history'
+import { markLeadAsGenerated } from '@/lib/db/search-db'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -153,12 +154,23 @@ export const useDiscoverStore = create<DiscoverState>((set, get) => ({
                       employees: l.employees,
                       description: l.description,
                       erpScore: l.erpScore,
+                      dataScore: l.dataScore,
+                      rank: l.rank,
+                      rationale: l.rationale,
+                      orgId: l.orgId,
+                      foundedYear: l.foundedYear,
+                      annualRevenue: l.annualRevenue,
+                      techStack: l.techStack,
+                      phone: l.phone,
+                      linkedinUrl: l.linkedinUrl,
                       location: l.location,
                       contactName: l.contactName,
                       contactTitle: l.contactTitle,
                       contactEmail: l.contactEmail,
                       contactLinkedIn: l.contactLinkedIn,
                       postalAddress: l.postalAddress,
+                      recipientName: l.contactName ?? '',
+                      status: 'pending',
                     }))
                   })
                 })
@@ -166,6 +178,17 @@ export const useDiscoverStore = create<DiscoverState>((set, get) => ({
                 if (data.success) {
                   const savedCount = data.leadCount ?? currentLeads.length
                   console.log('[Discover] Search saved:', data.search.id, 'with', savedCount, 'leads')
+                  // Update local leads with DB IDs so we can mark them generated later
+                  if (data.leads && Array.isArray(data.leads)) {
+                    const savedLeads = data.leads as { id: string; company: string }[]
+                    const idMap = new Map(savedLeads.map((sl: { id: string; company: string }) => [sl.company, sl.id]))
+                    set((s) => ({
+                      leads: s.leads.map(l => ({
+                        ...l,
+                        id: idMap.get(l.company) ?? undefined,
+                      })),
+                    }))
+                  }
                   set({
                     totalSearched: event.total as number,
                     phase: 'results',
@@ -273,7 +296,15 @@ export const useDiscoverStore = create<DiscoverState>((set, get) => ({
             })
           } catch (err) {
             console.warn('Failed to save pack to history:', err)
-            // Continue - pack was still generated
+          }
+        }
+
+        // Mark lead as generated if it has a DB id
+        if ((lead as any).id) {
+          try {
+            await markLeadAsGenerated((lead as any).id)
+          } catch (err) {
+            console.warn('Failed to mark lead as generated:', err)
           }
         }
       } catch (err) {
@@ -290,3 +321,30 @@ export const useDiscoverStore = create<DiscoverState>((set, get) => ({
     set({ phase: 'done' })
   },
 }))
+
+// ── Pending leads from localStorage (searches/[id] → discover flow) ────────────
+// Check on module load if there are pending leads from the saved search detail page
+if (typeof window !== 'undefined') {
+  const pending = localStorage.getItem('pending_leads')
+  if (pending) {
+    try {
+      const leads = JSON.parse(pending) as Lead[]
+      if (leads.length > 0 && window.location.pathname === '/discover') {
+        const params = new URLSearchParams(window.location.search)
+        if (params.get('batch') === 'true') {
+          // Hydrate store and clear localStorage
+          const store = useDiscoverStore.getState()
+          // Add recipientName from contactName if missing
+          const reviewedLeads = leads.map((l) => ({
+            ...l,
+            recipientName: (l as any).recipientName || l.contactName || '',
+          }))
+          store.startGeneration(reviewedLeads as ReviewedLead[])
+          localStorage.removeItem('pending_leads')
+        }
+      }
+    } catch {
+      localStorage.removeItem('pending_leads')
+    }
+  }
+}

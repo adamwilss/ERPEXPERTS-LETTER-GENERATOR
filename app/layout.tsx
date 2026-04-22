@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import Header from '@/components/Header'
+import OnboardingTour from '@/components/OnboardingTour'
 
 export const metadata: Metadata = {
   title: 'ERP Experts — Letter Portal',
@@ -17,6 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen">
         <Header />
         {children}
+        <OnboardingTour />
       </body>
     </html>
   )

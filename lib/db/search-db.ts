@@ -26,14 +26,25 @@ export interface SavedLead {
   employees: string;
   description: string;
   erpScore: number;
+  dataScore: number;
+  rank: number;
+  rationale: string;
+  orgId?: string;
+  foundedYear?: number;
+  annualRevenue?: string;
+  techStack?: string[];
+  phone?: string;
+  linkedinUrl?: string;
   location?: string;
   contactName?: string;
   contactTitle: string;
   contactEmail?: string;
   contactLinkedIn?: string;
   postalAddress?: string;
+  recipientName?: string;
   createdAt: string;
   generated?: boolean;
+  status?: string;
 }
 
 // Save a search and its leads
@@ -60,7 +71,6 @@ export async function saveSearchWithLeads(
   if (!searchRow) {
     throw new Error('Failed to create search - no row returned');
   }
-  // Keep as INTEGER for Postgres foreign key column — do NOT convert to string
   const searchId = searchRow.id;
   console.log('[DB] Created search with ID:', searchId);
 
@@ -73,23 +83,28 @@ export async function saveSearchWithLeads(
     createdAt: searchRow.created_at,
   };
 
-  // Insert all leads using a transaction for atomicity and reliability
-  // The neon HTTP driver handles concurrent individual queries poorly,
-  // so we batch them into a single transaction request.
   const savedLeads: SavedLead[] = [];
   console.log('[DB] Building', leads.length, 'insert queries for transaction');
 
   const insertQueries = leads.map((lead) => sql`
     INSERT INTO search_leads (
       search_id, company, website, industry, employees, description,
-      erp_score, location, contact_name, contact_title, contact_email,
-      contact_linkedin, postal_address
+      erp_score, data_score, rank, rationale, org_id, founded_year,
+      annual_revenue, tech_stack, phone, linkedin_url, location,
+      contact_name, contact_title, contact_email, contact_linkedin,
+      postal_address, recipient_name, status
     )
     VALUES (
       ${searchId}, ${lead.company}, ${lead.website}, ${lead.industry},
       ${lead.employees}, ${lead.description}, ${lead.erpScore ?? 0},
-      ${lead.location ?? null}, ${lead.contactName ?? null}, ${lead.contactTitle ?? null},
-      ${lead.contactEmail ?? null}, ${lead.contactLinkedIn ?? null}, ${lead.postalAddress ?? null}
+      ${lead.dataScore ?? 0}, ${lead.rank ?? null}, ${lead.rationale ?? null},
+      ${lead.orgId ?? null}, ${lead.foundedYear ?? null},
+      ${lead.annualRevenue ?? null}, ${lead.techStack ? JSON.stringify(lead.techStack) : null},
+      ${lead.phone ?? null}, ${lead.linkedinUrl ?? null}, ${lead.location ?? null},
+      ${lead.contactName ?? null}, ${lead.contactTitle ?? null},
+      ${lead.contactEmail ?? null}, ${lead.contactLinkedIn ?? null},
+      ${lead.postalAddress ?? null}, ${lead.recipientName ?? null},
+      ${lead.status ?? 'pending'}
     )
     RETURNING id, created_at
   `);
@@ -124,14 +139,22 @@ export async function saveSearchWithLeads(
         const leadResult = await sql`
           INSERT INTO search_leads (
             search_id, company, website, industry, employees, description,
-            erp_score, location, contact_name, contact_title, contact_email,
-            contact_linkedin, postal_address
+            erp_score, data_score, rank, rationale, org_id, founded_year,
+            annual_revenue, tech_stack, phone, linkedin_url, location,
+            contact_name, contact_title, contact_email, contact_linkedin,
+            postal_address, recipient_name, status
           )
           VALUES (
             ${searchId}, ${lead.company}, ${lead.website}, ${lead.industry},
             ${lead.employees}, ${lead.description}, ${lead.erpScore ?? 0},
-            ${lead.location ?? null}, ${lead.contactName ?? null}, ${lead.contactTitle ?? null},
-            ${lead.contactEmail ?? null}, ${lead.contactLinkedIn ?? null}, ${lead.postalAddress ?? null}
+            ${lead.dataScore ?? 0}, ${lead.rank ?? null}, ${lead.rationale ?? null},
+            ${lead.orgId ?? null}, ${lead.foundedYear ?? null},
+            ${lead.annualRevenue ?? null}, ${lead.techStack ? JSON.stringify(lead.techStack) : null},
+            ${lead.phone ?? null}, ${lead.linkedinUrl ?? null}, ${lead.location ?? null},
+            ${lead.contactName ?? null}, ${lead.contactTitle ?? null},
+            ${lead.contactEmail ?? null}, ${lead.contactLinkedIn ?? null},
+            ${lead.postalAddress ?? null}, ${lead.recipientName ?? null},
+            ${lead.status ?? 'pending'}
           )
           RETURNING id, created_at
         `;
@@ -170,21 +193,18 @@ export async function getDbDebugInfo(): Promise<{
 }> {
   const sql = getSql();
   try {
-    // Check if tables exist
     const tableResult = await sql`
       SELECT table_name FROM information_schema.tables
       WHERE table_schema = 'public' AND table_name IN ('searches', 'search_leads')
     `;
     const tables = (tableResult as unknown[]).map((r: any) => r.table_name);
 
-    // Count rows
     const searchCountResult = await sql`SELECT COUNT(*) as count FROM searches`;
     const searchCount = Number((searchCountResult as any[])[0]?.count ?? 0);
 
     const leadCountResult = await sql`SELECT COUNT(*) as count FROM search_leads`;
     const leadCount = Number((leadCountResult as any[])[0]?.count ?? 0);
 
-    // Get a sample search to verify FK integrity
     let sampleSearchId: number | undefined;
     let sampleSearchLeadCount: number | undefined;
     if (searchCount > 0) {
@@ -248,7 +268,6 @@ export async function loadLeadsForSearch(searchId: string): Promise<SavedLead[]>
 
   console.log('[DB] Loading leads for search_id:', searchId);
 
-  // Convert to integer for Postgres
   const numericId = parseInt(searchId, 10);
   if (isNaN(numericId)) {
     console.error('[DB] Invalid search ID:', searchId);
@@ -258,11 +277,14 @@ export async function loadLeadsForSearch(searchId: string): Promise<SavedLead[]>
   const result = await sql`
     SELECT
       id, search_id, company, website, industry, employees,
-      description, erp_score, location, contact_name, contact_title,
-      contact_email, contact_linkedin, postal_address, created_at, generated
+      description, erp_score, data_score, rank, rationale,
+      org_id, founded_year, annual_revenue, tech_stack, phone,
+      linkedin_url, location, contact_name, contact_title,
+      contact_email, contact_linkedin, postal_address, recipient_name,
+      created_at, generated, status
     FROM search_leads
     WHERE search_id = ${numericId}
-    ORDER BY erp_score DESC
+    ORDER BY erp_score DESC, data_score DESC
   `;
 
   console.log('[DB] Query returned', (result as unknown[]).length, 'rows');
@@ -276,14 +298,25 @@ export async function loadLeadsForSearch(searchId: string): Promise<SavedLead[]>
     employees: String(row.employees),
     description: String(row.description),
     erpScore: Number(row.erp_score),
+    dataScore: Number(row.data_score ?? 0),
+    rank: Number(row.rank ?? 0),
+    rationale: row.rationale ? String(row.rationale) : '',
+    orgId: row.org_id ? String(row.org_id) : undefined,
+    foundedYear: row.founded_year ? Number(row.founded_year) : undefined,
+    annualRevenue: row.annual_revenue ? String(row.annual_revenue) : undefined,
+    techStack: row.tech_stack ? JSON.parse(String(row.tech_stack)) as string[] : undefined,
+    phone: row.phone ? String(row.phone) : undefined,
+    linkedinUrl: row.linkedin_url ? String(row.linkedin_url) : undefined,
     location: row.location ? String(row.location) : undefined,
     contactName: row.contact_name ? String(row.contact_name) : undefined,
     contactTitle: String(row.contact_title),
     contactEmail: row.contact_email ? String(row.contact_email) : undefined,
     contactLinkedIn: row.contact_linkedin ? String(row.contact_linkedin) : undefined,
     postalAddress: row.postal_address ? String(row.postal_address) : undefined,
+    recipientName: row.recipient_name ? String(row.recipient_name) : undefined,
     createdAt: String(row.created_at),
     generated: Boolean(row.generated),
+    status: row.status ? String(row.status) : 'pending',
   }));
 }
 
@@ -296,7 +329,21 @@ export async function markLeadAsGenerated(leadId: string): Promise<void> {
   }
   await sql`
     UPDATE search_leads
-    SET generated = true
+    SET generated = true, status = 'generated'
+    WHERE id = ${numericId}
+  `;
+}
+
+// Update lead status (pending | approved | rejected | generated)
+export async function updateLeadStatus(leadId: string, status: string): Promise<void> {
+  const sql = getSql();
+  const numericId = parseInt(leadId, 10);
+  if (isNaN(numericId)) {
+    throw new Error(`Invalid lead ID: ${leadId}`);
+  }
+  await sql`
+    UPDATE search_leads
+    SET status = ${status}
     WHERE id = ${numericId}
   `;
 }

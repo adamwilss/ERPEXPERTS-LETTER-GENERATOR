@@ -3,7 +3,8 @@
 import { useEffect, useState, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { Trash2, ChevronDown, ChevronRight, Printer, Mail, Plus, Database, History } from 'lucide-react'
+import { Trash2, ChevronDown, ChevronRight, Printer, Mail, Plus, Database, History, Search } from 'lucide-react'
+import EmptyState from '@/components/EmptyState'
 import {
   loadHistory, deletePack, clearHistory, updatePackStatus, initializeSequence,
   updatePackOutcome, markAsSent, type SavedPack, type PackStatus, type OutcomeData
@@ -247,16 +248,16 @@ export default function HistoryPage() {
             <p className="text-sm text-gray-500 dark:text-[#555]">Loading history from database…</p>
           </div>
         ) : packs.length === 0 ? (
-          <div className="empty-state animate-fade-up">
-            <div className="empty-state-icon">
-              <Mail className="w-7 h-7 text-gray-400 dark:text-[#444]" />
-            </div>
-            <p className="text-sm text-gray-500 dark:text-[#555] mb-1">Generated letter packs will appear here automatically.</p>
-            <p className="text-xs text-gray-400 dark:text-[#444] mb-6">Start by generating a letter or discovering leads.</p>
-            <Link href="/discover" className="btn-secondary">
-              Discover leads →
-            </Link>
-          </div>
+          <EmptyState
+            icon={<Mail className="w-7 h-7" />}
+            title="No saved letters yet"
+            description="Generated letter packs will appear here automatically. Start by generating a letter or discovering leads."
+            action={
+              <Link href="/discover" className="btn btn-secondary">
+                Discover leads →
+              </Link>
+            }
+          />
         ) : (
           <div className="space-y-2 stagger-children">
             {packs.map((pack) => {

@@ -16,6 +16,8 @@ CREATE TABLE IF NOT EXISTS companies (
 CREATE TABLE IF NOT EXISTS packs (
   id SERIAL PRIMARY KEY,
   company_id INTEGER REFERENCES companies(id) ON DELETE CASCADE,
+  search_id INTEGER REFERENCES searches(id) ON DELETE SET NULL,
+  lead_id INTEGER REFERENCES search_leads(id) ON DELETE SET NULL,
   recipient_name TEXT,
   contact_title TEXT,
   content TEXT NOT NULL,
@@ -69,18 +71,30 @@ CREATE TABLE IF NOT EXISTS search_leads (
   employees TEXT,
   description TEXT,
   erp_score INTEGER DEFAULT 0,
+  data_score INTEGER DEFAULT 0,
+  rank INTEGER,
+  rationale TEXT,
+  org_id TEXT,
+  founded_year INTEGER,
+  annual_revenue TEXT,
+  tech_stack TEXT,
+  phone TEXT,
+  linkedin_url TEXT,
   location TEXT,
   contact_name TEXT,
   contact_title TEXT,
   contact_email TEXT,
   contact_linkedin TEXT,
   postal_address TEXT,
+  recipient_name TEXT,
   generated BOOLEAN DEFAULT FALSE,
+  status TEXT DEFAULT 'pending',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_packs_company ON packs(company_id);
+CREATE INDEX IF NOT EXISTS idx_packs_search ON packs(search_id);
 CREATE INDEX IF NOT EXISTS idx_packs_status ON packs(status);
 CREATE INDEX IF NOT EXISTS idx_packs_created ON packs(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_sequences_pack ON sequences(pack_id);
@@ -88,3 +102,23 @@ CREATE INDEX IF NOT EXISTS idx_outcomes_pack ON outcomes(pack_id);
 CREATE INDEX IF NOT EXISTS idx_searches_created ON searches(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_search_leads_search ON search_leads(search_id);
 CREATE INDEX IF NOT EXISTS idx_search_leads_generated ON search_leads(generated);
+CREATE INDEX IF NOT EXISTS idx_search_leads_status ON search_leads(status);
+
+-- Migration: add missing columns for existing deployments
+-- Run these manually in Neon SQL Editor if tables already exist:
+--
+-- ALTER TABLE search_leads ADD COLUMN IF NOT EXISTS data_score INTEGER DEFAULT 0;
+-- ALTER TABLE search_leads ADD COLUMN IF NOT EXISTS rank INTEGER;
+-- ALTER TABLE search_leads ADD COLUMN IF NOT EXISTS rationale TEXT;
+-- ALTER TABLE search_leads ADD COLUMN IF NOT EXISTS org_id TEXT;
+-- ALTER TABLE search_leads ADD COLUMN IF NOT EXISTS founded_year INTEGER;
+-- ALTER TABLE search_leads ADD COLUMN IF NOT EXISTS annual_revenue TEXT;
+-- ALTER TABLE search_leads ADD COLUMN IF NOT EXISTS tech_stack TEXT;
+-- ALTER TABLE search_leads ADD COLUMN IF NOT EXISTS phone TEXT;
+-- ALTER TABLE search_leads ADD COLUMN IF NOT EXISTS linkedin_url TEXT;
+-- ALTER TABLE search_leads ADD COLUMN IF NOT EXISTS recipient_name TEXT;
+-- ALTER TABLE search_leads ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'pending';
+-- ALTER TABLE packs ADD COLUMN IF NOT EXISTS search_id INTEGER REFERENCES searches(id) ON DELETE SET NULL;
+-- ALTER TABLE packs ADD COLUMN IF NOT EXISTS lead_id INTEGER REFERENCES search_leads(id) ON DELETE SET NULL;
+-- CREATE INDEX IF NOT EXISTS idx_packs_search ON packs(search_id);
+-- CREATE INDEX IF NOT EXISTS idx_search_leads_status ON search_leads(status);

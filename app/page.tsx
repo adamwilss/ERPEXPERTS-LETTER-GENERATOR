@@ -29,7 +29,7 @@ export default function Home() {
       {!submitted ? (
         <div className="page-container">
           {/* Hero */}
-          <div className="mb-10 animate-fade-up">
+          <div id="tour-hero" className="mb-10 animate-fade-up">
             <div className="page-badge mb-4">
               <Sparkles className="w-3.5 h-3.5 text-emerald-500" />
               AI-Powered Outreach
@@ -43,29 +43,51 @@ export default function Home() {
 
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-8">
             {/* Form */}
-            <div className="animate-fade-up" style={{ animationDelay: '0.1s' }}>
+            <div id="tour-form" className="animate-fade-up" style={{ animationDelay: '0.1s' }}>
               <div className="card card-hover p-7">
                 <LetterForm onSubmit={handleSubmit} />
               </div>
             </div>
 
             {/* Sidebar */}
-            <div className="space-y-4 animate-fade-up" style={{ animationDelay: '0.15s' }}>
+            <div id="tour-sidebar" className="space-y-4 animate-fade-up" style={{ animationDelay: '0.15s' }}>
               <div className="card p-6">
                 <p className="label mb-4">What you get</p>
                 <div className="space-y-5">
                   {[
-                    { num: '01', icon: FileText, title: 'Cover letter', desc: 'Company-specific, signed by Ric. Ready to print and post.' },
-                    { num: '02', icon: TrendingUp, title: 'Business case', desc: 'Pain points, benchmarks, and a named case study.' },
-                    { num: '03', icon: Shield, title: 'Tech map', desc: 'Which systems integrate, replace, or get eliminated.' },
+                    {
+                      num: '01',
+                      icon: FileText,
+                      title: 'Cover letter',
+                      desc: 'Company-specific, signed by Ric. Ready to print and post.',
+                    },
+                    {
+                      num: '02',
+                      icon: TrendingUp,
+                      title: 'Business case',
+                      desc: 'Pain points, benchmarks, and a named case study.',
+                    },
+                    {
+                      num: '03',
+                      icon: Shield,
+                      title: 'Tech map',
+                      desc: 'Which systems integrate, replace, or get eliminated.',
+                    },
                   ].map(({ num, icon: Icon, title, desc }) => (
                     <div key={title} className="flex gap-4">
-                      <div className="mt-0.5 w-7 h-7 rounded-lg bg-gray-100 dark:bg-[#1a1a1a] border border-gray-200 dark:border-[#1e1e1e] flex items-center justify-center flex-shrink-0">
+                      <div className="mt-0.5 w-7 h-7 rounded-lg bg-gray-100 dark:bg-[#1a1a1a] border border-gray-200 dark:border-[#1e1e1e] flex items-center justify-center flex-shrink-0"
+                      >
                         <Icon className="w-3.5 h-3.5 text-gray-500 dark:text-[#555]" />
                       </div>
                       <div>
-                        <div className="text-[13px] font-semibold text-gray-800 dark:text-[#ddd]">{title}</div>
-                        <div className="text-xs text-gray-500 dark:text-[#555] mt-0.5 leading-relaxed">{desc}</div>
+                        <div className="text-[13px] font-semibold text-gray-800 dark:text-[#ddd]"
+                        >
+                          {title}
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-[#555] mt-0.5 leading-relaxed"
+                        >
+                          {desc}
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -80,9 +102,11 @@ export default function Home() {
                     ['Projects completed', '350+'],
                     ['Abandoned implementations', '0'],
                   ].map(([label, value]) => (
-                    <div key={label} className="flex items-center justify-between">
+                    <div key={label} className="flex items-center justify-between"
+                    >
                       <span className="text-xs text-gray-500 dark:text-[#555]">{label}</span>
-                      <span className="text-xs font-bold text-gray-800 dark:text-[#ccc]">{value}</span>
+                      <span className="text-xs font-bold text-gray-800 dark:text-[#ccc]"
+                      >{value}</span>
                     </div>
                   ))}
                 </div>
@@ -93,17 +117,31 @@ export default function Home() {
       ) : (
         <div className="page-container">
           {isLoading && !completion && (
-            <div className="py-20 flex flex-col items-start gap-5 max-w-lg animate-fade-up">
+            <div className="py-20 flex flex-col items-start gap-5 max-w-lg animate-fade-up"
+            >
               <div className="flex items-center gap-3">
                 <div className="loading-ring" />
-                <span className="text-sm font-semibold text-gray-950 dark:text-white">Researching {companyName}…</span>
+                <span className="text-sm font-semibold text-gray-950 dark:text-white"
+                >
+                  Researching {companyName}…
+                </span>
               </div>
               <div className="ml-8 space-y-2">
-                <div className="h-1.5 w-48 bg-gray-100 dark:bg-[#1a1a1a] rounded-full overflow-hidden">
-                  <div className="h-full bg-gray-400 dark:bg-[#555] rounded-full animate-shimmer" style={{ width: '60%' }} />
+                <div className="h-1.5 w-48 bg-gray-100 dark:bg-[#1a1a1a] rounded-full overflow-hidden"
+                >
+                  <div
+                    className="h-full bg-gray-400 dark:bg-[#555] rounded-full animate-shimmer"
+                    style={{ width: '60%' }}
+                  />
                 </div>
-                <p className="text-xs text-gray-500 dark:text-[#555]">Reading the company website and gathering context.</p>
-                <p className="text-xs text-gray-400 dark:text-[#444]">This takes around 15–30 seconds.</p>
+                <p className="text-xs text-gray-500 dark:text-[#555]"
+                >
+                  Reading the company website and gathering context.
+                </p>
+                <p className="text-xs text-gray-400 dark:text-[#444]"
+                >
+                  This takes around 15–30 seconds.
+                </p>
               </div>
               <button
                 onClick={() => setSubmitted(false)}
@@ -115,18 +153,31 @@ export default function Home() {
           )}
 
           {isLoading && completion && (
-            <div className="mb-6 flex items-center gap-2 text-xs text-gray-500 dark:text-[#555] bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#1e1e1e] rounded-lg px-3 py-2 w-fit animate-fade-in">
+            <div className="mb-6 flex items-center gap-2 text-xs text-gray-500 dark:text-[#555] bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#1e1e1e] rounded-lg px-3 py-2 w-fit animate-fade-in"
+            >
               <div className="loading-ring w-3.5 h-3.5" />
               Writing letter pack…
             </div>
           )}
 
           {error && (
-            <div className="bg-red-50 dark:bg-red-500/5 border border-red-200 dark:border-red-500/20 rounded-xl p-5 text-sm text-red-600 dark:text-red-400 max-w-lg animate-fade-up">
+            <div className="bg-red-50 dark:bg-red-500/5 border border-red-200 dark:border-red-500/20 rounded-xl p-5 text-sm text-red-600 dark:text-red-400 max-w-lg animate-fade-up"
+            >
               <div className="flex items-start gap-3">
-                <div className="mt-0.5 w-5 h-5 rounded-full bg-red-100 dark:bg-red-500/10 flex items-center justify-center flex-shrink-0">
-                  <svg className="w-3 h-3 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                <div className="mt-0.5 w-5 h-5 rounded-full bg-red-100 dark:bg-red-500/10 flex items-center justify-center flex-shrink-0"
+                >
+                  <svg
+                    className="w-3 h-3 text-red-600 dark:text-red-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2.5}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </div>
                 <div>

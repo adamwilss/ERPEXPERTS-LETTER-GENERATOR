@@ -13,12 +13,14 @@
   body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     background-color: #fafafa;
+    background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0,0,0,0.03), transparent);
     color: #0a0a0a;
     font-feature-settings: 'ss01' on, 'ss02' on, 'cv01' on;
   }
 
   html.dark body {
     background-color: #0a0a0a;
+    background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255,255,255,0.03), transparent);
     color: #f5f5f5;
   }
 
@@ -53,11 +55,11 @@
 
   /* ── Card System ────────────────────────────────────────────── */
   .card {
-    @apply bg-white dark:bg-[#111] border border-gray-200/80 dark:border-[#1e1e1e] rounded-2xl;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.02);
+    @apply bg-white dark:bg-[#111] border border-gray-200/60 dark:border-[#1e1e1e] rounded-[20px];
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 6px 20px rgba(0,0,0,0.02);
   }
   html.dark .card {
-    box-shadow: 0 0 0 1px rgba(255,255,255,0.03);
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.03), 0 4px 12px rgba(0,0,0,0.2);
   }
 
   .card-hover {
@@ -65,19 +67,19 @@
   }
   .card-hover:hover {
     @apply border-gray-300 dark:border-[#2a2a2a];
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.04);
-    transform: translateY(-1px);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 12px 28px rgba(0,0,0,0.05);
+    transform: translateY(-2px);
   }
   html.dark .card-hover:hover {
-    box-shadow: 0 0 0 1px rgba(255,255,255,0.05), 0 8px 24px rgba(0,0,0,0.3);
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.05), 0 12px 28px rgba(0,0,0,0.35);
   }
 
   .card-elevated {
-    @apply bg-white dark:bg-[#111] border border-gray-200/80 dark:border-[#1e1e1e] rounded-2xl;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.04), 0 24px 48px rgba(0,0,0,0.02);
+    @apply bg-white dark:bg-[#111] border border-gray-200/60 dark:border-[#1e1e1e] rounded-[20px];
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 12px 28px rgba(0,0,0,0.05), 0 32px 64px rgba(0,0,0,0.03);
   }
   html.dark .card-elevated {
-    box-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 8px 24px rgba(0,0,0,0.4), 0 24px 48px rgba(0,0,0,0.2);
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 12px 28px rgba(0,0,0,0.45), 0 32px 64px rgba(0,0,0,0.25);
   }
 
   /* ── Button System ──────────────────────────────────────────── */
@@ -88,6 +90,7 @@
   .btn-primary {
     @apply btn bg-gray-950 dark:bg-white text-white dark:text-gray-950 rounded-xl px-5 py-3 text-sm;
     @apply hover:bg-gray-800 dark:hover:bg-gray-100 shadow-sm;
+    @apply disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-gray-950 disabled:dark:hover:bg-white;
   }
 
   .btn-secondary {
@@ -123,16 +126,16 @@
 
   .page-badge {
     @apply inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[11px] font-semibold tracking-wide;
-    @apply bg-gray-100 dark:bg-[#1a1a1a] border border-gray-200 dark:border-[#1e1e1e] text-gray-500 dark:text-[#666];
+    @apply bg-gray-100 dark:bg-[#151515] border border-gray-200 dark:border-[#1e1e1e] text-gray-500 dark:text-[#666];
   }
 
   .page-title {
-    @apply text-3xl font-bold text-gray-950 dark:text-white tracking-tight leading-tight mt-4 mb-2;
-    letter-spacing: -0.02em;
+    @apply text-[32px] font-extrabold text-gray-950 dark:text-white tracking-tight leading-[1.1] mt-4 mb-2;
+    letter-spacing: -0.03em;
   }
 
   .page-description {
-    @apply text-sm text-gray-500 dark:text-[#555] leading-relaxed max-w-lg;
+    @apply text-[13px] text-gray-500 dark:text-[#555] leading-relaxed max-w-lg mt-1;
   }
 
   /* ── Empty State ────────────────────────────────────────────── */
@@ -286,6 +289,82 @@
   .stagger-children > *:nth-child(6) { animation-delay: 0.3s; }
   .stagger-children > *:nth-child(7) { animation-delay: 0.35s; }
   .stagger-children > *:nth-child(8) { animation-delay: 0.4s; }
+}
+
+/* ── Driver.js Tour Customisation ─────────────────────────────── */
+.erp-tour-popover {
+  background: white !important;
+  border: 1px solid #e5e5e5 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04) !important;
+  padding: 20px !important;
+  max-width: 320px !important;
+}
+html.dark .erp-tour-popover {
+  background: #111 !important;
+  border-color: #1e1e1e !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03) !important;
+}
+.erp-tour-popover .driver-popover-title {
+  font-family: 'Inter', system-ui, sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  color: #0a0a0a !important;
+  letter-spacing: -0.01em !important;
+  margin-bottom: 8px !important;
+}
+html.dark .erp-tour-popover .driver-popover-title {
+  color: #f5f5f5 !important;
+}
+.erp-tour-popover .driver-popover-description {
+  font-family: 'Inter', system-ui, sans-serif !important;
+  font-size: 13px !important;
+  line-height: 1.6 !important;
+  color: #666 !important;
+}
+html.dark .erp-tour-popover .driver-popover-description {
+  color: #888 !important;
+}
+.erp-tour-popover .driver-popover-close-btn {
+  color: #999 !important;
+  font-size: 12px !important;
+}
+.erp-tour-popover .driver-popover-progress-text {
+  font-size: 11px !important;
+  color: #999 !important;
+}
+.erp-tour-popover .driver-popover-next-btn,
+.erp-tour-popover .driver-popover-prev-btn {
+  font-family: 'Inter', system-ui, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  padding: 6px 12px !important;
+  transition: all 0.15s !important;
+}
+.erp-tour-popover .driver-popover-next-btn {
+  background: #0a0a0a !important;
+  color: white !important;
+  border: none !important;
+}
+html.dark .erp-tour-popover .driver-popover-next-btn {
+  background: white !important;
+  color: #0a0a0a !important;
+}
+.erp-tour-popover .driver-popover-prev-btn {
+  background: transparent !important;
+  color: #666 !important;
+  border: 1px solid #e5e5e5 !important;
+}
+html.dark .erp-tour-popover .driver-popover-prev-btn {
+  color: #888 !important;
+  border-color: #1e1e1e !important;
+}
+.erp-tour-popover .driver-popover-arrow {
+  border-color: white !important;
+}
+html.dark .erp-tour-popover .driver-popover-arrow {
+  border-color: #111 !important;
 }
 
 /* ── Print styles ─────────────────────────────────────────────── */
