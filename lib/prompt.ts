@@ -333,24 +333,24 @@ OUTPUT FORMAT:
 Return exactly three parts. Nothing before ---PART1---, nothing after final content.
 
 ---PART1---
-[POSTAL ADDRESS BLOCK — copy exactly from prospect details]
+POSTAL ADDRESS BLOCK — copy exactly from prospect details.
 
-[Date]
+Date — current date.
 
 SUBJECT: Re: Connecting [Company] technology stack: a short analysis
 
-[Salutation: Dear [First Name], if real name exists. Dear [Job Title], if only a title was provided. NEVER "Hello,"]
+Salutation: Dear [First Name], if real name exists. Dear [Job Title], if only a title was provided. NEVER "Hello,". Do NOT label this as "Salutation:" in the output — just write it as the opening line.
 
-[PARAGRAPH 1 — HOOK: 2-3 short sentences. Tension/cost/failure. Their specific model.]
+PARAGRAPH 1 — HOOK: 2-3 short sentences. Tension/cost/failure. Their specific model. Do NOT label this as "PARAGRAPH 1" in the output.
 
-[PARAGRAPH 2 — PAIN: 2-3 structural pains. Concrete consequences. Likely systems where inferable. Short punchy sentences.]
+PARAGRAPH 2 — PAIN: 2-3 structural pains. Concrete consequences. Likely systems where inferable. Short punchy sentences. Do NOT label this as "PARAGRAPH 2" in the output.
 
-I have enclosed a short analysis of how this plays out for [Company] and what the picture looks like once the operational and financial layers are unified.
+Bridge sentence: "I have enclosed a short analysis of how this plays out for [Company] and what the picture looks like once the operational and financial layers are unified."
 
-Worth a 15-minute conversation?
+CTA: "Worth a 15-minute conversation?"
 
+Sign-off:
 Best,
-
 Ric Wilson
 Managing Director, ERP Experts
 21 years NetSuite experience · 350+ completed projects
@@ -358,43 +358,41 @@ Managing Director, ERP Experts
 TITLE: The business case for [Company]
 SUBTITLE: What staying on [their current setup] is costing, and what changing it is worth
 
-[OPENING: 1-2 sharp sentences about THEIR operational friction. Lead with their problem, not NetSuite. Make it sting.]
+OPENING: 1-2 sharp sentences about THEIR operational friction. Lead with their problem, not NetSuite. Make it sting. Do NOT label this as "OPENING" in the output.
 
-[STAT]
+CALL-OUT STAT BOX 1:
 Headline: [Specific figure]
 Body: [Tied to their model — concrete consequence]
 Source: [Real source OR "illustrative benchmark based on industry pattern"]
-[/STAT]
+Use [STAT] and [/STAT] delimiters around this block.
 
-[STAT]
+CALL-OUT STAT BOX 2:
 Headline: [Second figure]
 Body: [Tied to their operations]
 Source: [Source or "illustrative"]
-[/STAT]
+Use [STAT] and [/STAT] delimiters around this block.
 
-[COST OF STAYING HERE — THIS IS THE MONEY SECTION:
-Explicitly quantify what the current architecture costs them every month. Frame it as lost profit, not lost efficiency.
-- Headcount wasted: "At this scale, manual reconciliation likely costs 1-2 FTE days every week. That is capacity you are paying for and cannot use."
-- Margin erosion: "Currency mismatches, invoicing delays, and stock discrepancies typically create 1-2% margin pressure for businesses at this scale."
-- Decision delay: "Without live numbers, strategic decisions are made on data that is 2-4 weeks old."
-- Cash flow drag: "Every day between order and invoice is a day of cash sitting in process instead of your account."
-Be conservative. Unsupported big numbers destroy credibility. Frame as "typical pattern" or "illustrative benchmark" if you lack a hard source.]
+COST OF STAYING HERE — write a short section that explicitly quantifies what the current architecture costs them every month. Frame it as lost profit, not lost efficiency. Include these angles naturally in prose, not as bullet points:
+- Headcount wasted: At this scale, manual reconciliation likely costs 1-2 FTE days every week. That is capacity you are paying for and cannot use.
+- Margin erosion: Currency mismatches, invoicing delays, and stock discrepancies typically create 1-2% margin pressure for businesses at this scale.
+- Decision delay: Without live numbers, strategic decisions are made on data that is 2-4 weeks old.
+- Cash flow drag: Every day between order and invoice is a day of cash sitting in process instead of your account.
+Be conservative. Unsupported big numbers destroy credibility. Frame as "typical pattern" or "illustrative benchmark" if you lack a hard source.
 
-[PAIN EXPANSION: One paragraph per pain. BEFORE (what goes wrong now, what it costs in money or time) → AFTER (what changes). Concrete.]
+PAIN EXPANSION: One paragraph per pain. BEFORE (what goes wrong now, what it costs in money or time) → AFTER (what changes). Concrete. Do NOT label paragraphs as "BEFORE" or "AFTER" in the output.
 
-[CASE STUDY: Tight integration. "This is directly comparable to [Name]..." BEFORE (systems, time lost, money burned) → AFTER (concrete outcomes with numbers).]
+CASE STUDY: Tight integration. "This is directly comparable to [Name]..." Before: their systems, time lost, money burned. After: concrete outcomes with numbers. Write this as flowing prose, not bracketed sections.
 
-[TRANSFORMATION STATEMENT — ONE SHARP SENTENCE:
+TRANSFORMATION STATEMENT — include ONE sharp sentence in the prose:
 "From [current state: X disconnected systems and Y-day closes] → To [future state: one platform and real-time visibility.]"
-Make it feel inevitable, not aspirational.]
+Make it feel inevitable, not aspirational. Weave it into a paragraph, do not set it off as a separate block.
 
-[HORMOZI VALUE PROPOSITION:
-Position ERP Experts as selling an OUTCOME, not software.
+HORMOZI VALUE PROPOSITION — weave this into the narrative EARLY, not as a separate block:
 "We do not just implement NetSuite. We eliminate reconciliation chaos, reporting delays, and margin leaks — delivered at a fixed price by a senior consultant who reports directly to me."
-This should appear EARLY in the business case, woven into the narrative, not just as a block at the end.]
+Position ERP Experts as selling an OUTCOME, not software.
 
-[POST-NETSUITE: Their problem first. What gets replaced. What integrates. What becomes visible. Commercial outcomes: faster invoicing, reduced headcount waste, fewer disputes.
-NEVER say "systems replace processes." Say "systems automate processes" or "processes move from spreadsheets into the platform."]
+POST-NETSUITE: Lead with their problem first. What gets replaced. What integrates. What becomes visible. Commercial outcomes: faster invoicing, reduced headcount waste, fewer disputes.
+NEVER say "systems replace processes." Say "systems automate processes" or "processes move from spreadsheets into the platform."
 
 We have been implementing NetSuite since 2005. In 21 years and 350+ projects we have not abandoned a single implementation. We are not a large systems integrator — your project is led by a senior consultant with direct access to me, delivered at a fixed price, with UK-based aftercare that means you are not left to manage it alone.
 
@@ -413,7 +411,7 @@ CURRENT STATE → FUTURE STATE
 
 | System | Relationship | What It Means | Impact for [Company] |
 |---|---|---|---|
-[4–8 rows. Process-centric, not just tool listings. Show how WORK FLOWS.]
+Write 4–8 rows. Process-centric, not just tool listings. Show how WORK FLOWS.
 
 CRITICAL TABLE RULES:
 1. Column 1 (System): name the specific system or process (e.g. "Shopify", "Xero", "Month-end reporting")
