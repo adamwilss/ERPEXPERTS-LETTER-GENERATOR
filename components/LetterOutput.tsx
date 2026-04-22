@@ -12,6 +12,7 @@ import SaveTemplateModal from './SaveTemplateModal'
 import { saveTemplate } from '@/lib/templates'
 import { savePack } from '@/lib/history'
 import { parseStats } from '@/lib/parse'
+import { WritingAnimation } from './WritingAnimation'
 
 interface Props {
   coverLetter: string
@@ -337,9 +338,8 @@ export default function LetterOutput({
 
 function Placeholder() {
   return (
-    <div className="py-16 text-center">
-      <div className="loading-ring mx-auto mb-4" />
-      <p className="text-sm text-gray-400 dark:text-[#444]">Generating…</p>
+    <div className="py-12 flex flex-col items-center gap-4">
+      <WritingAnimation text="Writing your letter..." />
     </div>
   )
 }

@@ -208,9 +208,10 @@ export default function Home() {
             )}
 
             {isLoading && completion && (
-              <div className="mb-6 flex items-center gap-2 text-xs text-gray-500 dark:text-[#555] bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#1e1e1e] rounded-lg px-3 py-2 w-fit animate-fade-in glow-green">
-                <Zap className="w-3.5 h-3.5 text-emerald-500 animate-pulse" />
-                Writing letter pack...
+              <div className="mb-8 flex items-center gap-3 text-xs text-gray-500 dark:text-[#555] bg-gray-50/80 dark:bg-[#111]/80 border border-gray-200 dark:border-[#1e1e1e] rounded-xl px-4 py-3 w-fit animate-fade-in glow-green backdrop-blur-sm">
+                <Zap className="w-4 h-4 text-emerald-500 animate-pulse" />
+                <span className="font-semibold">Writing letter pack...</span>
+                <span className="text-gray-400 dark:text-[#444]">almost done</span>
               </div>
             )}
 

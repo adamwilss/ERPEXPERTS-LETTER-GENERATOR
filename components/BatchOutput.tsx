@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronRight, CheckCircle, Loader2, AlertCircle } from 'lucide-react'
 import LetterOutput from './LetterOutput'
+import { WritingAnimation } from './WritingAnimation'
 import { parseOutput } from '@/lib/parse'
 
 export interface PackStatus {
@@ -91,7 +92,9 @@ export default function BatchOutput({ packs }: Props) {
                   {pack.status === 'done' ? (
                     <CheckCircle className="w-4 h-4 text-emerald-500 dark:text-emerald-400 flex-shrink-0" />
                   ) : pack.status === 'generating' ? (
-                    <Loader2 className="w-4 h-4 text-gray-400 dark:text-[#444] animate-spin flex-shrink-0" />
+                    <div className="w-4 h-4 flex items-center justify-center flex-shrink-0">
+                      <span className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
+                    </div>
                   ) : pack.status === 'error' ? (
                     <AlertCircle className="w-4 h-4 text-red-500 dark:text-red-400 flex-shrink-0" />
                   ) : (
@@ -118,7 +121,7 @@ export default function BatchOutput({ packs }: Props) {
                     </>
                   )}
                   {pack.status === 'generating' && (
-                    <span className="text-xs text-gray-400 dark:text-[#444] animate-pulse">Writing…</span>
+                    <span className="text-xs text-amber-500 dark:text-amber-400 font-semibold animate-pulse">Writing...</span>
                   )}
                   {pack.status === 'pending' && (
                     <span className="text-xs text-gray-300 dark:text-[#333]">Queued</span>
@@ -136,6 +139,18 @@ export default function BatchOutput({ packs }: Props) {
                     companyName={pack.company}
                     isStreaming={false}
                   />
+                </div>
+              )}
+
+              {/* Generating placeholder */}
+              {pack.status === 'generating' && (
+                <div className="border-t border-gray-100 dark:border-[#181818] px-5 py-8">
+                  <div className="flex flex-col items-center gap-4">
+                    <WritingAnimation text={`Writing letter for ${pack.company}...`} />
+                    <p className="text-xs text-gray-400 dark:text-[#444]">
+                      Researching and drafting — this takes about 45 seconds
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
