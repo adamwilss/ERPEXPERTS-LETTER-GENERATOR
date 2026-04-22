@@ -1,5 +1,13 @@
 import { getSql } from './client';
 
+// Helper to handle neon results
+function getFirstRow<T>(result: unknown): T | undefined {
+  if (Array.isArray(result) && result.length > 0) {
+    return result[0] as T;
+  }
+  return undefined;
+}
+
 export interface SavedSearch {
   id: string;
   industry: string;
@@ -42,7 +50,10 @@ export async function saveSearchWithLeads(
     RETURNING id, created_at
   `;
 
-  const searchRow = searchResult[0] as { id: number; created_at: string };
+  const searchRow = getFirstRow<{ id: number; created_at: string }>(searchResult);
+  if (!searchRow) {
+    throw new Error('Failed to create search');
+  }
   const searchId = searchRow.id.toString();
 
   const search: SavedSearch = {
@@ -73,7 +84,8 @@ export async function saveSearchWithLeads(
       RETURNING id, created_at
     `;
 
-    const leadRow = leadResult[0] as { id: number; created_at: string };
+    const leadRow = getFirstRow<{ id: number; created_at: string }>(leadResult);
+    if (!leadRow) continue;
 
     savedLeads.push({
       ...lead,
