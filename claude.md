@@ -810,6 +810,14 @@ If any answer is weak, rewrite before returning.
 
 ---
 
+## Git workflow
+
+The user always wants commits pushed to the GitHub remote immediately after they are created. Vercel auto-deploys from `master`, so a local commit that is not pushed will not trigger a deployment.
+
+**Rule:** After every `git commit`, immediately run `git push origin master` unless the user explicitly says not to.
+
+---
+
 ## Ideal outcome
 
 Within roughly one minute of input, the user receives a two part letter pack that feels researched, specific, commercially sharp, and individually written for the target company.
