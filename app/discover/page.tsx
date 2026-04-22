@@ -1,7 +1,7 @@
 'use client'
 
-import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown, ChevronUp, Search, Zap } from 'lucide-react'
+import { Search, Zap } from 'lucide-react'
+import { ChevronDown, ChevronUp } from 'lucide-react'
 import LeadReview, { ReviewedLead } from '@/components/LeadReview'
 import BatchOutput from '@/components/BatchOutput'
 import { useDiscoverStore } from '@/lib/discover-store'
@@ -63,15 +63,9 @@ export default function DiscoverPage() {
       <div className="max-w-5xl mx-auto px-6 py-10">
 
         {/* ── Form ────────────────────────────────────────────────────────── */}
-        <AnimatePresence>
-          {store.phase === 'form' && (
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.2 }}
-              className="max-w-2xl"
-            >
+        {store.phase === 'form' && (
+          <div className="max-w-2xl animate-in fade-in duration-150"
+          >
               <h1 className="text-[22px] font-semibold text-gray-900 dark:text-white tracking-tight mb-1">Discover leads</h1>
               <p className="text-sm text-gray-500 dark:text-[#555] mb-8 leading-relaxed">
                 Pick a preset to search instantly, or customise your own criteria below.
@@ -80,18 +74,16 @@ export default function DiscoverPage() {
               {/* Preset chips */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
                 {PRESETS.map((preset) => (
-                  <motion.button
+                  <button
                     key={preset.label}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.97 }}
                     onClick={() => handlePreset(preset)}
-                    className="bg-white dark:bg-[#111] border border-gray-200 dark:border-[#1e1e1e] hover:border-gray-300 dark:hover:border-[#2a2a2a] hover:bg-gray-50 dark:hover:bg-white/[0.02] rounded-xl px-4 py-3 text-left transition-colors group shadow-sm dark:shadow-none"
+                    className="bg-white dark:bg-[#111] border border-gray-200 dark:border-[#1e1e1e] hover:border-gray-300 dark:hover:border-[#2a2a2a] hover:bg-gray-50 dark:hover:bg-white/[0.02] rounded-xl px-4 py-3 text-left transition-colors group shadow-sm dark:shadow-none active:scale-[0.98]"
                   >
                     <div className="text-[13px] font-medium text-gray-700 dark:text-[#ccc] group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
                       {preset.label}
                     </div>
                     <div className="text-[11px] text-gray-400 dark:text-[#444] mt-0.5">{preset.sub}</div>
-                  </motion.button>
+                  </button>
                 ))}
               </div>
 
@@ -104,15 +96,9 @@ export default function DiscoverPage() {
                 Custom search
               </button>
 
-              <AnimatePresence>
-                {store.showCustom && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-                    className="overflow-hidden"
-                  >
+              {store.showCustom && (
+                <div className="overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
+                >
                     <div className="bg-white dark:bg-[#111] border border-gray-200 dark:border-[#1e1e1e] rounded-xl p-6 space-y-4 shadow-sm dark:shadow-none">
                       <div className="grid grid-cols-2 gap-4">
                         <SelectField label="Industry" value={store.industry} onChange={(v) => store.setFormField('industry', v)}
@@ -135,32 +121,25 @@ export default function DiscoverPage() {
                             className="w-full border border-gray-200 dark:border-[#1e1e1e] bg-white dark:bg-[#1a1a1a] rounded-lg px-3 py-2.5 text-sm text-gray-900 dark:text-white placeholder:text-gray-300 dark:placeholder:text-[#333] focus:outline-none focus:border-gray-400 dark:focus:border-[#2a2a2a] focus:ring-1 focus:ring-gray-200 dark:focus:ring-[#1e1e1e] transition-colors" />
                         </div>
                       </div>
-                      <motion.button
-                        whileHover={{ scale: 1.01 }}
-                        whileTap={{ scale: 0.99 }}
+                      <button
                         onClick={handleCustomSearch}
-                        className="w-full px-5 py-3 bg-gray-900 dark:bg-white text-white dark:text-[#090909] text-sm font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 hover:bg-gray-800 dark:hover:bg-[#e8e8e8]"
+                        className="w-full px-5 py-3 bg-gray-900 dark:bg-white text-white dark:text-[#090909] text-sm font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 hover:bg-gray-800 dark:hover:bg-[#e8e8e8] active:scale-[0.98]"
                       >
                         <Search className="w-4 h-4" />
                         Search
-                      </motion.button>
+                      </button>
                     </div>
-                  </motion.div>
+                  </div>
                 )}
-              </AnimatePresence>
 
               {store.searchError && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="mt-4 bg-red-50 dark:bg-red-500/5 border border-red-200 dark:border-red-500/20 rounded-lg p-4 text-sm text-red-600 dark:text-red-400"
+                <div className="mt-4 bg-red-50 dark:bg-red-500/5 border border-red-200 dark:border-red-500/20 rounded-lg p-4 text-sm text-red-600 dark:text-red-400 animate-in fade-in duration-200"
                 >
                   {store.searchError}
-                </motion.div>
+                </div>
               )}
-            </motion.div>
-          )}
-        </AnimatePresence>
+          </div>
+        )}
 
         {/* ── Streaming / Results ─────────────────────────────────────────── */}
         {(store.phase === 'streaming' || store.phase === 'results') && (

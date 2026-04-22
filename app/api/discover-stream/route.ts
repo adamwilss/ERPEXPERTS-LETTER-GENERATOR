@@ -374,14 +374,11 @@ export async function POST(req: Request) {
       }
 
       try {
-        // Phase 1a: Apollo search (2 pages in parallel)
+        // Phase 1a: Apollo search (1 page only, 5 companies max to save tokens)
         send({ type: 'status', message: 'Searching Apollo…' })
-        const [r1, r2] = await Promise.all([
-          fetchApolloPage(apolloKey, apolloBody, 1),
-          fetchApolloPage(apolloKey, apolloBody, 2),
-        ])
+        const r1 = await fetchApolloPage(apolloKey, apolloBody, 1)
 
-        if (r1.error && r2.error) {
+        if (r1.error) {
           send({ type: 'error', message: `Apollo search failed: ${r1.error}` })
           controller.close()
           return
@@ -389,27 +386,28 @@ export async function POST(req: Request) {
 
         const seen = new Set<string>()
         const allOrgs: ApolloOrg[] = []
-        for (const org of [...r1.orgs, ...r2.orgs]) {
+        for (const org of r1.orgs) {
           if (!org.name || !getDomain(org)) continue
           const key = org.id ?? org.name
           if (seen.has(key)) continue
           seen.add(key)
           allOrgs.push(org)
+          if (allOrgs.length >= 10) break // Hard limit: 10 companies max
         }
 
         if (allOrgs.length === 0) {
-          const apolloErr = r1.error ?? r2.error
+          const apolloErr = r1.error
           send({ type: 'error', message: apolloErr ? `Apollo error: ${apolloErr}` : 'No companies found. Try different criteria.' })
           controller.close()
           return
         }
 
-        // Phase 1b: Pre-sort by org data richness, enrich top 60
+        // Phase 1b: Pre-sort by org data richness, enrich top 10
         const candidates = allOrgs
           .sort((a, b) => preScore(b) - preScore(a))
-          .slice(0, 60)
+          .slice(0, 10)
 
-        send({ type: 'status', message: `Found ${allOrgs.length} companies — enriching top ${candidates.length}…`, total: candidates.length })
+        send({ type: 'status', message: `Found ${allOrgs.length} companies — enriching all ${candidates.length}…`, total: candidates.length })
 
         // Phase 1c: Enrich + contact lookup for all candidates in parallel
         // Collect into buckets — do not stream yet
