@@ -96,7 +96,7 @@ export async function saveSearchWithLeads(
 
   try {
     console.log('[DB] Executing transaction with', insertQueries.length, 'queries');
-    const txResults = await sql.transaction(insertQueries);
+    const txResults = await getSql().transaction(insertQueries);
     console.log('[DB] Transaction completed. Results count:', txResults.length);
 
     for (let i = 0; i < txResults.length; i++) {
