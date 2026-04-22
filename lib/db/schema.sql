@@ -48,13 +48,6 @@ CREATE TABLE IF NOT EXISTS outcomes (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Indexes for performance
-CREATE INDEX IF NOT EXISTS idx_packs_company ON packs(company_id);
-CREATE INDEX IF NOT EXISTS idx_packs_status ON packs(status);
-CREATE INDEX IF NOT EXISTS idx_packs_created ON packs(created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_sequences_pack ON sequences(pack_id);
-CREATE INDEX IF NOT EXISTS idx_outcomes_pack ON outcomes(pack_id);
-
 -- Searches table (for saving Apollo search results)
 CREATE TABLE IF NOT EXISTS searches (
   id SERIAL PRIMARY KEY,
@@ -66,11 +59,12 @@ CREATE TABLE IF NOT EXISTS searches (
 );
 
 -- Search leads table (Apollo results)
+-- All fields nullable except id and search_id to handle incomplete Apollo data
 CREATE TABLE IF NOT EXISTS search_leads (
   id SERIAL PRIMARY KEY,
-  search_id INTEGER REFERENCES searches(id) ON DELETE CASCADE,
-  company TEXT NOT NULL,
-  website TEXT NOT NULL,
+  search_id INTEGER NOT NULL REFERENCES searches(id) ON DELETE CASCADE,
+  company TEXT,
+  website TEXT,
   industry TEXT,
   employees TEXT,
   description TEXT,
@@ -85,6 +79,12 @@ CREATE TABLE IF NOT EXISTS search_leads (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Indexes for performance
+CREATE INDEX IF NOT EXISTS idx_packs_company ON packs(company_id);
+CREATE INDEX IF NOT EXISTS idx_packs_status ON packs(status);
+CREATE INDEX IF NOT EXISTS idx_packs_created ON packs(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_sequences_pack ON sequences(pack_id);
+CREATE INDEX IF NOT EXISTS idx_outcomes_pack ON outcomes(pack_id);
 CREATE INDEX IF NOT EXISTS idx_searches_created ON searches(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_search_leads_search ON search_leads(search_id);
 CREATE INDEX IF NOT EXISTS idx_search_leads_generated ON search_leads(generated);

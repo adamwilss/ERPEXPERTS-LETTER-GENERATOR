@@ -17,7 +17,12 @@ export async function GET(
   } catch (error) {
     console.error('[API] Failed to load leads:', error);
     return NextResponse.json(
-      { error: 'Failed to load leads', details: String(error), leads: [] },
+      {
+        error: 'Failed to load leads',
+        details: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        leads: []
+      },
       { status: 500 }
     );
   }

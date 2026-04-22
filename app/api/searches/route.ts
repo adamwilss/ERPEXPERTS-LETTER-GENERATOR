@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { saveSearchWithLeads, loadSavedSearches, loadLeadsForSearch } from '@/lib/db/search-db';
+import { saveSearchWithLeads, loadSavedSearches } from '@/lib/db/search-db';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,6 +30,8 @@ export async function POST(request: Request) {
     }
 
     console.log('[API] Saving search with', body.leads.length, 'leads');
+    console.log('[API] First lead sample:', JSON.stringify(body.leads[0], null, 2));
+
     const result = await saveSearchWithLeads(body.params, body.leads);
     console.log('[API] Saved search:', result.search.id, 'with', result.leads.length, 'leads');
 
@@ -41,7 +43,11 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('[API] Failed to save search:', error);
     return NextResponse.json(
-      { error: 'Failed to save search', details: String(error) },
+      {
+        error: 'Failed to save search',
+        details: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      },
       { status: 500 }
     );
   }
