@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useCompletion } from '@ai-sdk/react'
 import { motion } from 'framer-motion'
 import LetterForm, { FormValues } from '@/components/LetterForm'
 import LetterOutput from '@/components/LetterOutput'
 import { parseOutput } from '@/lib/parse'
+import { savePack } from '@/lib/history'
 import { FileText, TrendingUp, Shield, Sparkles, Zap } from 'lucide-react'
 import { HeroGlow, GradientBorder, TypingText } from '@/components/MotionConfig'
 import { WritingAnimation } from '@/components/WritingAnimation'
@@ -19,13 +20,33 @@ export default function Home() {
     streamProtocol: 'text',
   })
 
+  const [formValues, setFormValues] = useState<FormValues | null>(null)
+
   const handleSubmit = async (values: FormValues) => {
     setCompanyName(values.company)
+    setFormValues(values)
     setSubmitted(true)
     await complete('', { body: values })
   }
 
   const parsed = completion ? parseOutput(completion) : null
+
+  // Auto-save to history when generation completes
+  useEffect(() => {
+    if (!isLoading && completion && parsed && formValues) {
+      savePack({
+        company: formValues.company,
+        recipientName: formValues.recipientName,
+        contactTitle: formValues.jobTitle,
+        completion,
+        website: formValues.url,
+        location: '',
+        industry: '',
+        employees: '',
+        erpScore: undefined,
+      }).catch((err) => console.warn('Failed to auto-save pack:', err))
+    }
+  }, [isLoading, completion, parsed, formValues])
 
   return (
     <main className="page-shell">

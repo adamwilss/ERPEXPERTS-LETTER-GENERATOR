@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { Loader2, Bell, BarChart3, LayoutTemplate, HelpCircle, Sparkles } from 'lucide-react'
+import { Loader2, Bell, BarChart3, LayoutTemplate, HelpCircle } from 'lucide-react'
 import { startTour } from './OnboardingTour'
 import ThemeToggle from './ThemeToggle'
 import { useDiscoverStore } from '@/lib/discover-store'
@@ -96,14 +96,6 @@ function SessionPill() {
   )
 }
 
-function CinematicToggle() {
-  // Always on — non-toggleable per user request
-  return (
-    <div className="p-2 rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 transition-all">
-      <Sparkles className="w-4 h-4" />
-    </div>
-  )
-}
 
 export default function Header() {
   const pathname = usePathname()
@@ -165,7 +157,6 @@ export default function Header() {
           <ReminderBadge />
           <SessionPill />
           <div className="w-px h-4 bg-gray-200 dark:bg-[#1e1e1e] mx-1" />
-          <CinematicToggle />
           <Link
             href="/analytics"
             className={`p-2 rounded-lg transition-all ${
