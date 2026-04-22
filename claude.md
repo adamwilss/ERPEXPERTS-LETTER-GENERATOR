@@ -29,8 +29,9 @@ The standard for tone, structure, specificity, and commercial sharpness is the G
 | PDF export | `@react-pdf/renderer` | Two-page styled PDF. Add in v2 once output quality is confirmed. |
 | Word export | `docx` (npm) | `.docx` download for editing before send. Add in v2. |
 | Copy | Clipboard API | One-click copy per section. Zero dependency. Ship in v1. |
+| Database | Neon Postgres | Persistent history storage via `@neondatabase/serverless`. |
 | Hosting | Vercel | Auto-deploys from GitHub. Edge Runtime for long-running generation calls. |
-| Secrets | `.env.local` / Vercel env vars | `OPENAI_API_KEY`, `TAVILY_API_KEY`. Never committed. |
+| Secrets | `.env.local` / Vercel env vars | `OPENAI_API_KEY`, `TAVILY_API_KEY`, `DATABASE_URL`. Never committed. |
 
 ### Project structure
 
@@ -56,8 +57,14 @@ The standard for tone, structure, specificity, and commercial sharpness is the G
 │       │   └── route.ts          # Apollo search (legacy)
 │       ├── discover-stream/
 │       │   └── route.ts          # Streaming Apollo search with AI ranking
-│       └── score/
-│           └── route.ts          # Lead scoring endpoint
+│       ├── score/
+│       │   └── route.ts          # Lead scoring endpoint
+│       └── history/
+│           ├── route.ts          # GET/POST history
+│           ├── [id]/
+│           │   └── route.ts      # PATCH/DELETE single pack
+│           └── migrate/
+│               └── route.ts      # localStorage → Postgres migration
 ├── components/
 │   ├── LetterForm.tsx            # Controlled form component
 │   ├── LetterOutput.tsx          # Three-tab output display (cover letter / business case / tech map)
@@ -76,12 +83,16 @@ The standard for tone, structure, specificity, and commercial sharpness is the G
 │   ├── research.ts               # Jina Reader fetch + Tavily search
 │   ├── prompt.ts                 # System prompt + follow-up prompts
 │   ├── parse.ts                  # Output parsing (part1/2/3)
-│   ├── history.ts                # localStorage history with sequences/outcomes
+│   ├── history.ts                # Postgres + localStorage sync layer
 │   ├── templates.ts              # Template library storage
 │   ├── reminders.ts              # Reminder storage & management
 │   ├── discover-store.ts         # Zustand store for discover flow
 │   ├── exportDocx.ts             # DOCX generation
-│   └── netsuite-context.ts       # Industry-specific NetSuite context
+│   ├── netsuite-context.ts       # Industry-specific NetSuite context
+│   └── db/
+│       ├── client.ts             # Neon database client
+│       ├── schema.sql            # Database tables
+│       └── history-db.ts         # Postgres CRUD operations
 ├── public/
 │   └── logo.svg                  # ERP Experts logo
 ├── .env.local                    # API keys — not committed
@@ -159,8 +170,11 @@ This approach provides more reliable filtering across Apollo's database.
 | `OPENAI_API_KEY` | platform.openai.com | Letter generation & lead ranking |
 | `TAVILY_API_KEY` | app.tavily.com | Supplementary company research |
 | `APOLLO_API_KEY` | apollo.io | Lead discovery (people + company data) |
+| `DATABASE_URL` | Vercel Dashboard (Neon) | Postgres connection (auto-injected) |
 
-**Note:** Apollo API is required for lead discovery to function. Without it, the /discover page will show errors.
+**Notes:**
+- Apollo API is required for lead discovery to function
+- `DATABASE_URL` is auto-configured by Vercel when you connect Neon storage
 
 ### Hosting
 
@@ -230,11 +244,123 @@ If the team grows or access needs to be more granular, add Clerk or NextAuth in 
 
 ### What this does not need in v1
 
-- A database (stateless — generate on demand, no letter history)
+- ~~A database~~ ✅ **Now using Vercel Postgres for persistent history**
 - A user management system (Vercel password protection is sufficient)
 - A queue or background job system (streaming handles perceived latency)
 - A design system beyond Tailwind + shadcn
 - Multi-tenant or role-based access
+
+---
+
+## Configuration
+
+### Environment Variables
+
+| Variable | Required | Source | Purpose |
+|----------|----------|--------|---------|
+| `OPENAI_API_KEY` | **Yes** | platform.openai.com | Letter generation & lead ranking |
+| `TAVILY_API_KEY` | No | app.tavily.com | Supplementary company research |
+| `APOLLO_API_KEY` | **Yes** (for Discover) | apollo.io | Lead discovery (people + company data) |
+| `DATABASE_URL` | **Yes** | Vercel Dashboard | Postgres connection (auto-injected by Vercel) |
+
+**Note:** Apollo API is required for lead discovery. Without it, the `/discover` page will show errors.
+
+### Vercel Storage Setup
+
+1. **Connect Neon Postgres:**
+   - Go to Vercel Dashboard → **Storage**
+   - Click **Connect Store** → **Neon**
+   - Create new database or connect existing
+   - Vercel auto-injects `DATABASE_URL` into your project
+
+2. **Run Database Schema:**
+   - In Vercel Dashboard → Storage → Neon → **SQL Editor**
+   - Copy contents of `lib/db/schema.sql`
+   - Execute to create tables
+
+3. **Migrate Existing Data (optional):**
+   - Once deployed, POST existing localStorage data to `/api/history/migrate`
+
+---
+
+## Plan / Launch
+
+### Pre-Launch Checklist
+
+- [ ] Set up Vercel Pro ($20/month) for password protection
+- [ ] Connect GitHub repo to Vercel
+- [ ] Add Neon Postgres storage
+- [ ] Set `OPENAI_API_KEY` in Vercel environment variables
+- [ ] Set `APOLLO_API_KEY` (if using Lead Discovery)
+- [ ] Run database schema in Neon SQL Editor
+- [ ] Configure Vercel password protection
+- [ ] Add custom domain `letters.erpexperts.co.uk` (optional)
+- [ ] Test letter generation with 3-5 real companies
+- [ ] Verify history persistence works
+
+### Deployment Steps
+
+1. **Push to GitHub** → Vercel auto-deploys
+2. **First deploy** will fail (no database) - this is normal
+3. **Add Storage** → Neon → creates database
+4. **Redeploy** after database is connected
+5. **Run schema.sql** in Neon SQL Editor
+6. **Test** the app thoroughly
+
+### Rollback
+
+Vercel keeps every deployment. To rollback:
+- Go to Vercel Dashboard → Deployments
+- Click previous working deployment → **Promote to Production**
+
+---
+
+## Scale
+
+### Current Limits
+
+| Resource | Limit | At Scale |
+|----------|-------|----------|
+| **Postgres Storage** | 256 MB (free tier) | Upgrade to paid Neon ($0.10/GB) |
+| **API Calls** | No hard limit | Monitor OpenAI/Tavily costs |
+| **Apollo Credits** | 1,000/month ($59 plan) | Upgrade to $99 plan for 2,500 credits |
+| **Vercel Function Duration** | 60s (Pro) | Use Edge Runtime for unlimited |
+| **Concurrent Generations** | 10 (serverless) | Add queue system if needed |
+
+### Cost Projections
+
+**Current (light usage):**
+- Vercel Pro: $20/month
+- OpenAI: ~$0.03 per letter (~$2-5/month)
+- Neon: $0 (256MB free tier)
+- Apollo: $59/month (optional)
+- **Total: ~$82-85/month**
+
+**At Scale (100 letters/day):**
+- Vercel Pro: $20/month
+- OpenAI: ~$90/month
+- Neon: $5-10/month (data growth)
+- Apollo: $99/month (higher tier)
+- **Total: ~$215-230/month**
+
+### Scaling Triggers
+
+Upgrade when:
+- Postgres hits 200MB storage (approaching 256MB limit)
+- OpenAI costs exceed $50/month (move to Azure OpenAI for volume pricing)
+- Apollo credits consistently hitting monthly cap
+- >50 simultaneous users (add rate limiting, queue system)
+
+### High Availability
+
+Current setup:
+- Vercel Edge = globally distributed, auto-scaling
+- Neon Postgres = multi-region, automatic failover
+- No single point of failure
+
+Backup strategy:
+- Neon automatic daily backups
+- Can export history via `/api/history` endpoint
 
 ---
 
