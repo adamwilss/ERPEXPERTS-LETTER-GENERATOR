@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { Search, Zap } from 'lucide-react'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import LeadReview, { ReviewedLead } from '@/components/LeadReview'
@@ -156,6 +157,18 @@ export default function DiscoverPage() {
               <button onClick={store.reset} className="text-xs text-gray-400 dark:text-[#444] hover:text-gray-600 dark:hover:text-[#888] underline underline-offset-2 transition-colors">
                 ← New search
               </button>
+            </div>
+
+            <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-lg flex items-center justify-between">
+              <span className="text-sm text-blue-700 dark:text-blue-400">
+                Search saved automatically
+              </span>
+              <Link
+                href="/searches"
+                className="text-sm font-medium text-blue-700 dark:text-blue-400 hover:underline underline-offset-2"
+              >
+                View saved searches →
+              </Link>
             </div>
 
             <LeadReview
