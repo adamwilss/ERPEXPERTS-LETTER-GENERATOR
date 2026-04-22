@@ -358,41 +358,28 @@ Managing Director, ERP Experts
 TITLE: The business case for [Company]
 SUBTITLE: What staying on [their current setup] is costing, and what changing it is worth
 
-OPENING: 1-2 sharp sentences about THEIR operational friction. Lead with their problem, not NetSuite. Make it sting. Do NOT label this as "OPENING" in the output.
+CRITICAL — the text below is a LIST OF REQUIREMENTS for you. Do NOT include any of these requirement labels in the output. Write flowing prose only. No section headers. No labels. Just paragraphs.
 
-CALL-OUT STAT BOX 1:
-Headline: [Specific figure]
-Body: [Tied to their model — concrete consequence]
-Source: [Real source OR "illustrative benchmark based on industry pattern"]
-Use [STAT] and [/STAT] delimiters around this block.
+Requirement 1 — Open with 1-2 sharp sentences about THEIR operational friction. Lead with their problem, not NetSuite. Make it sting.
 
-CALL-OUT STAT BOX 2:
-Headline: [Second figure]
-Body: [Tied to their operations]
-Source: [Source or "illustrative"]
-Use [STAT] and [/STAT] delimiters around this block.
+Requirement 2 — Include two call-out stat boxes wrapped in [STAT]...[/STAT] delimiters. Each must have a headline figure, body text tied to their operations, and a source citation.
 
-COST OF STAYING HERE — write a short section that explicitly quantifies what the current architecture costs them every month. Frame it as lost profit, not lost efficiency. Include these angles naturally in prose, not as bullet points:
+Requirement 3 — Write a short section that explicitly quantifies what the current architecture costs them every month. Frame it as lost profit, not lost efficiency. Weave these angles naturally into prose paragraphs:
 - Headcount wasted: At this scale, manual reconciliation likely costs 1-2 FTE days every week. That is capacity you are paying for and cannot use.
 - Margin erosion: Currency mismatches, invoicing delays, and stock discrepancies typically create 1-2% margin pressure for businesses at this scale.
 - Decision delay: Without live numbers, strategic decisions are made on data that is 2-4 weeks old.
 - Cash flow drag: Every day between order and invoice is a day of cash sitting in process instead of your account.
 Be conservative. Unsupported big numbers destroy credibility. Frame as "typical pattern" or "illustrative benchmark" if you lack a hard source.
 
-PAIN EXPANSION: One paragraph per pain. BEFORE (what goes wrong now, what it costs in money or time) → AFTER (what changes). Concrete. Do NOT label paragraphs as "BEFORE" or "AFTER" in the output.
+Requirement 4 — Expand each pain point in a single paragraph. Show what goes wrong now and what it costs in money or time, then what changes with NetSuite. Do not use "Before:" and "After:" labels.
 
-CASE STUDY: Tight integration. "This is directly comparable to [Name]..." Before: their systems, time lost, money burned. After: concrete outcomes with numbers. Write this as flowing prose, not bracketed sections.
+Requirement 5 — Reference ONE case study as a proof anchor. Start with "This is directly comparable to [Name]..." Describe their situation before and after with concrete numbers. Write as flowing prose.
 
-TRANSFORMATION STATEMENT — include ONE sharp sentence in the prose:
-"From [current state: X disconnected systems and Y-day closes] → To [future state: one platform and real-time visibility.]"
-Make it feel inevitable, not aspirational. Weave it into a paragraph, do not set it off as a separate block.
+Requirement 6 — Include one sharp transformation sentence woven into a paragraph: "From X disconnected systems and Y-day closes to one platform and real-time visibility." Make it feel inevitable.
 
-HORMOZI VALUE PROPOSITION — weave this into the narrative EARLY, not as a separate block:
-"We do not just implement NetSuite. We eliminate reconciliation chaos, reporting delays, and margin leaks — delivered at a fixed price by a senior consultant who reports directly to me."
-Position ERP Experts as selling an OUTCOME, not software.
+Requirement 7 — Weave the value proposition into the narrative early: "We do not just implement NetSuite. We eliminate reconciliation chaos, reporting delays, and margin leaks — delivered at a fixed price by a senior consultant who reports directly to me." Position ERP Experts as selling an outcome, not software.
 
-POST-NETSUITE: Lead with their problem first. What gets replaced. What integrates. What becomes visible. Commercial outcomes: faster invoicing, reduced headcount waste, fewer disputes.
-NEVER say "systems replace processes." Say "systems automate processes" or "processes move from spreadsheets into the platform."
+Requirement 8 — Describe the post-NetSuite picture. Lead with their problem first. What gets replaced. What integrates. What becomes visible. Commercial outcomes: faster invoicing, reduced headcount waste, fewer disputes. NEVER say "systems replace processes." Say "systems automate processes" or "processes move from spreadsheets into the platform."
 
 We have been implementing NetSuite since 2005. In 21 years and 350+ projects we have not abandoned a single implementation. We are not a large systems integrator — your project is led by a senior consultant with direct access to me, delivered at a fixed price, with UK-based aftercare that means you are not left to manage it alone.
 
