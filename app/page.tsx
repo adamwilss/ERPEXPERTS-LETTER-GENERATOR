@@ -7,6 +7,7 @@ import LetterForm, { FormValues } from '@/components/LetterForm'
 import LetterOutput from '@/components/LetterOutput'
 import { parseOutput } from '@/lib/parse'
 import { FileText, TrendingUp, Shield, Sparkles, Zap } from 'lucide-react'
+import { HeroGlow, GradientBorder, TypingText } from '@/components/MotionConfig'
 
 export default function Home() {
   const [submitted, setSubmitted] = useState(false)
@@ -30,30 +31,35 @@ export default function Home() {
       {!submitted ? (
         <div className="page-container">
           {/* Hero */}
-          <div id="tour-hero" className="mb-10 animate-fade-up">
-            <div className="page-badge mb-4">
-              <Sparkles className="w-3.5 h-3.5 text-emerald-500" />
-              AI-Powered Outreach
+          <HeroGlow>
+            <div id="tour-hero" className="mb-10 animate-fade-up">
+              <div className="page-badge mb-4">
+                <Sparkles className="w-3.5 h-3.5 text-emerald-500" />
+                AI-Powered Outreach
+              </div>
+              <h1 className="page-title max-w-md">Generate outreach pack</h1>
+              <p className="page-description">
+                Enter prospect details. The system researches the company and produces a three-part
+                personalised letter pack in under 60 seconds.
+              </p>
             </div>
-            <h1 className="page-title max-w-md">Generate outreach pack</h1>
-            <p className="page-description">
-              Enter prospect details. The system researches the company and produces a three-part
-              personalised letter pack in under 60 seconds.
-            </p>
-          </div>
+          </HeroGlow>
 
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-8">
             {/* Form */}
             <div id="tour-form" className="animate-fade-up" style={{ animationDelay: '0.1s' }}>
-              <div className="card card-hover p-7">
-                <LetterForm onSubmit={handleSubmit} />
-              </div>
+              <GradientBorder>
+                <div className="card card-hover p-7">
+                  <LetterForm onSubmit={handleSubmit} />
+                </div>
+              </GradientBorder>
             </div>
 
             {/* Sidebar */}
             <div id="tour-sidebar" className="space-y-4 animate-fade-up" style={{ animationDelay: '0.15s' }}>
-              <div className="card p-6">
-                <p className="label mb-4">What you get</p>
+              <GradientBorder>
+                <div className="card p-6">
+                  <p className="label mb-4">What you get</p>
                 <div className="space-y-5">
                   {[
                     {
@@ -98,8 +104,10 @@ export default function Home() {
                   ))}
                 </div>
               </div>
+              </GradientBorder>
 
-              <div className="card p-6 bg-gradient-to-br from-gray-50/80 to-white dark:from-[#111] dark:to-[#0a0a0a]">
+              <GradientBorder>
+                <div className="card p-6 bg-gradient-to-br from-gray-50/80 to-white dark:from-[#111] dark:to-[#0a0a0a]">
                 <p className="label mb-4">Credentials</p>
                 <div className="space-y-3.5">
                   {[
@@ -116,6 +124,7 @@ export default function Home() {
                   ))}
                 </div>
               </div>
+              </GradientBorder>
             </div>
           </div>
         </div>
@@ -126,10 +135,10 @@ export default function Home() {
             >
               <div className="flex items-center gap-3">
                 <div className="loading-ring" />
-                <span className="text-sm font-semibold text-gray-950 dark:text-white"
-                >
-                  Researching {companyName}…
-                </span>
+                <TypingText
+                  text={`Researching ${companyName}…`}
+                  className="text-sm font-semibold text-gray-950 dark:text-white"
+                />
               </div>
               <div className="ml-8 space-y-2">
                 <div className="h-1.5 w-48 bg-gray-100 dark:bg-[#1a1a1a] rounded-full overflow-hidden"

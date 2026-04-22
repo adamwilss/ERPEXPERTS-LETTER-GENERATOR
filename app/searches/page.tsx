@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ChevronRight, Database, Eye, Search, Trash2, Users, Rocket } from 'lucide-react'
+import { GradientBorder } from '@/components/MotionConfig'
 import type { SavedSearch, SavedLead } from '@/lib/db/search-db'
 import EmptyState from '@/components/EmptyState'
 
@@ -129,7 +130,8 @@ export default function SearchesPage() {
         ) : (
           <div className="space-y-3 stagger-children">
             {searches.map((search) => (
-              <div key={search.id} className="card card-hover overflow-hidden">
+              <GradientBorder key={search.id} className="block">
+                <div className="card card-hover overflow-hidden">
                 <div className="flex items-center justify-between px-5 py-4">
                   <button
                     onClick={() => toggleExpand(search.id)}
@@ -256,6 +258,7 @@ export default function SearchesPage() {
                   </div>
                 )}
               </div>
+              </GradientBorder>
             ))}
           </div>
         )}

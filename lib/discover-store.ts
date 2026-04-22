@@ -322,29 +322,22 @@ export const useDiscoverStore = create<DiscoverState>((set, get) => ({
   },
 }))
 
-// ── Pending leads from localStorage (searches/[id] → discover flow) ────────────
-// Check on module load if there are pending leads from the saved search detail page
-if (typeof window !== 'undefined') {
+// ── Pending leads helper (called by DiscoverPage on mount) ───────────────────
+export function getPendingLeadsFromStorage(): ReviewedLead[] | null {
+  if (typeof window === 'undefined') return null
   const pending = localStorage.getItem('pending_leads')
-  if (pending) {
-    try {
-      const leads = JSON.parse(pending) as Lead[]
-      if (leads.length > 0 && window.location.pathname === '/discover') {
-        const params = new URLSearchParams(window.location.search)
-        if (params.get('batch') === 'true') {
-          // Hydrate store and clear localStorage
-          const store = useDiscoverStore.getState()
-          // Add recipientName from contactName if missing
-          const reviewedLeads = leads.map((l) => ({
-            ...l,
-            recipientName: (l as any).recipientName || l.contactName || '',
-          }))
-          store.startGeneration(reviewedLeads as ReviewedLead[])
-          localStorage.removeItem('pending_leads')
-        }
-      }
-    } catch {
-      localStorage.removeItem('pending_leads')
-    }
+  if (!pending) return null
+  try {
+    const leads = JSON.parse(pending) as Lead[]
+    if (leads.length === 0) return null
+    const reviewedLeads = leads.map((l) => ({
+      ...l,
+      recipientName: (l as any).recipientName || l.contactName || '',
+    })) as ReviewedLead[]
+    localStorage.removeItem('pending_leads')
+    return reviewedLeads
+  } catch {
+    localStorage.removeItem('pending_leads')
+    return null
   }
 }

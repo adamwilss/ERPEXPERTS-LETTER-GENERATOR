@@ -1,10 +1,13 @@
 'use client'
 
+import { useEffect, Suspense } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { Search, Zap, Sparkles, ChevronDown, ChevronUp, Compass } from 'lucide-react'
+import { GradientBorder } from '@/components/MotionConfig'
 import LeadReview, { ReviewedLead } from '@/components/LeadReview'
 import BatchOutput from '@/components/BatchOutput'
-import { useDiscoverStore } from '@/lib/discover-store'
+import { useDiscoverStore, getPendingLeadsFromStorage } from '@/lib/discover-store'
 
 const PRESETS = [
   { label: 'Manufacturing', sub: '50–200 · UK', industry: 'Manufacturing', range: '51,200', loc: 'United Kingdom' },
@@ -31,6 +34,22 @@ const INDUSTRIES = [
   'Healthcare', 'Food & Beverage', 'Automotive', 'Aerospace & Defence',
 ]
 
+function BatchDetector() {
+  const store = useDiscoverStore()
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    if (searchParams.get('batch') === 'true' && store.phase === 'form') {
+      const pending = getPendingLeadsFromStorage()
+      if (pending && pending.length > 0) {
+        store.startGeneration(pending)
+      }
+    }
+  }, [searchParams, store])
+
+  return null
+}
+
 export default function DiscoverPage() {
   const store = useDiscoverStore()
 
@@ -56,6 +75,9 @@ export default function DiscoverPage() {
 
   return (
     <main className="page-shell">
+      <Suspense fallback={null}>
+        <BatchDetector />
+      </Suspense>
       <div className="page-container">
         {/* ── Form ────────────────────────────────────────────────────────── */}
         {store.phase === 'form' && (
@@ -107,7 +129,8 @@ export default function DiscoverPage() {
             {store.showCustom && (
               <div className="overflow-hidden animate-fade-up"
               >
-                <div className="card p-7 space-y-5">
+                <GradientBorder>
+                  <div className="card p-7 space-y-5">
                   <div className="grid grid-cols-2 gap-4">
                     <SelectField
                       label="Industry"
@@ -152,7 +175,8 @@ export default function DiscoverPage() {
                     <Search className="w-4 h-4" />
                     Search
                   </button>
-                </div>
+                  </div>
+                </GradientBorder>
               </div>
             )}
 
