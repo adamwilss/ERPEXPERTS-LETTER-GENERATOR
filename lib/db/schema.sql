@@ -1,5 +1,4 @@
 -- Vercel/Neon Postgres Schema for Letter History
--- Run this in your Vercel Dashboard SQL Editor after connecting Neon
 
 -- Companies table (normalized)
 CREATE TABLE IF NOT EXISTS companies (
@@ -10,8 +9,7 @@ CREATE TABLE IF NOT EXISTS companies (
   location TEXT,
   employee_count TEXT,
   erp_score INTEGER,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE(name, COALESCE(website, ''))
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Letter packs
@@ -57,23 +55,36 @@ CREATE INDEX IF NOT EXISTS idx_packs_created ON packs(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_sequences_pack ON sequences(pack_id);
 CREATE INDEX IF NOT EXISTS idx_outcomes_pack ON outcomes(pack_id);
 
--- Trigger to auto-update updated_at
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.updated_at = CURRENT_TIMESTAMP;
-  RETURN NEW;
-END;
-$$ language 'plpgsql';
+-- Searches table (for saving Apollo search results)
+CREATE TABLE IF NOT EXISTS searches (
+  id SERIAL PRIMARY KEY,
+  industry TEXT NOT NULL,
+  employee_range TEXT NOT NULL,
+  location TEXT NOT NULL,
+  keywords TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-DROP TRIGGER IF EXISTS update_packs_updated_at ON packs;
-CREATE TRIGGER update_packs_updated_at
-  BEFORE UPDATE ON packs
-  FOR EACH ROW
-  EXECUTE FUNCTION update_updated_at_column();
+-- Search leads table (Apollo results)
+CREATE TABLE IF NOT EXISTS search_leads (
+  id SERIAL PRIMARY KEY,
+  search_id INTEGER REFERENCES searches(id) ON DELETE CASCADE,
+  company TEXT NOT NULL,
+  website TEXT NOT NULL,
+  industry TEXT,
+  employees TEXT,
+  description TEXT,
+  erp_score INTEGER DEFAULT 0,
+  location TEXT,
+  contact_name TEXT,
+  contact_title TEXT,
+  contact_email TEXT,
+  contact_linkedin TEXT,
+  postal_address TEXT,
+  generated BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-DROP TRIGGER IF EXISTS update_outcomes_updated_at ON outcomes;
-CREATE TRIGGER update_outcomes_updated_at
-  BEFORE UPDATE ON outcomes
-  FOR EACH ROW
-  EXECUTE FUNCTION update_updated_at_column();
+CREATE INDEX IF NOT EXISTS idx_searches_created ON searches(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_search_leads_search ON search_leads(search_id);
+CREATE INDEX IF NOT EXISTS idx_search_leads_generated ON search_leads(generated);

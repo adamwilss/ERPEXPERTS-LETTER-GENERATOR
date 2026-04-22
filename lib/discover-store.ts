@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import type { Lead, ReviewedLead } from '@/components/LeadReview'
 import type { PackStatus } from '@/components/BatchOutput'
 import { savePack } from '@/lib/history'
+import { saveSearchWithLeads } from '@/lib/db/search-db'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -136,6 +137,30 @@ export const useDiscoverStore = create<DiscoverState>((set, get) => ({
             }))
           } else if (event.type === 'done') {
             set({ totalSearched: event.total as number, phase: 'results' })
+
+            // Save search and leads to database
+            const currentLeads = get().leads
+            if (currentLeads.length > 0) {
+              try {
+                await saveSearchWithLeads(params, currentLeads.map(l => ({
+                  company: l.company,
+                  website: l.website,
+                  industry: l.industry,
+                  employees: l.employees,
+                  description: l.description,
+                  erpScore: l.erpScore,
+                  location: l.location,
+                  contactName: l.contactName,
+                  contactTitle: l.contactTitle,
+                  contactEmail: l.contactEmail,
+                  contactLinkedIn: l.contactLinkedIn,
+                  postalAddress: l.postalAddress,
+                })))
+                console.log('[Discover] Search saved to database')
+              } catch (err) {
+                console.warn('[Discover] Failed to save search:', err)
+              }
+            }
           } else if (event.type === 'error') {
             throw new Error(event.message as string)
           }
