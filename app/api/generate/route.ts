@@ -1,6 +1,6 @@
 import { streamText } from 'ai'
 import { createOpenAI } from '@ai-sdk/openai'
-import { fetchResearch } from '@/lib/research'
+import { fetchResearch, type ErpDetection } from '@/lib/research'
 import { buildSystemPrompt, buildUserMessage, buildFollowupPrompt, type FollowupType } from '@/lib/prompt'
 import { getIndustryContext, inferIndustryFromResearch, formatContextForPrompt } from '@/lib/netsuite-context'
 
@@ -15,31 +15,42 @@ export async function POST(req: Request) {
     const {
       company, url, recipientName, jobTitle, notes, postalAddress, industry,
       type = 'initial',
-      previousContent, // For follow-ups, the previous letter content
+      previousContent,
+      employeeCount,
+      revenue,
     } = body
 
     if (!company || !recipientName || !jobTitle) {
       return new Response('Missing required fields', { status: 400 })
     }
 
-    // Research phase — hard 20s cap so a hanging fetch never blocks generation
-    // For follow-ups, we may skip research if previousContent is provided
+    // Research phase
     let research = ''
+    let erpDetection: ErpDetection = { hasErp: false, erpName: null, isNetSuite: false, confidence: 'low' }
+    let erpExpertsContext = ''
+
     if (type === 'initial' || !previousContent) {
-      research = await Promise.race([
+      const result = await Promise.race([
         fetchResearch(url ?? '', company),
-        new Promise<string>((resolve) =>
+        new Promise<{ text: string; erpDetection: ErpDetection; erpExpertsContext: string }>((resolve) =>
           setTimeout(
-            () => resolve(`No research retrieved within time limit for ${company}. Infer from company name and any domain knowledge.`),
+            () => resolve({
+              text: `No research retrieved within time limit for ${company}. Infer from company name and any domain knowledge.`,
+              erpDetection: { hasErp: false, erpName: null, isNetSuite: false, confidence: 'low' },
+              erpExpertsContext: '',
+            }),
             20000
           )
         ),
       ])
+      research = result.text
+      erpDetection = result.erpDetection
+      erpExpertsContext = result.erpExpertsContext
     } else {
       research = 'Follow-up based on previous outreach. See previous content for company context.'
     }
 
-    // Resolve NetSuite context — explicit industry takes priority, then infer from research
+    // Resolve NetSuite context
     const resolvedIndustry = industry || inferIndustryFromResearch(research)
     const netsuiteContext = formatContextForPrompt(getIndustryContext(resolvedIndustry))
 
@@ -48,14 +59,21 @@ export async function POST(req: Request) {
     let userMessage: string
 
     if (type === 'initial') {
-      systemPrompt = buildSystemPrompt()
+      systemPrompt = buildSystemPrompt({
+        erpDetection,
+        erpExpertsContext,
+        employeeCount,
+        revenue,
+      })
       userMessage = buildUserMessage({
         company, url: url ?? '', recipientName, jobTitle, notes, research,
         postalAddress: postalAddress ?? '',
         netsuiteContext,
+        erpDetection,
+        employeeCount,
+        revenue,
       })
     } else {
-      // Follow-up types
       const { system, user } = buildFollowupPrompt({
         type: type as FollowupType,
         company, url: url ?? '', recipientName, jobTitle, notes, research,
@@ -67,12 +85,12 @@ export async function POST(req: Request) {
       userMessage = user
     }
 
-    // Generation phase — streamed back to client
+    // Generation phase
     const result = await streamText({
       model: openai('gpt-4o'),
       system: systemPrompt,
       messages: [{ role: 'user', content: userMessage }],
-      maxOutputTokens: type === 'initial' ? 6000 : 2000, // Follow-ups are shorter
+      maxOutputTokens: type === 'initial' ? 6000 : 2000,
     })
 
     return result.toTextStreamResponse()

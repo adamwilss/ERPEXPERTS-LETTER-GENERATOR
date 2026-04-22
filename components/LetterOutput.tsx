@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, FileText, BarChart3, Table2 } from 'lucide-react'
 import CopyButton from './CopyButton'
 import CalloutStat from './CalloutStat'
@@ -253,12 +254,21 @@ export default function LetterOutput({
         </div>
       </div>
 
-      {/* Document */}
-      <div className={`letter-paper rounded-2xl ${activeTab === 'map' ? 'max-w-4xl' : 'max-w-2xl'} px-12 py-11`}>
-        {activeTab === 'letter' && (coverLetter ? <CoverLetterView content={coverLetter} /> : <Placeholder />)}
-        {activeTab === 'case' && (businessCase ? <BusinessCaseView content={businessCase} /> : <Placeholder />)}
-        {activeTab === 'map' && (techMap ? <TechMap content={techMap} /> : <Placeholder />)}
-      </div>
+      {/* Document with animated tab transitions */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.25, ease: 'easeInOut' }}
+          className={`letter-paper rounded-2xl ${activeTab === 'map' ? 'max-w-4xl' : 'max-w-2xl'} px-12 py-11`}
+        >
+          {activeTab === 'letter' && (coverLetter ? <CoverLetterView content={coverLetter} /> : <Placeholder />)}
+          {activeTab === 'case' && (businessCase ? <BusinessCaseView content={businessCase} /> : <Placeholder />)}
+          {activeTab === 'map' && (techMap ? <TechMap content={techMap} /> : <Placeholder />)}
+        </motion.div>
+      </AnimatePresence>
 
       <SaveTemplateModal
         isOpen={showSaveModal}

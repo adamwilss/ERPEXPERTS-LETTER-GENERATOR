@@ -2,10 +2,11 @@
 
 import { useState } from 'react'
 import { useCompletion } from '@ai-sdk/react'
+import { motion } from 'framer-motion'
 import LetterForm, { FormValues } from '@/components/LetterForm'
 import LetterOutput from '@/components/LetterOutput'
 import { parseOutput } from '@/lib/parse'
-import { FileText, TrendingUp, Shield, Sparkles } from 'lucide-react'
+import { FileText, TrendingUp, Shield, Sparkles, Zap } from 'lucide-react'
 
 export default function Home() {
   const [submitted, setSubmitted] = useState(false)
@@ -74,7 +75,11 @@ export default function Home() {
                       desc: 'Which systems integrate, replace, or get eliminated.',
                     },
                   ].map(({ num, icon: Icon, title, desc }) => (
-                    <div key={title} className="flex gap-4">
+                    <motion.div
+                      key={title}
+                      whileHover={{ x: 4 }}
+                      className="flex gap-4"
+                    >
                       <div className="mt-0.5 w-7 h-7 rounded-lg bg-gray-100 dark:bg-[#1a1a1a] border border-gray-200 dark:border-[#1e1e1e] flex items-center justify-center flex-shrink-0"
                       >
                         <Icon className="w-3.5 h-3.5 text-gray-500 dark:text-[#555]" />
@@ -89,7 +94,7 @@ export default function Home() {
                           {desc}
                         </div>
                       </div>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               </div>
@@ -129,9 +134,11 @@ export default function Home() {
               <div className="ml-8 space-y-2">
                 <div className="h-1.5 w-48 bg-gray-100 dark:bg-[#1a1a1a] rounded-full overflow-hidden"
                 >
-                  <div
-                    className="h-full bg-gray-400 dark:bg-[#555] rounded-full animate-shimmer"
-                    style={{ width: '60%' }}
+                  <motion.div
+                    className="h-full bg-gradient-to-r from-emerald-400 to-blue-500 rounded-full"
+                    initial={{ width: '0%' }}
+                    animate={{ width: ['0%', '60%', '80%'] }}
+                    transition={{ duration: 2, repeat: Infinity, repeatType: 'reverse' }}
                   />
                 </div>
                 <p className="text-xs text-gray-500 dark:text-[#555]"
@@ -155,7 +162,7 @@ export default function Home() {
           {isLoading && completion && (
             <div className="mb-6 flex items-center gap-2 text-xs text-gray-500 dark:text-[#555] bg-gray-50 dark:bg-[#111] border border-gray-200 dark:border-[#1e1e1e] rounded-lg px-3 py-2 w-fit animate-fade-in"
             >
-              <div className="loading-ring w-3.5 h-3.5" />
+              <Zap className="w-3.5 h-3.5 text-emerald-500 animate-pulse" />
               Writing letter pack…
             </div>
           )}

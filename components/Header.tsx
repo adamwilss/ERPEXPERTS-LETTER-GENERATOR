@@ -4,11 +4,12 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { Loader2, Bell, BarChart3, LayoutTemplate, HelpCircle } from 'lucide-react'
+import { Loader2, Bell, BarChart3, LayoutTemplate, HelpCircle, Sparkles } from 'lucide-react'
 import { startTour } from './OnboardingTour'
 import ThemeToggle from './ThemeToggle'
 import { useDiscoverStore } from '@/lib/discover-store'
 import { getReminderCount, getOverdueReminders } from '@/lib/reminders'
+import { useMotionStore } from './MotionConfig'
 
 const nav = [
   { href: '/', label: 'Single letter' },
@@ -95,6 +96,23 @@ function SessionPill() {
   )
 }
 
+function CinematicToggle() {
+  const { cinematicMode, toggleCinematic } = useMotionStore()
+  return (
+    <button
+      onClick={toggleCinematic}
+      className={`p-2 rounded-lg transition-all ${
+        cinematicMode
+          ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
+          : 'text-gray-400 hover:text-gray-700 dark:text-[#555] dark:hover:text-[#ccc]'
+      }`}
+      title={cinematicMode ? 'Cinematic mode on' : 'Cinematic mode off'}
+    >
+      <Sparkles className="w-4 h-4" />
+    </button>
+  )
+}
+
 export default function Header() {
   const pathname = usePathname()
   return (
@@ -155,6 +173,7 @@ export default function Header() {
           <ReminderBadge />
           <SessionPill />
           <div className="w-px h-4 bg-gray-200 dark:bg-[#1e1e1e] mx-1" />
+          <CinematicToggle />
           <Link
             href="/analytics"
             className={`p-2 rounded-lg transition-all ${

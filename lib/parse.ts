@@ -49,10 +49,12 @@ export function parseStats(text: string): { stats: StatBlock[]; prose: string } 
 }
 
 // Parses a markdown table from the tech map section
+// Supports both 3-column (legacy) and 4-column (new) tables
 export interface TableRow {
   system: string
   relationship: string
   meaning: string
+  impact?: string
 }
 
 export function parseTechTable(text: string): { rows: TableRow[]; before: string; after: string } {
@@ -84,7 +86,12 @@ export function parseTechTable(text: string): { rows: TableRow[]; before: string
       .map((c) => c.trim())
       .filter(Boolean)
     if (cols.length >= 3) {
-      rows.push({ system: cols[0], relationship: cols[1], meaning: cols[2] })
+      rows.push({
+        system: cols[0],
+        relationship: cols[1],
+        meaning: cols[2],
+        impact: cols[3] ?? undefined,
+      })
     }
   })
 

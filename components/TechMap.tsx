@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import { parseTechTable, TableRow } from '@/lib/parse'
+import { DonutChart, BeforeAfterCards, CostCallout, IntegrationFlow } from './TechMapCharts'
 
 // ── Config ─────────────────────────────────────────────────────────────────────
 
@@ -96,6 +97,15 @@ function RelationshipGroup({ label, rows, cfg }: {
           <p className="flex-1 text-[14px] text-gray-600 leading-relaxed">
             {row.meaning}
           </p>
+
+          {/* Impact (4th column) */}
+          {row.impact && (
+            <div className="w-48 flex-shrink-0 pt-0.5 hidden lg:block">
+              <p className="text-[13px] text-gray-700 leading-relaxed">
+                {row.impact}
+              </p>
+            </div>
+          )}
         </div>
       ))}
     </div>
@@ -200,8 +210,21 @@ export default function TechMap({ content }: { content: string }) {
 
       {rows.length > 0 && (
         <>
+          {/* Charts section */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div className="rounded-xl border border-gray-200 dark:border-[#1e1e1e] bg-white dark:bg-[#111] p-5 flex items-center justify-center">
+              <DonutChart rows={rows} />
+            </div>
+            <div className="space-y-3">
+              <BeforeAfterCards rows={rows} />
+              <CostCallout systemCount={rows.length} />
+            </div>
+          </div>
+
+          <IntegrationFlow rows={rows} />
+
           {/* Legend pills */}
-          <div className="flex flex-wrap gap-2 mb-5">
+          <div className="flex flex-wrap gap-2 mb-5 mt-6">
             {legendItems.map(({ key, count, cfg }) => (
               <span key={key} className="flex items-center gap-1.5 text-[12px] text-gray-500">
                 <span className={`w-2 h-2 rounded-full flex-shrink-0 ${cfg.dot}`} />
@@ -218,6 +241,7 @@ export default function TechMap({ content }: { content: string }) {
               <span className="w-36 flex-shrink-0 text-[11px] font-semibold text-gray-400 uppercase tracking-[0.08em]">System</span>
               <span className="w-24 flex-shrink-0 text-[11px] font-semibold text-gray-400 uppercase tracking-[0.08em]">Status</span>
               <span className="flex-1 text-[11px] font-semibold text-gray-400 uppercase tracking-[0.08em]">What it means</span>
+              <span className="w-48 flex-shrink-0 text-[11px] font-semibold text-gray-400 uppercase tracking-[0.08em] hidden lg:block">Impact</span>
             </div>
 
             {orderedKeys.map(key => (

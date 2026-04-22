@@ -1,5 +1,6 @@
 import { generateText } from 'ai'
 import { createOpenAI } from '@ai-sdk/openai'
+import { buildVariantBody, APOLLO_VARIANTS } from '@/lib/apollo-variants'
 
 export const maxDuration = 90
 export const dynamic = 'force-dynamic'
@@ -140,12 +141,7 @@ function buildAddress(org: ApolloOrg, personOrg?: ApolloPerson['organization']):
   return undefined
 }
 
-// Data completeness score — "can we send this lead a personalised letter?"
-// Name is the gate: no name = 0, regardless of what else exists.
-//   0   = no contact name
-//   35  = name only
-//   65  = name + email
-//   100 = name + email + postal address
+// Data completeness score
 function computeDataScore(lead: Partial<StreamedLead>): number {
   if (!lead.contactName) return 0
   let s = 35
@@ -154,8 +150,6 @@ function computeDataScore(lead: Partial<StreamedLead>): number {
   return s
 }
 
-// Pre-score based on org-level data in the Apollo search response (no API calls).
-// Used to pick which candidates are worth enriching.
 function preScore(org: ApolloOrg): number {
   let s = 0
   const desc = org.short_description || org.seo_description || ''
@@ -171,21 +165,11 @@ function preScore(org: ApolloOrg): number {
   return s
 }
 
-// ERP fit score — "is this company a good NetSuite prospect?"
-// Four signal groups, weighted by how reliably each predicts ERP pain.
-//
-//   Operational keywords  0–40  (strongest signal: description reveals complexity)
-//   Company size fit      0–25  (smooth tent curve — no cliffs)
-//   Tech fragmentation    0–20  (many tools = disconnected stack, but not dominant)
-//   Revenue indicator     0–15  (scale signal: can they invest?)
-//
 function computeErpScore(org: ApolloOrg): number {
   const emp = org.estimated_num_employees ?? 0
   const techCount = org.technology_names?.length ?? 0
   const text = `${org.short_description ?? ''} ${org.seo_description ?? ''} ${org.industry ?? ''} ${org.keywords?.join(' ') ?? ''}`.toLowerCase()
 
-  // 1. Operational complexity keywords (0–40)
-  // Each matching keyword adds 6pts, capped at 40 (≥7 keywords = max).
   const erpKeywords = [
     'ecommerce', 'e-commerce', 'online store', 'shopify', 'woocommerce',
     'distribution', 'wholesale', 'manufacturing', 'fabrication',
@@ -199,7 +183,6 @@ function computeErpScore(org: ApolloOrg): number {
   const hits = erpKeywords.filter(k => text.includes(k)).length
   const keywordScore = Math.min(40, hits * 6)
 
-  // 2. Company size fit (0–25) — smooth tent curve, peak at 100–249 employees
   let sizeScore = 0
   if (emp >= 100 && emp <= 249) sizeScore = 25
   else if (emp >= 50 && emp < 100) sizeScore = 22
@@ -211,7 +194,6 @@ function computeErpScore(org: ApolloOrg): number {
   else if (emp >= 1000) sizeScore = 3
   else if (emp > 0) sizeScore = 2
 
-  // 3. Tech fragmentation (0–20) — more tools = more integration pain
   let techScore = 0
   if (techCount >= 10) techScore = 20
   else if (techCount >= 7) techScore = 16
@@ -219,7 +201,6 @@ function computeErpScore(org: ApolloOrg): number {
   else if (techCount >= 2) techScore = 6
   else if (techCount >= 1) techScore = 3
 
-  // 4. Revenue indicator (0–15) — presence of revenue data = scale signal
   const revenueScore = org.annual_revenue_printed ? 15 : 0
 
   return Math.min(100, keywordScore + sizeScore + techScore + revenueScore)
@@ -235,8 +216,6 @@ function defaultContactTitle(industry: string): string {
   return 'Managing Director'
 }
 
-// Classify lead by data completeness.
-// "complete" = has name + email + postal address with a digit — ready to print and post.
 function classifyLead(lead: RawLead): 'complete' | 'partial' | 'sparse' {
   const hasName = Boolean(lead.contactName)
   const hasEmail = Boolean(lead.contactEmail)
@@ -246,9 +225,6 @@ function classifyLead(lead: RawLead): 'complete' | 'partial' | 'sparse' {
   return 'sparse'
 }
 
-// AI ranks leads by operational complexity and ERP pain signals.
-// Called on the top candidates from all tiers so ranking is always meaningful,
-// even when Apollo returns no contact data.
 async function rankLeadsWithGPT(
   leads: RawLead[],
   openaiKey: string
@@ -303,7 +279,6 @@ ${summaries}`
       })
       .filter((x): x is NonNullable<typeof x> => x !== null)
   } catch {
-    // Fallback: heuristic ERP order, description as rationale
     return [...leads]
       .sort((a, b) => b.erpScore - a.erpScore)
       .map((lead) => ({
@@ -324,45 +299,26 @@ export async function POST(req: Request) {
   if (!apolloKey) return new Response('APOLLO_API_KEY not configured', { status: 500 })
   if (!openaiKey) return new Response('OPENAI_API_KEY not configured', { status: 500 })
 
-  const apolloBody: Record<string, unknown> = {
+  const baseBody: Record<string, unknown> = {
     organization_locations: [location],
     organization_num_employees_ranges: [employeeRange],
   }
 
-  // Apollo industry filtering via keyword tags - more reliable than tag IDs
-  // Combine user keywords with industry for better filtering
-  const searchTerms: string[] = []
-
-  if (industry && industry.trim()) {
-    // Map to Apollo-recognized industry keywords
-    const industryMap: Record<string, string[]> = {
-      'Manufacturing': ['manufacturing'],
-      'Wholesale Distribution': ['wholesale', 'distribution'],
-      'Ecommerce': ['ecommerce', 'e-commerce', 'online retail'],
-      'Field Services': ['field service', 'services'],
-      'Construction': ['construction', 'contractor'],
-      'Specialty Retail': ['retail', 'specialty retail'],
-      'Professional Services': ['professional services', 'consulting'],
-      'Technology': ['technology', 'software', 'saas'],
-      'Healthcare': ['healthcare', 'health care', 'medical'],
-      'Food & Beverage': ['food', 'beverage', 'food and beverage'],
-      'Automotive': ['automotive', 'auto'],
-      'Aerospace & Defence': ['aerospace', 'defense'],
-    }
-    const industryTerms = industryMap[industry.trim()] || [industry.trim().toLowerCase()]
-    searchTerms.push(...industryTerms)
-  }
-
   // Add user keywords
   const userKeywords = keywords.split(',').map((k: string) => k.trim()).filter(Boolean)
-  searchTerms.push(...userKeywords)
-
-  // Apply keyword filter
-  if (searchTerms.length > 0) {
-    apolloBody.q_organization_keyword_tags = searchTerms
-    console.log(`[Apollo Search] Keywords: ${searchTerms.join(', ')}`)
+  if (userKeywords.length > 0) {
+    baseBody.q_organization_keyword_tags = userKeywords
   }
 
+  // ── VARIANT ROTATION ─────────────────────────────────────────────────────────
+  const variantIndex = Math.floor(Math.random() * APOLLO_VARIANTS)
+  const { body: apolloBody, label: variantLabel } = buildVariantBody(
+    industry,
+    variantIndex,
+    baseBody
+  )
+
+  console.log(`[Apollo Search] Variant: ${variantLabel} | Keywords: ${(apolloBody.q_organization_keyword_tags as string[])?.join(', ') ?? 'none'}`)
   console.log('[Apollo Search] Full body:', JSON.stringify(apolloBody, null, 2))
 
   const encoder = new TextEncoder()
@@ -374,11 +330,14 @@ export async function POST(req: Request) {
       }
 
       try {
-        // Phase 1a: Apollo search (1 page only, 5 companies max to save tokens)
-        send({ type: 'status', message: 'Searching Apollo…' })
-        const r1 = await fetchApolloPage(apolloKey, apolloBody, 1)
+        // Phase 1a: Apollo search (2 pages for more raw material)
+        send({ type: 'status', message: `Searching Apollo (${variantLabel})…` })
+        const [r1, r2] = await Promise.all([
+          fetchApolloPage(apolloKey, apolloBody, 1),
+          fetchApolloPage(apolloKey, apolloBody, 2),
+        ])
 
-        if (r1.error) {
+        if (r1.error && r2.error) {
           send({ type: 'error', message: `Apollo search failed: ${r1.error}` })
           controller.close()
           return
@@ -386,31 +345,28 @@ export async function POST(req: Request) {
 
         const seen = new Set<string>()
         const allOrgs: ApolloOrg[] = []
-        for (const org of r1.orgs) {
+        for (const org of [...(r1.orgs ?? []), ...(r2.orgs ?? [])]) {
           if (!org.name || !getDomain(org)) continue
           const key = org.id ?? org.name
           if (seen.has(key)) continue
           seen.add(key)
           allOrgs.push(org)
-          if (allOrgs.length >= 5) break // Hard limit: 5 companies max
         }
 
         if (allOrgs.length === 0) {
-          const apolloErr = r1.error
-          send({ type: 'error', message: apolloErr ? `Apollo error: ${apolloErr}` : 'No companies found. Try different criteria.' })
+          send({ type: 'error', message: 'No companies found. Try different criteria.' })
           controller.close()
           return
         }
 
-        // Phase 1b: Pre-sort by org data richness, enrich top 5
+        // Phase 1b: Pre-sort by org data richness, enrich top 15 (up from 5)
         const candidates = allOrgs
           .sort((a, b) => preScore(b) - preScore(a))
-          .slice(0, 5)
+          .slice(0, 15)
 
-        send({ type: 'status', message: `Found ${allOrgs.length} companies — enriching all ${candidates.length}…`, total: candidates.length })
+        send({ type: 'status', message: `Found ${allOrgs.length} companies — enriching ${candidates.length}…`, total: candidates.length })
 
         // Phase 1c: Enrich + contact lookup for all candidates in parallel
-        // Collect into buckets — do not stream yet
         const complete: RawLead[] = []
         const partial: RawLead[] = []
         const sparse: RawLead[] = []
@@ -467,10 +423,7 @@ export async function POST(req: Request) {
           message: `Enriched ${candidates.length} — ${complete.length} ready · ${partial.length} partial · AI ranking…`,
         })
 
-        // Phase 2: AI ranks ALL leads by operational complexity (not just completes).
-        // Pre-sort each tier by ERP score, then combine: complete → partial → sparse.
-        // GPT sees the top 30 and ranks them — contact completeness is a secondary
-        // signal displayed in the UI, not the primary ranking axis.
+        // Phase 2: AI ranks ALL leads by operational complexity.
         const allLeadsForRanking = [
           ...complete,
           ...partial.sort((a, b) => b.erpScore - a.erpScore),

@@ -61,15 +61,20 @@ export default function LetterForm({ onSubmit }: Props) {
         />
       </div>
       <div className="grid grid-cols-2 gap-4">
-        <Field
-          label="Recipient first name"
-          name="recipientName"
-          value={values.recipientName}
-          onChange={handleChange}
-          placeholder="Oliver"
-          icon={<User className="w-3.5 h-3.5" />}
-          required
-        />
+        <div>
+          <Field
+            label="Recipient name"
+            name="recipientName"
+            value={values.recipientName}
+            onChange={handleChange}
+            placeholder="Oliver Smith"
+            icon={<User className="w-3.5 h-3.5" />}
+            required
+          />
+          <p className="mt-1.5 text-[11px] text-gray-400 dark:text-[#555] leading-relaxed">
+            We'll extract the first name automatically for the salutation.
+          </p>
+        </div>
         <Field
           label="Job title"
           name="jobTitle"
