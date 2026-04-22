@@ -3,9 +3,9 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { ChevronRight, Database, Search, Trash2, Users } from 'lucide-react'
+import { ChevronRight, Database, Eye, Search, Trash2, Users } from 'lucide-react'
 import type { SavedSearch, SavedLead } from '@/lib/db/search-db'
-import { useRouter } from 'next/navigation'
+// Removed useRouter import
 
 interface SearchWithLeads extends SavedSearch {
   leads?: SavedLead[]
@@ -73,17 +73,6 @@ export default function SearchesPage() {
     } catch (err) {
       console.error('Failed to delete:', err)
     }
-  }
-
-  const useSearch = (search: SearchWithLeads) => {
-    // Navigate to discover with this search's params
-    const params = new URLSearchParams({
-      industry: search.industry,
-      employeeRange: search.employeeRange,
-      location: search.location,
-      keywords: search.keywords,
-    })
-    router.push(`/discover?${params.toString()}`)
   }
 
   if (loading) {
@@ -166,12 +155,13 @@ export default function SearchesPage() {
                     </div>
                   </button>
                   <div className="ml-4 flex items-center gap-2 flex-shrink-0">
-                    <button
-                      onClick={() => useSearch(search)}
-                      className="text-xs px-3 py-1.5 bg-gray-100 dark:bg-[#1a1a1a] text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-[#222] transition-colors"
+                    <Link
+                      href={`/searches/${search.id}`}
+                      className="flex items-center gap-1 text-xs px-3 py-1.5 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 rounded-md hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors"
                     >
-                      Use Search
-                    </button>
+                      <Eye className="w-3 h-3" />
+                      View Leads
+                    </Link>
                     <button
                       onClick={() => handleDelete(search.id)}
                       className="text-gray-300 dark:text-[#333] hover:text-red-500 dark:hover:text-red-400 transition-colors p-1"
