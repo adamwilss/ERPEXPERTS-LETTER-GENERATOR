@@ -10,12 +10,14 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+    console.log('[API] Loading leads for search:', id);
     const leads = await loadLeadsForSearch(id);
+    console.log('[API] Found', leads.length, 'leads');
     return NextResponse.json({ leads });
   } catch (error) {
-    console.error('Failed to load leads:', error);
+    console.error('[API] Failed to load leads:', error);
     return NextResponse.json(
-      { error: 'Failed to load leads', leads: [] },
+      { error: 'Failed to load leads', details: String(error), leads: [] },
       { status: 500 }
     );
   }

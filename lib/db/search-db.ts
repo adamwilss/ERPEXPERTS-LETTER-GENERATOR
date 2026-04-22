@@ -132,15 +132,26 @@ export async function loadSavedSearches(): Promise<SavedSearch[]> {
 export async function loadLeadsForSearch(searchId: string): Promise<SavedLead[]> {
   const sql = getSql();
 
+  console.log('[DB] Loading leads for search_id:', searchId, 'type:', typeof searchId);
+
+  // Convert to integer for Postgres
+  const numericId = parseInt(searchId, 10);
+  if (isNaN(numericId)) {
+    console.error('[DB] Invalid search ID:', searchId);
+    return [];
+  }
+
   const result = await sql`
     SELECT
       id, search_id, company, website, industry, employees,
       description, erp_score, location, contact_name, contact_title,
       contact_email, contact_linkedin, postal_address, created_at, generated
     FROM search_leads
-    WHERE search_id = ${searchId}
+    WHERE search_id = ${numericId}
     ORDER BY erp_score DESC
   `;
+
+  console.log('[DB] Query returned', (result as unknown[]).length, 'rows');
 
   return (result as Record<string, unknown>[]).map(row => ({
     id: String(row.id),
