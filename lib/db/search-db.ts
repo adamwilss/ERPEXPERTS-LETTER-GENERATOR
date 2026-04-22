@@ -73,59 +73,149 @@ export async function saveSearchWithLeads(
     createdAt: searchRow.created_at,
   };
 
-  // Insert all leads in parallel for reliability
+  // Insert all leads using a transaction for atomicity and reliability
+  // The neon HTTP driver handles concurrent individual queries poorly,
+  // so we batch them into a single transaction request.
   const savedLeads: SavedLead[] = [];
-  console.log('[DB] Starting to insert', leads.length, 'leads in parallel');
+  console.log('[DB] Building', leads.length, 'insert queries for transaction');
 
-  const insertPromises = leads.map(async (lead) => {
-    console.log('[DB] Preparing INSERT for:', lead.company, '| erpScore:', lead.erpScore, '| contact:', lead.contactName || '(none)');
+  const insertQueries = leads.map((lead) => sql`
+    INSERT INTO search_leads (
+      search_id, company, website, industry, employees, description,
+      erp_score, location, contact_name, contact_title, contact_email,
+      contact_linkedin, postal_address
+    )
+    VALUES (
+      ${searchId}, ${lead.company}, ${lead.website}, ${lead.industry},
+      ${lead.employees}, ${lead.description}, ${lead.erpScore ?? 0},
+      ${lead.location ?? null}, ${lead.contactName ?? null}, ${lead.contactTitle ?? null},
+      ${lead.contactEmail ?? null}, ${lead.contactLinkedIn ?? null}, ${lead.postalAddress ?? null}
+    )
+    RETURNING id, created_at
+  `);
 
-    try {
-      const leadResult = await sql`
-        INSERT INTO search_leads (
-          search_id, company, website, industry, employees, description,
-          erp_score, location, contact_name, contact_title, contact_email,
-          contact_linkedin, postal_address
-        )
-        VALUES (
-          ${searchId}, ${lead.company}, ${lead.website}, ${lead.industry},
-          ${lead.employees}, ${lead.description}, ${lead.erpScore ?? 0},
-          ${lead.location ?? null}, ${lead.contactName ?? null}, ${lead.contactTitle ?? null},
-          ${lead.contactEmail ?? null}, ${lead.contactLinkedIn ?? null}, ${lead.postalAddress ?? null}
-        )
-        RETURNING id, created_at
-      `;
+  try {
+    console.log('[DB] Executing transaction with', insertQueries.length, 'queries');
+    const txResults = await sql.transaction(insertQueries);
+    console.log('[DB] Transaction completed. Results count:', txResults.length);
 
-      console.log('[DB] Lead insert result for', lead.company, ':', leadResult);
-
-      const leadRow = getFirstRow<{ id: number; created_at: string }>(leadResult);
-      if (!leadRow) {
-        console.error('[DB] Failed to get ID for lead:', lead.company, 'result was:', leadResult);
-        return null;
+    for (let i = 0; i < txResults.length; i++) {
+      const rows = txResults[i] as unknown[];
+      const row = getFirstRow<{ id: number; created_at: string }>(rows);
+      if (row) {
+        savedLeads.push({
+          ...leads[i],
+          id: row.id.toString(),
+          searchId: searchId.toString(),
+          createdAt: row.created_at,
+          generated: false,
+        } as SavedLead);
+      } else {
+        console.error('[DB] No row returned for lead index', i, 'company:', leads[i].company, 'result:', rows);
       }
-
-      console.log('[DB] Created lead with ID:', leadRow.id);
-
-      return {
-        ...lead,
-        id: leadRow.id.toString(),
-        searchId: searchId.toString(),
-        createdAt: leadRow.created_at,
-        generated: false,
-      } as SavedLead;
-    } catch (err) {
-      console.error('[DB] Failed to insert lead:', lead.company, 'Error:', err);
-      return null;
     }
-  });
+  } catch (txErr) {
+    console.error('[DB] Transaction failed:', txErr);
+    console.log('[DB] Falling back to sequential inserts...');
 
-  const results = await Promise.all(insertPromises);
-  for (const lead of results) {
-    if (lead) savedLeads.push(lead);
+    for (let i = 0; i < leads.length; i++) {
+      const lead = leads[i];
+      try {
+        const leadResult = await sql`
+          INSERT INTO search_leads (
+            search_id, company, website, industry, employees, description,
+            erp_score, location, contact_name, contact_title, contact_email,
+            contact_linkedin, postal_address
+          )
+          VALUES (
+            ${searchId}, ${lead.company}, ${lead.website}, ${lead.industry},
+            ${lead.employees}, ${lead.description}, ${lead.erpScore ?? 0},
+            ${lead.location ?? null}, ${lead.contactName ?? null}, ${lead.contactTitle ?? null},
+            ${lead.contactEmail ?? null}, ${lead.contactLinkedIn ?? null}, ${lead.postalAddress ?? null}
+          )
+          RETURNING id, created_at
+        `;
+        const row = getFirstRow<{ id: number; created_at: string }>(leadResult);
+        if (row) {
+          savedLeads.push({
+            ...lead,
+            id: row.id.toString(),
+            searchId: searchId.toString(),
+            createdAt: row.created_at,
+            generated: false,
+          } as SavedLead);
+        } else {
+          console.error('[DB] No row returned for lead (sequential):', lead.company, 'result:', leadResult);
+        }
+      } catch (innerErr) {
+        console.error('[DB] Sequential insert failed for lead', lead.company, ':', innerErr);
+      }
+    }
   }
 
   console.log('[DB] Finished. Saved', savedLeads.length, 'out of', leads.length, 'leads');
   return { search, leads: savedLeads };
+}
+
+// Debug endpoint helper: check DB connectivity and counts
+export async function getDbDebugInfo(): Promise<{
+  connected: boolean;
+  searchesTable: boolean;
+  searchLeadsTable: boolean;
+  searchCount: number;
+  leadCount: number;
+  sampleSearchId?: number;
+  sampleSearchLeadCount?: number;
+  error?: string;
+}> {
+  const sql = getSql();
+  try {
+    // Check if tables exist
+    const tableResult = await sql`
+      SELECT table_name FROM information_schema.tables
+      WHERE table_schema = 'public' AND table_name IN ('searches', 'search_leads')
+    `;
+    const tables = (tableResult as unknown[]).map((r: any) => r.table_name);
+
+    // Count rows
+    const searchCountResult = await sql`SELECT COUNT(*) as count FROM searches`;
+    const searchCount = Number((searchCountResult as any[])[0]?.count ?? 0);
+
+    const leadCountResult = await sql`SELECT COUNT(*) as count FROM search_leads`;
+    const leadCount = Number((leadCountResult as any[])[0]?.count ?? 0);
+
+    // Get a sample search to verify FK integrity
+    let sampleSearchId: number | undefined;
+    let sampleSearchLeadCount: number | undefined;
+    if (searchCount > 0) {
+      const sampleResult = await sql`SELECT id FROM searches LIMIT 1`;
+      const sampleRow = getFirstRow<{ id: number }>(sampleResult as unknown[]);
+      if (sampleRow) {
+        sampleSearchId = sampleRow.id;
+        const sampleLeadsResult = await sql`SELECT COUNT(*) as count FROM search_leads WHERE search_id = ${sampleSearchId}`;
+        sampleSearchLeadCount = Number((sampleLeadsResult as any[])[0]?.count ?? 0);
+      }
+    }
+
+    return {
+      connected: true,
+      searchesTable: tables.includes('searches'),
+      searchLeadsTable: tables.includes('search_leads'),
+      searchCount,
+      leadCount,
+      sampleSearchId,
+      sampleSearchLeadCount,
+    };
+  } catch (err) {
+    return {
+      connected: false,
+      searchesTable: false,
+      searchLeadsTable: false,
+      searchCount: 0,
+      leadCount: 0,
+      error: err instanceof Error ? err.message : String(err),
+    };
+  }
 }
 
 // Load all saved searches
