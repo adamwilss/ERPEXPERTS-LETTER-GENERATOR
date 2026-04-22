@@ -3,13 +3,14 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, FileText, BarChart3, Table2 } from 'lucide-react'
+import { Plus, FileText, BarChart3, Table2, Archive, Check, Loader2 } from 'lucide-react'
 import CopyButton from './CopyButton'
 import CalloutStat from './CalloutStat'
 import TechMap from './TechMap'
 import DownloadMenu from './DownloadMenu'
 import SaveTemplateModal from './SaveTemplateModal'
 import { saveTemplate } from '@/lib/templates'
+import { savePack } from '@/lib/history'
 import { parseStats } from '@/lib/parse'
 
 interface Props {
@@ -17,6 +18,8 @@ interface Props {
   businessCase: string
   techMap: string
   companyName?: string
+  recipientName?: string
+  jobTitle?: string
   isStreaming: boolean
 }
 
@@ -198,10 +201,35 @@ function renderProseWithStats(text: string) {
 }
 
 export default function LetterOutput({
-  coverLetter, businessCase, techMap, companyName, isStreaming,
+  coverLetter, businessCase, techMap, companyName, recipientName, jobTitle, isStreaming,
 }: Props) {
   const [activeTab, setActiveTab] = useState<TabId>('letter')
   const [showSaveModal, setShowSaveModal] = useState(false)
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+
+  const handleSaveToHistory = async () => {
+    if (!companyName) return
+    setSaveStatus('saving')
+    try {
+      await savePack({
+        company: companyName,
+        recipientName: recipientName || 'Unknown',
+        contactTitle: jobTitle || '',
+        completion: `${coverLetter}\n\n---\n\n${businessCase}\n\n---\n\n${techMap}`,
+        website: '',
+        location: '',
+        industry: '',
+        employees: '',
+        erpScore: undefined,
+      })
+      setSaveStatus('saved')
+      setTimeout(() => setSaveStatus('idle'), 2500)
+    } catch (err) {
+      console.warn('Failed to save to history:', err)
+      setSaveStatus('error')
+      setTimeout(() => setSaveStatus('idle'), 2500)
+    }
+  }
 
   return (
     <div>
@@ -236,6 +264,21 @@ export default function LetterOutput({
           {activeTab === 'map' && techMap && <CopyButton text={techMap} label="Copy" />}
           {!isStreaming && coverLetter && businessCase && techMap && (
             <>
+              <button
+                onClick={handleSaveToHistory}
+                disabled={saveStatus === 'saving'}
+                className={`btn-secondary btn-sm ${saveStatus === 'saved' ? 'text-emerald-600 dark:text-emerald-400' : ''}`}
+                title="Save to History"
+              >
+                {saveStatus === 'saving' ? (
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                ) : saveStatus === 'saved' ? (
+                  <Check className="w-3 h-3" />
+                ) : (
+                  <Archive className="w-3 h-3" />
+                )}
+                {saveStatus === 'saved' ? 'Saved' : saveStatus === 'error' ? 'Failed' : 'Save'}
+              </button>
               <button
                 onClick={() => setShowSaveModal(true)}
                 className="btn-secondary btn-sm"

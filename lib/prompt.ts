@@ -370,9 +370,17 @@ SUBTITLE: How NetSuite sits at the centre of [Company]'s technology stack: what 
 
 CURRENT STATE → FUTURE STATE
 
-| Current Process / System | What Happens Now | Future State | Impact for [Company] |
+| System | Relationship | What It Means | Impact for [Company] |
 |---|---|---|---|
-[4–8 rows. Process-centric, not just tool listings. Show how WORK FLOWS. Use "In [industry] firms like [Company]..." for uncertain systems. For confirmed systems, state confidently. 4th column = one sentence commercial consequence. Parallel structure in every row. NO broken characters.]
+[4–8 rows. Process-centric, not just tool listings. Show how WORK FLOWS.]
+
+CRITICAL TABLE RULES:
+1. Column 1 (System): name the specific system or process (e.g. "Shopify", "Xero", "Month-end reporting")
+2. Column 2 (Relationship): MUST be exactly ONE WORD. Choose ONLY from: Integrate, Replace, Eliminate, Native. NO other words. NO sentences. ONE WORD ONLY.
+3. Column 3 (What It Means): one sentence describing the workflow change. Keep parallel structure across all rows.
+4. Column 4 (Impact): one sentence commercial consequence for this company specifically.
+5. Use "In [industry] firms like [Company]..." for uncertain systems. For confirmed systems, state confidently.
+6. NO broken characters, NO soft hyphens, NO unicode artefacts.
 
 Book a 15-minute call with Ric Wilson
 T: 01785 714 514 · E: ric@erpexperts.co.uk · W: www.erpexperts.co.uk`

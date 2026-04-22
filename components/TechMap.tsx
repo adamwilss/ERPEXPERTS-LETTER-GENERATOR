@@ -2,6 +2,26 @@ import Image from 'next/image'
 import { parseTechTable, TableRow } from '@/lib/parse'
 import { DonutChart, BeforeAfterCards, CostCallout, IntegrationFlow } from './TechMapCharts'
 
+// ── Relationship normalizer ────────────────────────────────────────────────────
+
+const RELATIONSHIP_KEYWORDS = ['Integrate', 'Replace', 'Eliminate', 'Native'] as const
+
+function normalizeRelationship(text: string): string {
+  const lower = text.toLowerCase()
+  // Check if any keyword appears in the text
+  for (const kw of RELATIONSHIP_KEYWORDS) {
+    if (lower.includes(kw.toLowerCase())) {
+      return kw
+    }
+  }
+  // Fallback: check for close matches
+  if (lower.includes('integrat') || lower.includes('connect') || lower.includes('sync')) return 'Integrate'
+  if (lower.includes('replac') || lower.includes('substitut') || lower.includes('migrate')) return 'Replace'
+  if (lower.includes('eliminat') || lower.includes('remove') || lower.includes('remov')) return 'Eliminate'
+  if (lower.includes('nativ') || lower.includes('built-in') || lower.includes('internal')) return 'Native'
+  return 'Other'
+}
+
 // ── Config ─────────────────────────────────────────────────────────────────────
 
 const RELATIONSHIP_ORDER = ['Integrate', 'Replace', 'Eliminate', 'Native']
@@ -74,40 +94,44 @@ function RelationshipGroup({ label, rows, cfg }: {
       </div>
 
       {/* Rows */}
-      {rows.map((row, i) => (
-        <div
-          key={i}
-          className={`flex gap-5 px-4 py-5 border-b border-gray-100 last:border-b-0 ${cfg.rowBg}`}
-        >
-          {/* System name */}
-          <div className="w-36 flex-shrink-0 pt-0.5">
-            <span className="text-[14px] font-semibold text-gray-900 leading-snug">
-              {row.system}
-            </span>
-          </div>
-
-          {/* Badge */}
-          <div className="w-24 flex-shrink-0 pt-0.5">
-            <span className={`inline-block text-[11px] font-semibold px-2.5 py-1 rounded-full ${cfg.badge}`}>
-              {row.relationship}
-            </span>
-          </div>
-
-          {/* Meaning */}
-          <p className="flex-1 text-[14px] text-gray-600 leading-relaxed">
-            {row.meaning}
-          </p>
-
-          {/* Impact (4th column) */}
-          {row.impact && (
-            <div className="w-48 flex-shrink-0 pt-0.5 hidden lg:block">
-              <p className="text-[13px] text-gray-700 leading-relaxed">
-                {row.impact}
-              </p>
+      {rows.map((row, i) => {
+        const normalizedRel = normalizeRelationship(row.relationship)
+        const rowCfg = CONFIG[normalizedRel] ?? FALLBACK_CONFIG
+        return (
+          <div
+            key={i}
+            className={`flex gap-5 px-4 py-5 border-b border-gray-100 last:border-b-0 ${rowCfg.rowBg}`}
+          >
+            {/* System name */}
+            <div className="w-32 flex-shrink-0 pt-0.5 min-w-0">
+              <span className="text-[14px] font-semibold text-gray-900 leading-snug">
+                {row.system}
+              </span>
             </div>
-          )}
-        </div>
-      ))}
+
+            {/* Badge */}
+            <div className="w-28 flex-shrink-0 pt-0.5">
+              <span className={`inline-block text-[11px] font-semibold px-2.5 py-1 rounded-full whitespace-nowrap ${rowCfg.badge}`}>
+                {normalizedRel}
+              </span>
+            </div>
+
+            {/* Meaning */}
+            <p className="flex-1 text-[14px] text-gray-600 leading-relaxed min-w-0">
+              {row.meaning}
+            </p>
+
+            {/* Impact (4th column) */}
+            {row.impact && (
+              <div className="w-52 flex-shrink-0 pt-0.5 hidden lg:block min-w-0">
+                <p className="text-[13px] text-gray-700 leading-relaxed">
+                  {row.impact}
+                </p>
+              </div>
+            )}
+          </div>
+        )
+      })}
     </div>
   )
 }
@@ -159,10 +183,10 @@ export default function TechMap({ content }: { content: string }) {
   const title = lines.find((l) => l.startsWith('TITLE:'))?.replace('TITLE:', '').trim() ?? ''
   const subtitle = lines.find((l) => l.startsWith('SUBTITLE:'))?.replace('SUBTITLE:', '').trim() ?? ''
 
-  // Group rows by relationship type, preserving AI order within each group
+  // Group rows by normalized relationship type, preserving AI order within each group
   const grouped: Record<string, TableRow[]> = {}
   for (const row of rows) {
-    const key = row.relationship in CONFIG ? row.relationship : 'Other'
+    const key = normalizeRelationship(row.relationship)
     if (!grouped[key]) grouped[key] = []
     grouped[key].push(row)
   }
@@ -238,10 +262,10 @@ export default function TechMap({ content }: { content: string }) {
           <div className="border border-gray-200 rounded-xl overflow-hidden">
             {/* Column headers */}
             <div className="flex gap-5 px-4 py-2.5 bg-white border-b border-gray-200">
-              <span className="w-36 flex-shrink-0 text-[11px] font-semibold text-gray-400 uppercase tracking-[0.08em]">System</span>
-              <span className="w-24 flex-shrink-0 text-[11px] font-semibold text-gray-400 uppercase tracking-[0.08em]">Status</span>
+              <span className="w-32 flex-shrink-0 text-[11px] font-semibold text-gray-400 uppercase tracking-[0.08em]">System</span>
+              <span className="w-28 flex-shrink-0 text-[11px] font-semibold text-gray-400 uppercase tracking-[0.08em]">Status</span>
               <span className="flex-1 text-[11px] font-semibold text-gray-400 uppercase tracking-[0.08em]">What it means</span>
-              <span className="w-48 flex-shrink-0 text-[11px] font-semibold text-gray-400 uppercase tracking-[0.08em] hidden lg:block">Impact</span>
+              <span className="w-52 flex-shrink-0 text-[11px] font-semibold text-gray-400 uppercase tracking-[0.08em] hidden lg:block">Impact</span>
             </div>
 
             {orderedKeys.map(key => (

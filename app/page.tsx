@@ -222,6 +222,8 @@ export default function Home() {
                 businessCase={parsed.part2}
                 techMap={parsed.part3}
                 companyName={companyName}
+                recipientName={formValues?.recipientName}
+                jobTitle={formValues?.jobTitle}
                 isStreaming={isLoading}
               />
             </div>
