@@ -43,18 +43,25 @@ export async function saveSearchWithLeads(
 ): Promise<{ search: SavedSearch; leads: SavedLead[] }> {
   const sql = getSql();
 
+  console.log('[DB] Starting saveSearchWithLeads with', leads.length, 'leads');
+  console.log('[DB] Params:', params);
+
   // Insert search
+  console.log('[DB] Inserting search...');
   const searchResult = await sql`
     INSERT INTO searches (industry, employee_range, location, keywords)
     VALUES (${params.industry}, ${params.employeeRange}, ${params.location}, ${params.keywords})
     RETURNING id, created_at
   `;
 
+  console.log('[DB] Search insert result:', searchResult);
+
   const searchRow = getFirstRow<{ id: number; created_at: string }>(searchResult);
   if (!searchRow) {
-    throw new Error('Failed to create search');
+    throw new Error('Failed to create search - no row returned');
   }
   const searchId = searchRow.id.toString();
+  console.log('[DB] Created search with ID:', searchId);
 
   const search: SavedSearch = {
     id: searchId,
@@ -67,10 +74,14 @@ export async function saveSearchWithLeads(
 
   // Insert all leads
   const savedLeads: SavedLead[] = [];
-  console.log('[DB] Inserting', leads.length, 'leads for search', searchId);
+  console.log('[DB] Starting to insert', leads.length, 'leads');
 
-  for (const lead of leads) {
+  for (let i = 0; i < leads.length; i++) {
+    const lead = leads[i];
+    console.log(`[DB] Processing lead ${i + 1}/${leads.length}:`, lead.company);
+
     try {
+      console.log('[DB] Executing INSERT for:', lead.company);
       const leadResult = await sql`
         INSERT INTO search_leads (
           search_id, company, website, industry, employees, description,
@@ -86,11 +97,15 @@ export async function saveSearchWithLeads(
         RETURNING id, created_at
       `;
 
+      console.log('[DB] Lead insert result for', lead.company, ':', leadResult);
+
       const leadRow = getFirstRow<{ id: number; created_at: string }>(leadResult);
       if (!leadRow) {
-        console.warn('[DB] Failed to get ID for lead:', lead.company);
+        console.error('[DB] Failed to get ID for lead:', lead.company, 'result was:', leadResult);
         continue;
       }
+
+      console.log('[DB] Created lead with ID:', leadRow.id);
 
       savedLeads.push({
         ...lead,
@@ -99,11 +114,13 @@ export async function saveSearchWithLeads(
         createdAt: leadRow.created_at,
         generated: false,
       });
+      console.log('[DB] Successfully saved lead:', lead.company);
     } catch (err) {
-      console.error('[DB] Failed to insert lead:', lead.company, err);
+      console.error('[DB] Failed to insert lead:', lead.company, 'Error:', err);
     }
   }
 
+  console.log('[DB] Finished. Saved', savedLeads.length, 'out of', leads.length, 'leads');
   return { search, leads: savedLeads };
 }
 
@@ -111,12 +128,15 @@ export async function saveSearchWithLeads(
 export async function loadSavedSearches(): Promise<SavedSearch[]> {
   const sql = getSql();
 
+  console.log('[DB] Loading saved searches');
   const result = await sql`
     SELECT id, industry, employee_range, location, keywords, created_at
     FROM searches
     ORDER BY created_at DESC
     LIMIT 50
   `;
+
+  console.log('[DB] Found', (result as unknown[]).length, 'searches');
 
   return (result as Record<string, unknown>[]).map(row => ({
     id: String(row.id),
@@ -132,7 +152,7 @@ export async function loadSavedSearches(): Promise<SavedSearch[]> {
 export async function loadLeadsForSearch(searchId: string): Promise<SavedLead[]> {
   const sql = getSql();
 
-  console.log('[DB] Loading leads for search_id:', searchId, 'type:', typeof searchId);
+  console.log('[DB] Loading leads for search_id:', searchId);
 
   // Convert to integer for Postgres
   const numericId = parseInt(searchId, 10);
