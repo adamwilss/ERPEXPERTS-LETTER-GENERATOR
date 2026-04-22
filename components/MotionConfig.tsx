@@ -65,7 +65,7 @@ export function ParticleBackground() {
   if (!cinematic) return null
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+    <div className="fixed inset-0 pointer-events-none z-[-1] overflow-hidden">
       {Array.from({ length: 30 }).map((_, i) => (
         <div
           key={i}

@@ -254,7 +254,7 @@ export default function LetterOutput({
         </div>
       </div>
 
-      {/* Document with animated tab transitions */}
+      {/* Document with animated tab transitions — always light mode */}
       <AnimatePresence mode="wait">
         <motion.div
           key={activeTab}
@@ -263,6 +263,8 @@ export default function LetterOutput({
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.25, ease: 'easeInOut' }}
           className={`letter-paper rounded-2xl ${activeTab === 'map' ? 'max-w-4xl' : 'max-w-2xl'} px-12 py-11`}
+          style={{ color: '#111' }}
+          data-theme="light"
         >
           {activeTab === 'letter' && (coverLetter ? <CoverLetterView content={coverLetter} /> : <Placeholder />)}
           {activeTab === 'case' && (businessCase ? <BusinessCaseView content={businessCase} /> : <Placeholder />)}

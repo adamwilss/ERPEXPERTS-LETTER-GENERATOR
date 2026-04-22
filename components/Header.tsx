@@ -9,7 +9,7 @@ import { startTour } from './OnboardingTour'
 import ThemeToggle from './ThemeToggle'
 import { useDiscoverStore } from '@/lib/discover-store'
 import { getReminderCount, getOverdueReminders } from '@/lib/reminders'
-import { useMotionStore } from './MotionConfig'
+// Cinematic mode is permanently enabled
 
 const nav = [
   { href: '/', label: 'Single letter' },
@@ -97,19 +97,11 @@ function SessionPill() {
 }
 
 function CinematicToggle() {
-  const { cinematicMode, toggleCinematic } = useMotionStore()
+  // Always on — non-toggleable per user request
   return (
-    <button
-      onClick={toggleCinematic}
-      className={`p-2 rounded-lg transition-all ${
-        cinematicMode
-          ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
-          : 'text-gray-400 hover:text-gray-700 dark:text-[#555] dark:hover:text-[#ccc]'
-      }`}
-      title={cinematicMode ? 'Cinematic mode on' : 'Cinematic mode off'}
-    >
+    <div className="p-2 rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 transition-all">
       <Sparkles className="w-4 h-4" />
-    </button>
+    </div>
   )
 }
 

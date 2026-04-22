@@ -8,6 +8,7 @@ import LetterOutput from '@/components/LetterOutput'
 import { parseOutput } from '@/lib/parse'
 import { FileText, TrendingUp, Shield, Sparkles, Zap } from 'lucide-react'
 import { HeroGlow, GradientBorder, TypingText } from '@/components/MotionConfig'
+import { WritingAnimation } from '@/components/WritingAnimation'
 
 export default function Home() {
   const [submitted, setSubmitted] = useState(false)
@@ -131,25 +132,14 @@ export default function Home() {
       ) : (
         <div className="page-container">
           {isLoading && !completion && (
-            <div className="py-20 flex flex-col items-start gap-5 max-w-lg animate-fade-up"
+            <div className="py-20 flex flex-col items-center gap-6 max-w-lg mx-auto animate-fade-up"
             >
-              <div className="flex items-center gap-3">
-                <div className="loading-ring" />
+              <WritingAnimation text={`Researching ${companyName}…`} />
+              <div className="space-y-2 text-center">
                 <TypingText
                   text={`Researching ${companyName}…`}
                   className="text-sm font-semibold text-gray-950 dark:text-white"
                 />
-              </div>
-              <div className="ml-8 space-y-2">
-                <div className="h-1.5 w-48 bg-gray-100 dark:bg-[#1a1a1a] rounded-full overflow-hidden"
-                >
-                  <motion.div
-                    className="h-full bg-gradient-to-r from-emerald-400 to-blue-500 rounded-full"
-                    initial={{ width: '0%' }}
-                    animate={{ width: ['0%', '60%', '80%'] }}
-                    transition={{ duration: 2, repeat: Infinity, repeatType: 'reverse' }}
-                  />
-                </div>
                 <p className="text-xs text-gray-500 dark:text-[#555]"
                 >
                   Reading the company website and gathering context.
@@ -161,7 +151,7 @@ export default function Home() {
               </div>
               <button
                 onClick={() => setSubmitted(false)}
-                className="ml-8 text-xs text-gray-400 dark:text-[#444] hover:text-gray-600 dark:hover:text-[#888] underline underline-offset-2 transition-colors"
+                className="text-xs text-gray-400 dark:text-[#444] hover:text-gray-600 dark:hover:text-[#888] underline underline-offset-2 transition-colors"
               >
                 Cancel
               </button>
