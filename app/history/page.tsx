@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { Trash2, ChevronDown, ChevronRight, Printer, Mail, Calendar, Plus } from 'lucide-react'
+import { Trash2, ChevronDown, ChevronRight, Printer, Mail, Calendar, Plus, Database } from 'lucide-react'
 import {
   loadHistory, deletePack, clearHistory, updatePackStatus, initializeSequence,
   updatePackOutcome, markAsSent, type SavedPack, type PackStatus, type OutcomeData
@@ -162,45 +162,58 @@ function OutcomeModal({
 
 export default function HistoryPage() {
   const [packs, setPacks] = useState<SavedPack[]>([])
+  const [loading, setLoading] = useState(true)
   const [expanded, setExpanded] = useState<string | null>(null)
   const [outcomePack, setOutcomePack] = useState<SavedPack | null>(null)
 
-  useEffect(() => {
-    setPacks(loadHistory())
+  const loadPacks = useCallback(async () => {
+    setLoading(true)
+    try {
+      const loaded = await loadHistory()
+      setPacks(loaded)
+    } catch (error) {
+      console.error('Failed to load history:', error)
+    } finally {
+      setLoading(false)
+    }
   }, [])
 
-  const refresh = () => setPacks(loadHistory())
+  useEffect(() => {
+    loadPacks()
+  }, [loadPacks])
 
-  const handleDelete = (id: string) => {
-    deletePack(id)
-    setPacks(loadHistory())
+  const refresh = () => loadPacks()
+
+  const handleDelete = async (id: string) => {
+    await deletePack(id)
+    await loadPacks()
     if (expanded === id) setExpanded(null)
   }
 
-  const handleStatus = (id: string, status: PackStatus | undefined) => {
-    updatePackStatus(id, status)
+  const handleStatus = async (id: string, status: PackStatus | undefined) => {
+    await updatePackStatus(id, status)
     if (status === 'sent') {
-      initializeSequence(id)
+      await initializeSequence(id)
     }
-    setPacks(loadHistory())
+    await loadPacks()
   }
 
-  const handleMarkSent = (id: string) => {
-    markAsSent(id)
-    initializeSequence(id)
-    setPacks(loadHistory())
+  const handleMarkSent = async (id: string) => {
+    await markAsSent(id)
+    await initializeSequence(id)
+    await loadPacks()
   }
 
-  const handleOutcome = (outcome: Partial<OutcomeData>) => {
+  const handleOutcome = async (outcome: Partial<OutcomeData>) => {
     if (outcomePack) {
-      updatePackOutcome(outcomePack.id, outcome)
-      setPacks(loadHistory())
+      await updatePackOutcome(outcomePack.id, outcome)
+      await loadPacks()
     }
   }
 
-  const handleClear = () => {
-    if (confirm('Delete all saved letter packs?')) {
-      clearHistory()
+  const handleClear = async () => {
+    if (confirm('Delete all saved letter packs? This cannot be undone.')) {
+      await clearHistory()
       setPacks([])
       setExpanded(null)
     }
@@ -228,7 +241,12 @@ export default function HistoryPage() {
           )}
         </div>
 
-        {packs.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-24 text-gray-400 dark:text-[#555]">
+            <Database className="w-8 h-8 mx-auto mb-4 animate-pulse" />
+            <p className="text-sm">Loading history from database…</p>
+          </div>
+        ) : packs.length === 0 ? (
           <div className="text-center py-24 text-gray-300 dark:text-[#333]">
             <p className="text-sm">Generated letter packs will appear here automatically.</p>
             <Link href="/discover" className="mt-4 inline-block text-sm text-gray-700 dark:text-[#ccc] underline underline-offset-2 hover:text-gray-900 dark:hover:text-white transition-colors">

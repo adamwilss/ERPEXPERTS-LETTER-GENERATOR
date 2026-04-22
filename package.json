@@ -11,7 +11,9 @@
   "dependencies": {
     "@ai-sdk/openai": "^3.0.50",
     "@ai-sdk/react": "^3.0.147",
+    "@neondatabase/serverless": "^1.1.0",
     "@react-pdf/renderer": "^4.3.2",
+    "@vercel/postgres": "^0.10.0",
     "ai": "^6.0.145",
     "clsx": "^2.1.1",
     "docx": "^9.6.1",

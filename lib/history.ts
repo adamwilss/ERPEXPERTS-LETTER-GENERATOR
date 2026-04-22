@@ -1,194 +1,386 @@
-export type PackStatus = 'sent' | 'responded' | 'meeting' | 'not_interested' | 'no_response'
+import {
+  loadHistoryFromDB,
+  savePackToDB,
+  updatePackStatusInDB,
+  deletePackFromDB,
+  updateOutcomeInDB,
+  initializeSequenceInDB,
+  loadSequencesForPack,
+  updateSequenceStatusInDB,
+  updateSequenceContentInDB,
+  type SavedPack as DBSavedPack,
+  type PackStatus as DBPackStatus,
+  type OutcomeData as DBOutcomeData,
+  type SequenceStatus as DBSequenceStatus,
+  type SequenceStage as DBSequenceStage,
+} from './db/history-db';
 
-export type SequenceStage = 'pending' | 'generating' | 'ready' | 'sent'
+// Re-export types for compatibility
+export type PackStatus = DBPackStatus;
+export type SequenceStage = DBSequenceStage;
+export type SequenceStatus = DBSequenceStatus;
+export type OutcomeData = DBOutcomeData;
 
-export interface SequenceStatus {
-  initial: SequenceStage
-  followup1: SequenceStage | 'locked'
-  followup2: SequenceStage | 'locked'
-  breakup: SequenceStage | 'locked'
+// Extended SavedPack with client-side fields
+export interface SavedPack extends DBSavedPack {
+  // No additional fields currently, but extensible
 }
 
-export interface OutcomeData {
-  sentDate?: string
-  responseDate?: string
-  responseType?: 'positive' | 'neutral' | 'negative'
-  meetingBooked?: boolean
-  notes?: string
-}
+// LocalStorage key (now used as cache only)
+const KEY = 'erp_letter_history';
+const MAX = 100;
 
-export interface SavedPack {
-  id: string
-  company: string
-  recipientName: string
-  contactTitle: string
-  date: string // ISO string
-  completion: string
-  erpScore?: number
-  website?: string
-  location?: string
-  industry?: string
-  status?: PackStatus
-  // Sequence tracking
-  sequenceStatus?: SequenceStatus
-  sequenceContent?: {
-    initial?: string
-    followup1?: string
-    followup2?: string
-    breakup?: string
-  }
-  // Outcome tracking
-  outcomes?: OutcomeData
-  // Template & testing
-  templateId?: string
-  variant?: 'A' | 'B'
-}
+// Track if Postgres is available
+let postgresAvailable = false;
+let lastSyncTime = 0;
+const SYNC_INTERVAL = 30000; // 30 seconds
 
-const KEY = 'erp_letter_history'
-const MAX = 100
+// Check if we're in browser
+const isBrowser = typeof window !== 'undefined';
 
-export function loadHistory(): SavedPack[] {
-  if (typeof window === 'undefined') return []
+// Initialize Postgres connection check
+async function checkPostgres(): Promise<boolean> {
   try {
-    return JSON.parse(localStorage.getItem(KEY) ?? '[]')
+    const res = await fetch('/api/history', { method: 'GET' });
+    postgresAvailable = res.ok;
+    return postgresAvailable;
   } catch {
-    return []
+    postgresAvailable = false;
+    return false;
   }
 }
 
-export function savePack(pack: Omit<SavedPack, 'id' | 'date'>): SavedPack {
-  const saved: SavedPack = {
-    ...pack,
-    id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-    date: new Date().toISOString(),
+// Load from localStorage (cache)
+function loadFromCache(): SavedPack[] {
+  if (!isBrowser) return [];
+  try {
+    return JSON.parse(localStorage.getItem(KEY) ?? '[]');
+  } catch {
+    return [];
   }
-  const history = loadHistory()
-  const today = new Date().toDateString()
-  const filtered = history.filter(
+}
+
+// Save to localStorage (cache)
+function saveToCache(packs: SavedPack[]): void {
+  if (!isBrowser) return;
+  try {
+    localStorage.setItem(KEY, JSON.stringify(packs.slice(0, MAX)));
+  } catch (e) {
+    console.warn('Failed to save to cache:', e);
+  }
+}
+
+// Load history - tries Postgres first, falls back to cache
+export async function loadHistory(): Promise<SavedPack[]> {
+  // First check cache for immediate response
+  const cache = loadFromCache();
+
+  // Try to sync from Postgres
+  try {
+    const postgresPacks = await loadHistoryFromDB();
+    if (postgresPacks.length > 0) {
+      // Update cache with Postgres data
+      saveToCache(postgresPacks);
+      postgresAvailable = true;
+      lastSyncTime = Date.now();
+      return postgresPacks;
+    }
+  } catch (error) {
+    console.warn('Postgres load failed, using cache:', error);
+    postgresAvailable = false;
+  }
+
+  return cache;
+}
+
+// Sync function - background sync from Postgres to cache
+export async function syncFromPostgres(): Promise<void> {
+  if (Date.now() - lastSyncTime < SYNC_INTERVAL) return;
+
+  try {
+    const packs = await loadHistoryFromDB();
+    saveToCache(packs);
+    postgresAvailable = true;
+    lastSyncTime = Date.now();
+  } catch (error) {
+    console.warn('Sync failed:', error);
+    postgresAvailable = false;
+  }
+}
+
+// Save pack - write-through to Postgres + cache
+export async function savePack(
+  pack: Omit<SavedPack, 'id' | 'date'>
+): Promise<SavedPack> {
+  // Always save to Postgres first
+  let saved: SavedPack;
+  try {
+    saved = await savePackToDB(pack);
+    postgresAvailable = true;
+  } catch (error) {
+    console.warn('Postgres save failed, using cache only:', error);
+    postgresAvailable = false;
+    // Fallback: create local-only pack
+    saved = {
+      ...pack,
+      id: `local-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      date: new Date().toISOString(),
+    };
+  }
+
+  // Update cache
+  const cache = loadFromCache();
+  const today = new Date().toDateString();
+  const filtered = cache.filter(
     (h) => !(h.company === saved.company && h.recipientName === saved.recipientName && new Date(h.date).toDateString() === today)
-  )
-  const updated = [saved, ...filtered].slice(0, MAX)
-  localStorage.setItem(KEY, JSON.stringify(updated))
-  return saved
+  );
+  const updated = [saved, ...filtered].slice(0, MAX);
+  saveToCache(updated);
+
+  return saved;
 }
 
-export function updatePackStatus(id: string, status: PackStatus | undefined): void {
-  const updated = loadHistory().map((h) => h.id === id ? { ...h, status } : h)
-  localStorage.setItem(KEY, JSON.stringify(updated))
+// Update pack status - Postgres + cache
+export async function updatePackStatus(
+  id: string,
+  status: PackStatus | undefined
+): Promise<void> {
+  // Update Postgres
+  try {
+    await updatePackStatusInDB(id, status);
+    postgresAvailable = true;
+  } catch (error) {
+    console.warn('Postgres update failed:', error);
+    postgresAvailable = false;
+  }
+
+  // Update cache
+  const cache = loadFromCache();
+  const updated = cache.map((h) => (h.id === id ? { ...h, status } : h));
+  saveToCache(updated);
 }
 
-export function deletePack(id: string): void {
-  const updated = loadHistory().filter((h) => h.id !== id)
-  localStorage.setItem(KEY, JSON.stringify(updated))
+// Delete pack - Postgres + cache
+export async function deletePack(id: string): Promise<void> {
+  // Delete from Postgres
+  try {
+    await deletePackFromDB(id);
+    postgresAvailable = true;
+  } catch (error) {
+    console.warn('Postgres delete failed:', error);
+    postgresAvailable = false;
+  }
+
+  // Delete from cache
+  const cache = loadFromCache();
+  const updated = cache.filter((h) => h.id !== id);
+  saveToCache(updated);
 }
 
-export function clearHistory(): void {
-  localStorage.removeItem(KEY)
+// Clear all history
+export async function clearHistory(): Promise<void> {
+  // Clear Postgres
+  try {
+    const { clearAllHistoryFromDB } = await import('./db/history-db');
+    await clearAllHistoryFromDB();
+  } catch (error) {
+    console.warn('Postgres clear failed:', error);
+  }
+
+  // Clear cache
+  if (isBrowser) {
+    localStorage.removeItem(KEY);
+  }
 }
 
-// ── Sequence helpers ──────────────────────────────────────────────────────────
+// Initialize sequence
+export async function initializeSequence(packId: string): Promise<void> {
+  try {
+    await initializeSequenceInDB(packId);
+    postgresAvailable = true;
+  } catch (error) {
+    console.warn('Postgres sequence init failed:', error);
+    postgresAvailable = false;
+  }
 
-const DEFAULT_SEQUENCE_STATUS: SequenceStatus = {
-  initial: 'pending',
-  followup1: 'locked',
-  followup2: 'locked',
-  breakup: 'locked',
-}
-
-export function initializeSequence(packId: string): void {
-  const updated = loadHistory().map((h) =>
-    h.id === packId
-      ? { ...h, sequenceStatus: DEFAULT_SEQUENCE_STATUS, sequenceContent: {} }
-      : h
-  )
-  localStorage.setItem(KEY, JSON.stringify(updated))
-}
-
-export function updateSequenceStatus(
-  packId: string,
-  stage: keyof SequenceStatus,
-  status: SequenceStage | 'locked'
-): void {
-  const updated = loadHistory().map((h) =>
-    h.id === packId
-      ? { ...h, sequenceStatus: { ...(h.sequenceStatus ?? DEFAULT_SEQUENCE_STATUS), [stage]: status } }
-      : h
-  )
-  localStorage.setItem(KEY, JSON.stringify(updated))
-}
-
-export function updateSequenceContent(
-  packId: string,
-  stage: keyof NonNullable<SavedPack['sequenceContent']>,
-  content: string
-): void {
-  const updated = loadHistory().map((h) =>
-    h.id === packId
-      ? {
-          ...h,
-          sequenceContent: { ...(h.sequenceContent ?? {}), [stage]: content },
-        }
-      : h
-  )
-  localStorage.setItem(KEY, JSON.stringify(updated))
-}
-
-export function unlockNextStage(packId: string, currentStage: keyof SequenceStatus): void {
-  const stageOrder: (keyof SequenceStatus)[] = ['initial', 'followup1', 'followup2', 'breakup']
-  const currentIndex = stageOrder.indexOf(currentStage)
-  const nextStage = stageOrder[currentIndex + 1]
-
-  if (!nextStage) return
-
-  const updated = loadHistory().map((h) =>
+  // Update cache
+  const cache = loadFromCache();
+  const updated = cache.map((h) =>
     h.id === packId
       ? {
           ...h,
           sequenceStatus: {
-            ...(h.sequenceStatus ?? DEFAULT_SEQUENCE_STATUS),
-            [nextStage]: 'pending',
+            initial: 'pending' as const,
+            followup1: 'locked' as const,
+            followup2: 'locked' as const,
+            breakup: 'locked' as const,
+          },
+          sequenceContent: {},
+        }
+      : h
+  );
+  saveToCache(updated);
+}
+
+// Update sequence status
+export async function updateSequenceStatus(
+  packId: string,
+  stage: keyof SequenceStatus,
+  status: SequenceStage | 'locked'
+): Promise<void> {
+  try {
+    await updateSequenceStatusInDB(packId, stage, status);
+    postgresAvailable = true;
+  } catch (error) {
+    console.warn('Postgres sequence update failed:', error);
+    postgresAvailable = false;
+  }
+
+  // Update cache
+  const cache = loadFromCache();
+  const updated = cache.map((h) =>
+    h.id === packId
+      ? {
+          ...h,
+          sequenceStatus: {
+            ...(h.sequenceStatus ?? {
+              initial: 'pending',
+              followup1: 'locked',
+              followup2: 'locked',
+              breakup: 'locked',
+            }),
+            [stage]: status,
           },
         }
       : h
-  )
-  localStorage.setItem(KEY, JSON.stringify(updated))
+  );
+  saveToCache(updated);
 }
 
-// ── Outcome helpers ─────────────────────────────────────────────────────────
+// Update sequence content
+export async function updateSequenceContent(
+  packId: string,
+  stage: keyof SequenceStatus,
+  content: string
+): Promise<void> {
+  try {
+    await updateSequenceContentInDB(packId, stage, content);
+    postgresAvailable = true;
+  } catch (error) {
+    console.warn('Postgres sequence content update failed:', error);
+    postgresAvailable = false;
+  }
 
-export function updatePackOutcome(packId: string, outcome: Partial<OutcomeData>): void {
-  const updated = loadHistory().map((h) =>
+  // Update cache
+  const cache = loadFromCache();
+  const updated = cache.map((h) =>
     h.id === packId
-      ? { ...h, outcomes: { ...(h.outcomes ?? {}), ...outcome } }
+      ? {
+          ...h,
+          sequenceContent: { ...(h.sequenceContent ?? {}), [stage]: content },
+          sequenceStatus: {
+            ...(h.sequenceStatus ?? {
+              initial: 'pending',
+              followup1: 'locked',
+              followup2: 'locked',
+              breakup: 'locked',
+            }),
+            [stage]: 'ready',
+          },
+        }
       : h
-  )
-  localStorage.setItem(KEY, JSON.stringify(updated))
+  );
+  saveToCache(updated);
 }
 
-export function markAsSent(packId: string): void {
-  const now = new Date().toISOString()
-  updatePackStatus(packId, 'sent')
-  updatePackOutcome(packId, { sentDate: now })
+// Unlock next stage
+export async function unlockNextStage(
+  packId: string,
+  currentStage: keyof SequenceStatus
+): Promise<void> {
+  const stageOrder: (keyof SequenceStatus)[] = ['initial', 'followup1', 'followup2', 'breakup'];
+  const currentIndex = stageOrder.indexOf(currentStage);
+  const nextStage = stageOrder[currentIndex + 1];
+
+  if (!nextStage) return;
+
+  await updateSequenceStatus(packId, nextStage, 'pending');
 }
 
-export function recordResponse(
+// Update outcome
+export async function updatePackOutcome(
+  packId: string,
+  outcome: Partial<OutcomeData>
+): Promise<void> {
+  try {
+    await updateOutcomeInDB(packId, outcome);
+    postgresAvailable = true;
+  } catch (error) {
+    console.warn('Postgres outcome update failed:', error);
+    postgresAvailable = false;
+  }
+
+  // Update cache
+  const cache = loadFromCache();
+  const updated = cache.map((h) =>
+    h.id === packId ? { ...h, outcomes: { ...(h.outcomes ?? {}), ...outcome } } : h
+  );
+  saveToCache(updated);
+}
+
+// Mark as sent
+export async function markAsSent(packId: string): Promise<void> {
+  const now = new Date().toISOString();
+  await updatePackStatus(packId, 'sent');
+  await updatePackOutcome(packId, { sentDate: now });
+}
+
+// Record response
+export async function recordResponse(
   packId: string,
   type: 'positive' | 'neutral' | 'negative',
   meetingBooked?: boolean,
   notes?: string
-): void {
-  const now = new Date().toISOString()
-  updatePackOutcome(packId, {
+): Promise<void> {
+  const now = new Date().toISOString();
+  await updatePackOutcome(packId, {
     responseDate: now,
     responseType: type,
     meetingBooked,
     notes,
-  })
+  });
+
   if (type === 'positive') {
-    updatePackStatus(packId, meetingBooked ? 'meeting' : 'responded')
+    await updatePackStatus(packId, meetingBooked ? 'meeting' : 'responded');
   } else if (type === 'negative') {
-    updatePackStatus(packId, 'not_interested')
+    await updatePackStatus(packId, 'not_interested');
   } else {
-    updatePackStatus(packId, 'responded')
+    await updatePackStatus(packId, 'responded');
   }
+}
+
+// Legacy synchronous functions (for backward compatibility)
+// These will be deprecated - use async versions instead
+export function loadHistorySync(): SavedPack[] {
+  return loadFromCache();
+}
+
+export function savePackSync(pack: Omit<SavedPack, 'id' | 'date'>): SavedPack {
+  const saved: SavedPack = {
+    ...pack,
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    date: new Date().toISOString(),
+  };
+  const cache = loadFromCache();
+  const today = new Date().toDateString();
+  const filtered = cache.filter(
+    (h) => !(h.company === saved.company && h.recipientName === saved.recipientName && new Date(h.date).toDateString() === today)
+  );
+  const updated = [saved, ...filtered].slice(0, MAX);
+  saveToCache(updated);
+
+  // Async save to Postgres (fire and forget)
+  savePackToDB(pack).catch((err) => console.warn('Background Postgres save failed:', err));
+
+  return saved;
 }

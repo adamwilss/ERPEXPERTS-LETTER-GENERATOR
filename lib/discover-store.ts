@@ -210,15 +210,20 @@ export const useDiscoverStore = create<DiscoverState>((set, get) => ({
 
         // Save to history immediately (no React dependency)
         if (completion) {
-          savePack({
-            company: lead.company,
-            recipientName: lead.recipientName ?? '',
-            contactTitle: lead.contactTitle ?? '',
-            completion,
-            erpScore: lead.erpScore,
-            website: lead.website,
-            location: lead.location,
-          })
+          try {
+            await savePack({
+              company: lead.company,
+              recipientName: lead.recipientName ?? '',
+              contactTitle: lead.contactTitle ?? '',
+              completion,
+              erpScore: lead.erpScore,
+              website: lead.website,
+              location: lead.location,
+            })
+          } catch (err) {
+            console.warn('Failed to save pack to history:', err)
+            // Continue - pack was still generated
+          }
         }
       } catch (err) {
         results[i] = {
