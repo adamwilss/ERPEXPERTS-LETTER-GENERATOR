@@ -1,4 +1,4 @@
-import { sql } from './client';
+import { getSql } from './client';
 
 // Types matching existing history.ts
 export type PackStatus = 'sent' | 'responded' | 'meeting' | 'not_interested' | 'no_response';
@@ -42,10 +42,27 @@ export interface SavedPack {
   outcomes?: OutcomeData;
 }
 
+// Helper to handle neon results
+function getFirstRow<T>(result: unknown): T | undefined {
+  if (Array.isArray(result) && result.length > 0) {
+    return result[0] as T;
+  }
+  return undefined;
+}
+
+function getRows<T>(result: unknown): T[] {
+  if (Array.isArray(result)) {
+    return result as T[];
+  }
+  return [];
+}
+
 // Save a pack to Postgres - creates company if needed, then pack
 export async function savePackToDB(
   pack: Omit<SavedPack, 'id' | 'date'>
 ): Promise<SavedPack> {
+  const sql = getSql();
+
   // Insert or get company
   const companyResult = await sql`
     INSERT INTO companies (name, website, industry, location, employee_count, erp_score)
@@ -65,7 +82,8 @@ export async function savePackToDB(
     RETURNING id
   `;
 
-  const companyId = companyResult[0]?.id;
+  const companyRow = getFirstRow<{ id: number }>(companyResult);
+  const companyId = companyRow?.id;
   if (!companyId) {
     throw new Error('Failed to create or find company');
   }
@@ -83,10 +101,15 @@ export async function savePackToDB(
     RETURNING id, created_at
   `;
 
+  const packRow = getFirstRow<{ id: number; created_at: string }>(packResult);
+  if (!packRow) {
+    throw new Error('Failed to create pack');
+  }
+
   const saved: SavedPack = {
     ...pack,
-    id: packResult[0].id.toString(),
-    date: packResult[0].created_at,
+    id: packRow.id.toString(),
+    date: packRow.created_at,
   };
 
   return saved;
@@ -94,6 +117,8 @@ export async function savePackToDB(
 
 // Load all packs from Postgres with related data
 export async function loadHistoryFromDB(): Promise<SavedPack[]> {
+  const sql = getSql();
+
   const result = await sql`
     SELECT
       p.id,
@@ -120,25 +145,27 @@ export async function loadHistoryFromDB(): Promise<SavedPack[]> {
     LIMIT 100
   `;
 
-  return result.map((row: Record<string, unknown>) => ({
-    id: row.id?.toString() ?? '',
-    company: row.company as string,
-    recipientName: row.recipient_name as string,
-    contactTitle: row.contact_title as string,
-    date: row.date as string,
-    completion: row.completion as string,
-    website: row.website as string | undefined,
-    location: row.location as string | undefined,
-    industry: row.industry as string | undefined,
-    employees: row.employees as string | undefined,
-    erpScore: row.erp_score as number | undefined,
-    status: row.status as PackStatus | undefined,
+  const rows = getRows<Record<string, unknown>>(result);
+
+  return rows.map((row) => ({
+    id: String(row.id ?? ''),
+    company: String(row.company ?? ''),
+    recipientName: String(row.recipient_name ?? ''),
+    contactTitle: String(row.contact_title ?? ''),
+    date: String(row.date ?? ''),
+    completion: String(row.completion ?? ''),
+    website: row.website ? String(row.website) : undefined,
+    location: row.location ? String(row.location) : undefined,
+    industry: row.industry ? String(row.industry) : undefined,
+    employees: row.employees ? String(row.employees) : undefined,
+    erpScore: row.erp_score ? Number(row.erp_score) : undefined,
+    status: (row.status as PackStatus) || undefined,
     outcomes: row.sent_date ? {
-      sentDate: row.sent_date as string,
-      responseDate: row.response_date as string | undefined,
-      responseType: row.response_type as 'positive' | 'neutral' | 'negative' | undefined,
+      sentDate: String(row.sent_date),
+      responseDate: row.response_date ? String(row.response_date) : undefined,
+      responseType: row.response_type as OutcomeData['responseType'],
       meetingBooked: row.meeting_booked as boolean | undefined,
-      notes: row.notes as string | undefined,
+      notes: row.notes ? String(row.notes) : undefined,
     } : undefined,
   }));
 }
@@ -148,6 +175,7 @@ export async function updatePackStatusInDB(
   id: string,
   status: PackStatus | undefined
 ): Promise<void> {
+  const sql = getSql();
   await sql`
     UPDATE packs
     SET status = ${status ?? null}, updated_at = CURRENT_TIMESTAMP
@@ -157,11 +185,13 @@ export async function updatePackStatusInDB(
 
 // Delete pack (cascade will delete sequences and outcomes)
 export async function deletePackFromDB(id: string): Promise<void> {
+  const sql = getSql();
   await sql`DELETE FROM packs WHERE id = ${id}`;
 }
 
 // Clear all history (for testing/admin)
 export async function clearAllHistoryFromDB(): Promise<void> {
+  const sql = getSql();
   await sql`DELETE FROM outcomes`;
   await sql`DELETE FROM sequences`;
   await sql`DELETE FROM packs`;
@@ -173,6 +203,7 @@ export async function updateOutcomeInDB(
   packId: string,
   outcome: Partial<OutcomeData>
 ): Promise<void> {
+  const sql = getSql();
   await sql`
     INSERT INTO outcomes (pack_id, sent_date, response_date, response_type, meeting_booked, notes)
     VALUES (
@@ -195,7 +226,7 @@ export async function updateOutcomeInDB(
 
 // Sequence operations
 export async function initializeSequenceInDB(packId: string): Promise<void> {
-  // Create initial sequence entry
+  const sql = getSql();
   await sql`
     INSERT INTO sequences (pack_id, stage, status)
     VALUES (${packId}, 'initial', 'pending')
@@ -208,6 +239,7 @@ export async function updateSequenceStatusInDB(
   stage: keyof SequenceStatus,
   status: SequenceStage | 'locked'
 ): Promise<void> {
+  const sql = getSql();
   await sql`
     INSERT INTO sequences (pack_id, stage, status)
     VALUES (${packId}, ${stage}, ${status})
@@ -222,6 +254,7 @@ export async function updateSequenceContentInDB(
   stage: keyof SequenceStatus,
   content: string
 ): Promise<void> {
+  const sql = getSql();
   await sql`
     INSERT INTO sequences (pack_id, stage, content, status)
     VALUES (${packId}, ${stage}, ${content}, 'ready')
@@ -232,12 +265,17 @@ export async function updateSequenceContentInDB(
   `;
 }
 
-export async function loadSequencesForPack(packId: string): Promise<SequenceStatus & { content: Record<string, string> }> {
+export async function loadSequencesForPack(
+  packId: string
+): Promise<SequenceStatus & { content: Record<string, string> }> {
+  const sql = getSql();
   const result = await sql`
     SELECT stage, status, content
     FROM sequences
     WHERE pack_id = ${packId}
   `;
+
+  const rows = getRows<Record<string, unknown>>(result);
 
   const sequences: SequenceStatus = {
     initial: 'locked',
@@ -248,11 +286,11 @@ export async function loadSequencesForPack(packId: string): Promise<SequenceStat
 
   const content: Record<string, string> = {};
 
-  for (const row of result as Record<string, unknown>[]) {
-    const stage = row.stage as keyof SequenceStatus;
+  for (const row of rows) {
+    const stage = String(row.stage) as keyof SequenceStatus;
     sequences[stage] = row.status as SequenceStage | 'locked';
     if (row.content) {
-      content[stage] = row.content as string;
+      content[stage] = String(row.content);
     }
   }
 
