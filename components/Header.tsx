@@ -12,6 +12,7 @@ import { getReminderCount, getOverdueReminders } from '@/lib/reminders'
 const nav = [
   { href: '/', label: 'Single letter' },
   { href: '/discover', label: 'Discover leads' },
+  { href: '/searches', label: 'Saved searches' },
   { href: '/history', label: 'History' },
 ]
 
