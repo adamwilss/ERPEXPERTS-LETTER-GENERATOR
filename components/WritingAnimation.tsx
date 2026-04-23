@@ -55,11 +55,12 @@ export function WritingAnimation({ text = 'Writing your letter...', className = 
         {/* Writing hand / pencil — horizontal, tip pointing right */}
         <motion.div
           className="absolute"
-          style={{ width: 52, height: 20 }}
-          initial={{ x: 10, y: 6 }}
+          style={{ width: 52, height: 20, transformOrigin: '46px 10px' }}
+          initial={{ x: 10, y: 6, rotate: 0 }}
           animate={{
             x: [10, 132, 10, 132, 10, 100, 10],
             y: [6, 6, 18, 18, 30, 42, 64],
+            rotate: [0, -4, 3, -5, 2, -3, 0],
           }}
           transition={{
             duration: 5,
