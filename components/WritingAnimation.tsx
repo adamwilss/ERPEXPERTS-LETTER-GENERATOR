@@ -10,82 +10,114 @@ interface WritingAnimationProps {
 export function WritingAnimation({ text = 'Writing your letter...', className = '' }: WritingAnimationProps) {
   return (
     <div className={`flex flex-col items-center gap-5 ${className}`}>
-      <div className="relative w-52 h-28">
-        {/* Paper shadow */}
-        <motion.div
-          className="absolute -bottom-1 left-1 right-1 h-4 bg-black/[0.04] dark:bg-black/[0.15] rounded-full blur-md"
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-        />
-
-        {/* Paper sheet */}
-        <motion.div
-          className="absolute inset-0 bg-white dark:bg-[#1a1a1a] rounded-xl shadow-lg border border-gray-100 dark:border-[#222]"
-          initial={{ opacity: 0, y: 8, rotate: -1 }}
-          animate={{ opacity: 1, y: 0, rotate: 0 }}
-          transition={{ duration: 0.5, ease: 'easeOut' }}
+      <div className="relative w-72 h-20">
+        {/* Scribble line — a jagged back-and-forth path */}
+        <svg
+          className="absolute inset-0 w-full h-full overflow-visible"
+          viewBox="0 0 288 80"
+          fill="none"
+          preserveAspectRatio="none"
         >
-          {/* Paper subtle inner glow */}
-          <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white via-transparent to-gray-50/50 dark:from-[#1a1a1a] dark:to-[#111]/50" />
-        </motion.div>
+          <motion.path
+            d="M 10 40 Q 25 20, 40 45 T 70 30 T 100 50 T 130 25 T 160 55 T 190 20 T 220 50 T 250 30 T 278 40"
+            stroke="url(#scribbleGrad)"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            fill="none"
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: [0, 1, 1, 0], opacity: [0, 0.45, 0.45, 0] }}
+            transition={{
+              duration: 4,
+              repeat: Infinity,
+              ease: 'easeInOut',
+              times: [0, 0.45, 0.65, 1],
+            }}
+          />
+          {/* Second offset scribble for depth */}
+          <motion.path
+            d="M 15 48 Q 35 28, 55 52 T 90 38 T 125 58 T 155 32 T 185 55 T 215 28 T 245 52 T 270 38"
+            stroke="url(#scribbleGrad2)"
+            strokeWidth="1"
+            strokeLinecap="round"
+            fill="none"
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: [0, 1, 1, 0], opacity: [0, 0.25, 0.25, 0] }}
+            transition={{
+              duration: 4,
+              repeat: Infinity,
+              ease: 'easeInOut',
+              delay: 0.3,
+              times: [0, 0.45, 0.65, 1],
+            }}
+          />
+          <defs>
+            <linearGradient id="scribbleGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="#9ca3af" stopOpacity="0.3" />
+              <stop offset="50%" stopColor="#6b7280" stopOpacity="0.5" />
+              <stop offset="100%" stopColor="#9ca3af" stopOpacity="0.3" />
+            </linearGradient>
+            <linearGradient id="scribbleGrad2" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="#d1d5db" stopOpacity="0.2" />
+              <stop offset="50%" stopColor="#9ca3af" stopOpacity="0.35" />
+              <stop offset="100%" stopColor="#d1d5db" stopOpacity="0.2" />
+            </linearGradient>
+          </defs>
+        </svg>
 
-        {/* Lines on paper with staggered draw */}
-        <div className="absolute inset-4 flex flex-col gap-3">
-          {[0, 1, 2, 3].map((i) => (
-            <motion.div
-              key={i}
-              className="h-px rounded-full"
-              style={{
-                background: i === 3
-                  ? 'linear-gradient(90deg, #e5e7eb 60%, transparent)'
-                  : '#e5e7eb',
-              }}
-              initial={{ width: 0, opacity: 0 }}
-              animate={{ width: i === 3 ? '70%' : '100%', opacity: 1 }}
-              transition={{
-                duration: 1,
-                delay: 0.4 + i * 0.25,
-                ease: 'easeInOut',
-              }}
-            />
-          ))}
-        </div>
+        {/* Ink splatter dots along the scribble path */}
+        {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+          <motion.div
+            key={i}
+            className="absolute w-1 h-1 rounded-full bg-gray-400 dark:bg-gray-500"
+            style={{
+              left: `${8 + i * 11}%`,
+              top: `${42 + Math.sin(i * 2.3) * 18}%`,
+            }}
+            animate={{
+              opacity: [0, 0.6, 0],
+              scale: [0.3, 1, 0.3],
+            }}
+            transition={{
+              duration: 2.5,
+              delay: 0.4 + i * 0.25,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+          />
+        ))}
 
-        {/* Writing hand / pencil — horizontal, tip pointing right */}
+        {/* Horizontal pencil — squiggly swinging motion */}
         <motion.div
-          className="absolute"
+          className="absolute top-1/2 -translate-y-1/2"
           style={{ width: 52, height: 20, transformOrigin: '46px 10px' }}
-          initial={{ x: 10, y: 6, rotate: 0 }}
           animate={{
-            x: [10, 132, 10, 132, 10, 100, 10],
-            y: [6, 6, 18, 18, 30, 42, 64],
-            rotate: [0, -4, 3, -5, 2, -3, 0],
+            x: [4, 80, 140, 60, 170, 90, 20, 100, 4],
+            y: [0, -8, 5, -6, 8, -4, 6, -7, 0],
+            rotate: [-8, 12, -10, 14, -7, 11, -9, 13, -8],
           }}
           transition={{
-            duration: 5,
+            duration: 4,
             repeat: Infinity,
             ease: 'easeInOut',
-            times: [0, 0.15, 0.28, 0.42, 0.55, 0.7, 0.85],
           }}
         >
           {/* Pencil shadow */}
           <motion.div
-            className="absolute top-2 left-1 w-10 h-3 bg-black/10 dark:bg-black/30 rounded-sm blur-sm"
-            animate={{ opacity: [0.3, 0.5, 0.3] }}
-            transition={{ duration: 5, repeat: Infinity }}
+            className="absolute top-3 left-2 w-10 h-2 bg-black/10 dark:bg-black/30 rounded-sm blur-sm"
+            animate={{ opacity: [0.2, 0.4, 0.2] }}
+            transition={{ duration: 4, repeat: Infinity }}
           />
 
           <svg width="52" height="20" viewBox="0 0 52 20" fill="none" className="drop-shadow-sm overflow-visible">
-            {/* Eraser (back, left side) */}
+            {/* Eraser */}
             <rect x="0" y="5" width="8" height="10" rx="3" fill="url(#eraserGrad)" />
             <rect x="0" y="6" width="8" height="2" rx="1" fill="rgba(255,255,255,0.2)" />
 
-            {/* Ferrule — metallic */}
+            {/* Ferrule */}
             <rect x="8" y="4" width="6" height="12" rx="1" fill="url(#metalGrad)" />
             <rect x="8" y="5" width="6" height="0.5" fill="rgba(255,255,255,0.3)" />
 
-            {/* Main body — amber gradient */}
+            {/* Body */}
             <rect x="14" y="6" width="24" height="8" rx="2" fill="url(#pencilGrad)" />
             <rect x="14" y="6" width="12" height="8" rx="2" fill="url(#pencilHighlight)" />
 
@@ -118,48 +150,30 @@ export function WritingAnimation({ text = 'Writing your letter...', className = 
           </svg>
         </motion.div>
 
-        {/* Ink trail dots following the pencil tip */}
-        <div className="absolute inset-0 pointer-events-none">
-          {[0, 1, 2, 3, 4, 5].map((i) => (
-            <motion.div
-              key={i}
-              className="absolute w-1 h-1 rounded-full bg-gray-800 dark:bg-gray-300"
-              style={{
-                left: `${16 + i * 18}%`,
-                top: `${18 + (i % 2) * 14}%`,
-              }}
-              animate={{
-                opacity: [0, 0.8, 0],
-                scale: [0.5, 1.2, 0.5],
-              }}
-              transition={{
-                duration: 2,
-                delay: 0.8 + i * 0.35,
-                repeat: Infinity,
-                ease: 'easeInOut',
-              }}
-            />
-          ))}
-        </div>
-
-        {/* Sparkle effects near pencil tip */}
+        {/* Sparkles bursting from the pencil tip */}
         <motion.div
-          className="absolute w-1.5 h-1.5 rounded-full bg-emerald-400/60"
-          style={{ left: '58%', top: '12%' }}
-          animate={{ opacity: [0, 1, 0], scale: [0, 1, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity, delay: 0.5 }}
+          className="absolute w-2 h-2 rounded-full bg-emerald-400/70"
+          style={{ left: '52%', top: '35%' }}
+          animate={{ opacity: [0, 1, 0], scale: [0, 1.5, 0], x: [0, 8], y: [0, -4] }}
+          transition={{ duration: 1.2, repeat: Infinity, delay: 0.2, ease: 'easeOut' }}
         />
         <motion.div
-          className="absolute w-1 h-1 rounded-full bg-amber-400/50"
-          style={{ left: '82%', top: '28%' }}
-          animate={{ opacity: [0, 1, 0], scale: [0, 1, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity, delay: 1.2 }}
+          className="absolute w-1.5 h-1.5 rounded-full bg-amber-400/60"
+          style={{ left: '58%', top: '55%' }}
+          animate={{ opacity: [0, 1, 0], scale: [0, 1.2, 0], x: [0, 6], y: [0, 5] }}
+          transition={{ duration: 1.2, repeat: Infinity, delay: 0.6, ease: 'easeOut' }}
         />
         <motion.div
-          className="absolute w-1 h-1 rounded-full bg-blue-400/50"
-          style={{ left: '62%', top: '42%' }}
-          animate={{ opacity: [0, 1, 0], scale: [0, 1, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity, delay: 1.8 }}
+          className="absolute w-1 h-1 rounded-full bg-blue-400/60"
+          style={{ left: '62%', top: '30%' }}
+          animate={{ opacity: [0, 1, 0], scale: [0, 1, 0], x: [0, 10], y: [0, -6] }}
+          transition={{ duration: 1.2, repeat: Infinity, delay: 1.0, ease: 'easeOut' }}
+        />
+        <motion.div
+          className="absolute w-1.5 h-1.5 rounded-full bg-purple-400/50"
+          style={{ left: '48%', top: '60%' }}
+          animate={{ opacity: [0, 1, 0], scale: [0, 1.3, 0], x: [0, -5], y: [0, 4] }}
+          transition={{ duration: 1.2, repeat: Infinity, delay: 1.4, ease: 'easeOut' }}
         />
       </div>
 
