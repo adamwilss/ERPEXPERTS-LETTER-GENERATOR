@@ -52,13 +52,14 @@ export function WritingAnimation({ text = 'Writing your letter...', className = 
           ))}
         </div>
 
-        {/* Writing hand / pencil */}
+        {/* Writing hand / pencil — horizontal, tip pointing right */}
         <motion.div
           className="absolute"
-          initial={{ x: 14, y: 22 }}
+          style={{ width: 52, height: 20 }}
+          initial={{ x: 10, y: 6 }}
           animate={{
-            x: [14, 150, 14, 150, 14, 120, 14],
-            y: [22, 22, 42, 42, 62, 82, 102],
+            x: [10, 132, 10, 132, 10, 100, 10],
+            y: [6, 6, 18, 18, 30, 42, 64],
           }}
           transition={{
             duration: 5,
@@ -67,67 +68,64 @@ export function WritingAnimation({ text = 'Writing your letter...', className = 
             times: [0, 0.15, 0.28, 0.42, 0.55, 0.7, 0.85],
           }}
         >
-          {/* Pencil body with 3D depth */}
-          <div className="relative">
-            {/* Pencil shadow */}
-            <motion.div
-              className="absolute top-1 left-1 w-5 h-16 bg-black/10 dark:bg-black/30 rounded-sm blur-sm"
-              animate={{ opacity: [0.3, 0.5, 0.3] }}
-              transition={{ duration: 5, repeat: Infinity }}
-            />
+          {/* Pencil shadow */}
+          <motion.div
+            className="absolute top-2 left-1 w-10 h-3 bg-black/10 dark:bg-black/30 rounded-sm blur-sm"
+            animate={{ opacity: [0.3, 0.5, 0.3] }}
+            transition={{ duration: 5, repeat: Infinity }}
+          />
 
-            <svg width="32" height="36" viewBox="0 0 32 36" fill="none" className="drop-shadow-sm">
-              {/* Main body - amber gradient */}
-              <rect x="8" y="4" width="7" height="20" rx="1.5" fill="url(#pencilGrad)" />
-              <rect x="8" y="4" width="3.5" height="20" rx="1.5" fill="url(#pencilHighlight)" />
+          <svg width="52" height="20" viewBox="0 0 52 20" fill="none" className="drop-shadow-sm overflow-visible">
+            {/* Eraser (back, left side) */}
+            <rect x="0" y="5" width="8" height="10" rx="3" fill="url(#eraserGrad)" />
+            <rect x="0" y="6" width="8" height="2" rx="1" fill="rgba(255,255,255,0.2)" />
 
-              {/* Ferrule - metallic */}
-              <rect x="7" y="24" width="9" height="4" rx="1" fill="url(#metalGrad)" />
-              <rect x="7" y="25" width="9" height="0.5" fill="rgba(255,255,255,0.3)" />
+            {/* Ferrule — metallic */}
+            <rect x="8" y="4" width="6" height="12" rx="1" fill="url(#metalGrad)" />
+            <rect x="8" y="5" width="6" height="0.5" fill="rgba(255,255,255,0.3)" />
 
-              {/* Eraser */}
-              <rect x="7.5" y="28" width="8" height="5" rx="1.5" fill="url(#eraserGrad)" />
-              <rect x="7.5" y="28.5" width="8" height="1" rx="0.5" fill="rgba(255,255,255,0.2)" />
+            {/* Main body — amber gradient */}
+            <rect x="14" y="6" width="24" height="8" rx="2" fill="url(#pencilGrad)" />
+            <rect x="14" y="6" width="12" height="8" rx="2" fill="url(#pencilHighlight)" />
 
-              {/* Pencil tip - wood */}
-              <polygon points="11.5,4 15,0 18.5,4" fill="#d4a574" />
-              <polygon points="13,4 15,1.5 17,4" fill="#1f2937" />
+            {/* Wood tip */}
+            <polygon points="38,6 38,14 46,10" fill="#d4a574" />
+            {/* Lead tip */}
+            <polygon points="42,8 42,12 46,10" fill="#1f2937" />
+            {/* Tip highlight */}
+            <polygon points="44,9 44,11 46,10" fill="rgba(255,255,255,0.4)" />
 
-              {/* Tip highlight */}
-              <polygon points="15,1.5 15.5,2.5 14.5,2.5" fill="rgba(255,255,255,0.4)" />
-
-              <defs>
-                <linearGradient id="pencilGrad" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#f59e0b" />
-                  <stop offset="100%" stopColor="#d97706" />
-                </linearGradient>
-                <linearGradient id="pencilHighlight" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#fbbf24" />
-                  <stop offset="100%" stopColor="#f59e0b" />
-                </linearGradient>
-                <linearGradient id="metalGrad" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#9ca3af" />
-                  <stop offset="50%" stopColor="#d1d5db" />
-                  <stop offset="100%" stopColor="#9ca3af" />
-                </linearGradient>
-                <linearGradient id="eraserGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#fca5a5" />
-                  <stop offset="100%" stopColor="#f87171" />
-                </linearGradient>
-              </defs>
-            </svg>
-          </div>
+            <defs>
+              <linearGradient id="pencilGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#f59e0b" />
+                <stop offset="100%" stopColor="#d97706" />
+              </linearGradient>
+              <linearGradient id="pencilHighlight" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#fbbf24" />
+                <stop offset="100%" stopColor="#f59e0b" />
+              </linearGradient>
+              <linearGradient id="metalGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#9ca3af" />
+                <stop offset="50%" stopColor="#d1d5db" />
+                <stop offset="100%" stopColor="#9ca3af" />
+              </linearGradient>
+              <linearGradient id="eraserGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#fca5a5" />
+                <stop offset="100%" stopColor="#f87171" />
+              </linearGradient>
+            </defs>
+          </svg>
         </motion.div>
 
-        {/* Ink trail dots following the pencil */}
+        {/* Ink trail dots following the pencil tip */}
         <div className="absolute inset-0 pointer-events-none">
           {[0, 1, 2, 3, 4, 5].map((i) => (
             <motion.div
               key={i}
               className="absolute w-1 h-1 rounded-full bg-gray-800 dark:bg-gray-300"
               style={{
-                left: `${18 + i * 22}%`,
-                top: `${26 + (i % 2) * 18}%`,
+                left: `${16 + i * 18}%`,
+                top: `${18 + (i % 2) * 14}%`,
               }}
               animate={{
                 opacity: [0, 0.8, 0],
@@ -146,19 +144,19 @@ export function WritingAnimation({ text = 'Writing your letter...', className = 
         {/* Sparkle effects near pencil tip */}
         <motion.div
           className="absolute w-1.5 h-1.5 rounded-full bg-emerald-400/60"
-          style={{ left: '28%', top: '18%' }}
+          style={{ left: '58%', top: '12%' }}
           animate={{ opacity: [0, 1, 0], scale: [0, 1, 0] }}
           transition={{ duration: 1.5, repeat: Infinity, delay: 0.5 }}
         />
         <motion.div
           className="absolute w-1 h-1 rounded-full bg-amber-400/50"
-          style={{ left: '65%', top: '35%' }}
+          style={{ left: '82%', top: '28%' }}
           animate={{ opacity: [0, 1, 0], scale: [0, 1, 0] }}
           transition={{ duration: 1.5, repeat: Infinity, delay: 1.2 }}
         />
         <motion.div
           className="absolute w-1 h-1 rounded-full bg-blue-400/50"
-          style={{ left: '32%', top: '55%' }}
+          style={{ left: '62%', top: '42%' }}
           animate={{ opacity: [0, 1, 0], scale: [0, 1, 0] }}
           transition={{ duration: 1.5, repeat: Infinity, delay: 1.8 }}
         />

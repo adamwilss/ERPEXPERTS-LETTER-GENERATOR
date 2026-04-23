@@ -9,6 +9,7 @@ import CalloutStat from './CalloutStat'
 import TechMap from './TechMap'
 import DownloadMenu from './DownloadMenu'
 import SaveTemplateModal from './SaveTemplateModal'
+import InlineRewrite from './InlineRewrite'
 import { saveTemplate } from '@/lib/templates'
 import { savePack } from '@/lib/history'
 import { parseStats } from '@/lib/parse'
@@ -96,25 +97,27 @@ function CoverLetterView({ content }: { content: string }) {
       )}
 
       {/* Body */}
-      <div className="font-letter text-[16px] leading-[1.9] text-gray-800 space-y-7">
-        {paragraphs
-          .filter((_, i) => {
-            if (i === salutationIdx) return false
-            if (signoffIdx >= 0 && i >= signoffIdx) return false
-            return true
-          })
-          .map((para, i) => {
-            if (i === 0 && salutationIdx >= 0) {
-              return (
-                <>
-                  <p key="sal" className="font-sans text-[14px] text-gray-700">{paragraphs[salutationIdx]}</p>
-                  <p key={i}>{para.trim()}</p>
-                </>
-              )
-            }
-            return <p key={i}>{para.trim()}</p>
-          })}
-      </div>
+      <InlineRewrite context={content} part="letter">
+        <div className="font-letter text-[16px] leading-[1.9] text-gray-800 space-y-7">
+          {paragraphs
+            .filter((_, i) => {
+              if (i === salutationIdx) return false
+              if (signoffIdx >= 0 && i >= signoffIdx) return false
+              return true
+            })
+            .map((para, i) => {
+              if (i === 0 && salutationIdx >= 0) {
+                return (
+                  <>
+                    <p key="sal" className="font-sans text-[14px] text-gray-700">{paragraphs[salutationIdx]}</p>
+                    <p key={i}>{para.trim()}</p>
+                  </>
+                )
+              }
+              return <p key={i}>{para.trim()}</p>
+            })}
+        </div>
+      </InlineRewrite>
 
       {/* Sign-off */}
       {signoff && (
@@ -169,9 +172,11 @@ function BusinessCaseView({ content }: { content: string }) {
       {subtitle && (
         <p className="text-[14px] text-gray-500 italic mb-9 pb-7 border-b border-gray-200 leading-relaxed">{subtitle}</p>
       )}
-      <div className="font-letter text-[16px] leading-[1.9] text-gray-800">
-        {renderProseWithStats(bodyText)}
-      </div>
+      <InlineRewrite context={content} part="case" companyName={title}>
+        <div className="font-letter text-[16px] leading-[1.9] text-gray-800">
+          {renderProseWithStats(bodyText)}
+        </div>
+      </InlineRewrite>
       <div className="mt-10 pt-5 border-t border-gray-100 text-[11px] text-gray-400 flex items-center justify-between tracking-wide">
         <span>ERP Experts Ltd · Manchester, UK</span>
         <span>www.erpexperts.co.uk</span>

@@ -194,6 +194,21 @@ export default function TemplatesPage() {
           </div>
         </div>
 
+        {/* Tutorial card */}
+        <div className="bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-200 dark:border-emerald-500/15 rounded-xl p-5 mb-8">
+          <h3 className="text-sm font-semibold text-emerald-800 dark:text-emerald-400 mb-2">
+            What are templates?
+          </h3>
+          <div className="text-xs text-emerald-700 dark:text-emerald-300/80 space-y-1.5 leading-relaxed">
+            <p>
+              Templates are reusable letter structures. When you generate a great letter pack for a prospect, save it as a template. Later, you can "Use" that template to pre-fill the generator with the same structure, tone, and angles — the AI then rewrites it specifically for the new company.
+            </p>
+            <p>
+              <strong>How to use:</strong> Generate a letter → click <strong>Save Template</strong> → name it and tag it → come back here anytime → click <strong>Use</strong> on a template to start a new letter with that structure.
+            </p>
+          </div>
+        </div>
+
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-3 mb-6">
           <div className="relative flex-1 max-w-md">

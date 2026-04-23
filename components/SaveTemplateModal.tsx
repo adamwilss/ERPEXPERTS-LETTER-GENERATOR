@@ -41,6 +41,10 @@ export default function SaveTemplateModal({
           </button>
         </div>
 
+        <p className="text-xs text-gray-500 dark:text-[#555] mb-4 leading-relaxed">
+          Templates let you save this full letter pack so you can reuse it later as a starting point for similar companies. The AI will adapt the content to the new prospect while keeping the structure and angles that worked.
+        </p>
+
         <div className="space-y-4">
           <div>
             <label className="text-xs font-medium text-gray-500 dark:text-[#555] mb-1.5 block">

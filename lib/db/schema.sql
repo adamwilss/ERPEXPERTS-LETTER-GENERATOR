@@ -12,45 +12,11 @@ CREATE TABLE IF NOT EXISTS companies (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Letter packs
-CREATE TABLE IF NOT EXISTS packs (
-  id SERIAL PRIMARY KEY,
-  company_id INTEGER REFERENCES companies(id) ON DELETE CASCADE,
-  search_id INTEGER REFERENCES searches(id) ON DELETE SET NULL,
-  lead_id INTEGER REFERENCES search_leads(id) ON DELETE SET NULL,
-  recipient_name TEXT,
-  contact_title TEXT,
-  content TEXT NOT NULL,
-  status TEXT DEFAULT 'pending',
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+-- Unique constraint for upsert logic
+CREATE UNIQUE INDEX IF NOT EXISTS idx_companies_name_website
+  ON companies (LOWER(name), COALESCE(website, ''));
 
--- Follow-up sequences
-CREATE TABLE IF NOT EXISTS sequences (
-  id SERIAL PRIMARY KEY,
-  pack_id INTEGER REFERENCES packs(id) ON DELETE CASCADE,
-  stage TEXT NOT NULL,
-  content TEXT,
-  status TEXT DEFAULT 'pending',
-  sent_at TIMESTAMP,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Outcomes/responses
-CREATE TABLE IF NOT EXISTS outcomes (
-  id SERIAL PRIMARY KEY,
-  pack_id INTEGER REFERENCES packs(id) ON DELETE CASCADE,
-  sent_date TIMESTAMP,
-  response_date TIMESTAMP,
-  response_type TEXT,
-  meeting_booked BOOLEAN DEFAULT FALSE,
-  notes TEXT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Searches table (for saving Apollo search results)
+-- Searches table (for saving Apollo search results) — must exist before packs
 CREATE TABLE IF NOT EXISTS searches (
   id SERIAL PRIMARY KEY,
   industry TEXT NOT NULL,
@@ -90,6 +56,44 @@ CREATE TABLE IF NOT EXISTS search_leads (
   generated BOOLEAN DEFAULT FALSE,
   status TEXT DEFAULT 'pending',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Letter packs
+CREATE TABLE IF NOT EXISTS packs (
+  id SERIAL PRIMARY KEY,
+  company_id INTEGER REFERENCES companies(id) ON DELETE CASCADE,
+  search_id INTEGER REFERENCES searches(id) ON DELETE SET NULL,
+  lead_id INTEGER REFERENCES search_leads(id) ON DELETE SET NULL,
+  recipient_name TEXT,
+  contact_title TEXT,
+  content TEXT NOT NULL,
+  status TEXT DEFAULT 'pending',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Follow-up sequences
+CREATE TABLE IF NOT EXISTS sequences (
+  id SERIAL PRIMARY KEY,
+  pack_id INTEGER REFERENCES packs(id) ON DELETE CASCADE,
+  stage TEXT NOT NULL,
+  content TEXT,
+  status TEXT DEFAULT 'pending',
+  sent_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Outcomes/responses
+CREATE TABLE IF NOT EXISTS outcomes (
+  id SERIAL PRIMARY KEY,
+  pack_id INTEGER REFERENCES packs(id) ON DELETE CASCADE,
+  sent_date TIMESTAMP,
+  response_date TIMESTAMP,
+  response_type TEXT,
+  meeting_booked BOOLEAN DEFAULT FALSE,
+  notes TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Indexes for performance

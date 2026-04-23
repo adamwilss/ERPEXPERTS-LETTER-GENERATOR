@@ -597,6 +597,17 @@ html.dark .gradient-mesh {
 .letter-body p { margin-bottom: 12pt; }
 .letter-footer { font-family: 'Inter', sans-serif; font-size: 8pt; color: #999; border-top: 1px solid #eee; margin-top: 32pt; padding-top: 8pt; }
 
+/* Inline rewrite accepted highlight */
+.inline-rewrite-accepted {
+  background: linear-gradient(120deg, rgba(16, 185, 129, 0.12) 0%, rgba(16, 185, 129, 0.05) 100%);
+  border-radius: 2px;
+  padding: 0 2px;
+  transition: background 0.3s ease;
+}
+html.dark .inline-rewrite-accepted {
+  background: linear-gradient(120deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.08) 100%);
+}
+
 @media print {
   .no-print { display: none !important; }
   body { background: white !important; color: #111 !important; }

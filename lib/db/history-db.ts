@@ -63,29 +63,47 @@ export async function savePackToDB(
 ): Promise<SavedPack> {
   const sql = getSql();
 
-  // Insert or get company
-  const companyResult = await sql`
-    INSERT INTO companies (name, website, industry, location, employee_count, erp_score)
-    VALUES (
-      ${pack.company},
-      ${pack.website ?? null},
-      ${pack.industry ?? null},
-      ${pack.location ?? null},
-      ${pack.employees ?? null},
-      ${pack.erpScore ?? null}
-    )
-    ON CONFLICT (name, COALESCE(website, '')) DO UPDATE SET
-      industry = EXCLUDED.industry,
-      location = EXCLUDED.location,
-      employee_count = EXCLUDED.employee_count,
-      erp_score = EXCLUDED.erp_score
-    RETURNING id
+  // Try to find existing company by name (case-insensitive) and website
+  const existingCompany = await sql`
+    SELECT id FROM companies
+    WHERE LOWER(name) = LOWER(${pack.company})
+      AND COALESCE(website, '') = COALESCE(${pack.website ?? null}, '')
+    LIMIT 1
   `;
 
-  const companyRow = getFirstRow<{ id: number }>(companyResult);
-  const companyId = companyRow?.id;
-  if (!companyId) {
-    throw new Error('Failed to create or find company');
+  let companyId: number;
+  const existingRow = getFirstRow<{ id: number }>(existingCompany);
+
+  if (existingRow?.id) {
+    companyId = existingRow.id;
+    // Update company info
+    await sql`
+      UPDATE companies
+      SET industry = COALESCE(${pack.industry ?? null}, industry),
+          location = COALESCE(${pack.location ?? null}, location),
+          employee_count = COALESCE(${pack.employees ?? null}, employee_count),
+          erp_score = COALESCE(${pack.erpScore ?? null}, erp_score)
+      WHERE id = ${companyId}
+    `;
+  } else {
+    // Insert new company
+    const companyResult = await sql`
+      INSERT INTO companies (name, website, industry, location, employee_count, erp_score)
+      VALUES (
+        ${pack.company},
+        ${pack.website ?? null},
+        ${pack.industry ?? null},
+        ${pack.location ?? null},
+        ${pack.employees ?? null},
+        ${pack.erpScore ?? null}
+      )
+      RETURNING id
+    `;
+    const newRow = getFirstRow<{ id: number }>(companyResult);
+    if (!newRow?.id) {
+      throw new Error('Failed to create company');
+    }
+    companyId = newRow.id;
   }
 
   // Insert pack
