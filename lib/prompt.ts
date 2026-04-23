@@ -362,7 +362,19 @@ CRITICAL — the text below is a LIST OF REQUIREMENTS for you. Do NOT include an
 
 Requirement 1 — Open with 1-2 sharp sentences about THEIR operational friction. Lead with their problem, not NetSuite. Make it sting.
 
-Requirement 2 — Include two call-out stat boxes wrapped in [STAT]...[/STAT] delimiters. Each must have a headline figure, body text tied to their operations, and a source citation.
+Requirement 2 — Include two call-out stat boxes. Output them EXACTLY in this format with the delimiters:
+
+[STAT]
+Headline: [Specific figure tied to their model]
+Body: [One to two sentences — concrete consequence]
+Source: [Real source or "illustrative benchmark based on industry pattern"]
+[/STAT]
+
+[STAT]
+Headline: [Second figure]
+Body: [Tied to their operations]
+Source: [Source or "illustrative"]
+[/STAT]
 
 Requirement 3 — Write a short section that explicitly quantifies what the current architecture costs them every month. Frame it as lost profit, not lost efficiency. Weave these angles naturally into prose paragraphs:
 - Headcount wasted: At this scale, manual reconciliation likely costs 1-2 FTE days every week. That is capacity you are paying for and cannot use.
