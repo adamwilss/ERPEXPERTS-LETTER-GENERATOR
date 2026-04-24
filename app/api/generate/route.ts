@@ -90,7 +90,7 @@ export async function POST(req: Request) {
       model: openai('gpt-4o'),
       system: systemPrompt,
       messages: [{ role: 'user', content: userMessage }],
-      maxOutputTokens: type === 'initial' ? 6000 : 2000,
+      maxOutputTokens: type === 'initial' ? 3000 : 2000,
     })
 
     return result.toTextStreamResponse()

@@ -6,22 +6,20 @@ export interface ParsedOutput {
 
 export function parseOutput(raw: string): ParsedOutput {
   const p1Start = raw.indexOf('---PART1---')
-  const p2Start = raw.indexOf('---PART2---')
-  const p3Start = raw.indexOf('---PART3---')
 
-  const part1 =
-    p1Start !== -1
-      ? raw.slice(p1Start + 11, p2Start !== -1 ? p2Start : undefined).trim()
-      : ''
-
-  const part2 =
-    p2Start !== -1
-      ? raw.slice(p2Start + 11, p3Start !== -1 ? p3Start : undefined).trim()
-      : ''
-
-  const part3 = p3Start !== -1 ? raw.slice(p3Start + 11).trim() : ''
+  const part1 = p1Start !== -1 ? raw.slice(p1Start + 11).trim() : raw.trim()
+  const part2 = ''
+  const part3 = ''
 
   return { part1, part2, part3 }
+}
+
+export function parseSingleLetter(raw: string): string {
+  const p1Start = raw.indexOf('---PART1---')
+  if (p1Start !== -1) {
+    return raw.slice(p1Start + 11).trim()
+  }
+  return raw.trim()
 }
 
 // Parses [STAT]...[/STAT] blocks out of business case text

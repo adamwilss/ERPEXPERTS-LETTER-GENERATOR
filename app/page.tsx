@@ -7,7 +7,7 @@ import LetterForm, { FormValues } from '@/components/LetterForm'
 import LetterOutput from '@/components/LetterOutput'
 import { parseOutput } from '@/lib/parse'
 import { savePack } from '@/lib/history'
-import { FileText, TrendingUp, Shield, Sparkles, Zap, ArrowRight } from 'lucide-react'
+import { FileText, Sparkles, Zap, ArrowRight } from 'lucide-react'
 import { HeroGlow, GradientBorder } from '@/components/MotionConfig'
 import { WritingAnimation } from '@/components/WritingAnimation'
 
@@ -65,8 +65,8 @@ export default function Home() {
                 </div>
                 <h1 className="page-title max-w-lg">Generate outreach pack</h1>
                 <p className="page-description text-[14px]">
-                  Enter prospect details. The system researches the company and produces a three-part
-                  personalised letter pack in under 60 seconds.
+                  Enter prospect details. The system researches the company and produces a
+                  personalised cover letter in under 60 seconds.
                 </p>
               </div>
             </HeroGlow>
@@ -95,28 +95,10 @@ export default function Home() {
                           num: '01',
                           icon: FileText,
                           title: 'Cover letter',
-                          desc: 'Company-specific, signed by Ric. Ready to print and post.',
+                          desc: 'A short, specific, personally-written cover letter signed by Ric Wilson.',
                           color: 'text-emerald-500',
                           bg: 'bg-emerald-50 dark:bg-emerald-500/10',
                           border: 'border-emerald-200 dark:border-emerald-500/20',
-                        },
-                        {
-                          num: '02',
-                          icon: TrendingUp,
-                          title: 'Business case',
-                          desc: 'Pain points, benchmarks, and a named case study.',
-                          color: 'text-blue-500',
-                          bg: 'bg-blue-50 dark:bg-blue-500/10',
-                          border: 'border-blue-200 dark:border-blue-500/20',
-                        },
-                        {
-                          num: '03',
-                          icon: Shield,
-                          title: 'Tech map',
-                          desc: 'Which systems integrate, replace, or get eliminated.',
-                          color: 'text-amber-500',
-                          bg: 'bg-amber-50 dark:bg-amber-500/10',
-                          border: 'border-amber-200 dark:border-amber-500/20',
                         },
                       ].map(({ num, icon: Icon, title, desc, color, bg, border }, i) => (
                         <motion.div
@@ -210,7 +192,7 @@ export default function Home() {
             {isLoading && completion && (
               <div className="mb-8 flex items-center gap-3 text-xs text-gray-500 dark:text-[#555] bg-gray-50/80 dark:bg-[#111]/80 border border-gray-200 dark:border-[#1e1e1e] rounded-xl px-4 py-3 w-fit animate-fade-in glow-green backdrop-blur-sm">
                 <Zap className="w-4 h-4 text-emerald-500 animate-pulse" />
-                <span className="font-semibold">Writing letter pack...</span>
+                <span className="font-semibold">Writing letter...</span>
                 <span className="text-gray-400 dark:text-[#444]">almost done</span>
               </div>
             )}
@@ -244,9 +226,7 @@ export default function Home() {
             {parsed && (
               <div className="animate-fade-up">
                 <LetterOutput
-                  coverLetter={parsed.part1}
-                  businessCase={parsed.part2}
-                  techMap={parsed.part3}
+                  letter={parsed?.part1 || ''}
                   companyName={companyName}
                   recipientName={formValues?.recipientName}
                   jobTitle={formValues?.jobTitle}

@@ -375,9 +375,7 @@ export default function HistoryPage() {
                       {/* Letter Output */}
                       <div className="pt-4 border-t border-gray-200 dark:border-[#1e1e1e]">
                         <LetterOutput
-                          coverLetter={parsed.part1}
-                          businessCase={parsed.part2}
-                          techMap={parsed.part3}
+                          letter={parsed?.part1 || ''}
                           companyName={pack.company}
                           isStreaming={false}
                         />
