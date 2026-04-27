@@ -96,6 +96,19 @@ CREATE TABLE IF NOT EXISTS outcomes (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Research cache table (avoids re-fetching for same domain within 24h)
+CREATE TABLE IF NOT EXISTS research_cache (
+  id SERIAL PRIMARY KEY,
+  domain_hash TEXT UNIQUE NOT NULL,
+  domain TEXT NOT NULL,
+  content_json JSONB NOT NULL,
+  erp_detection JSONB,
+  fetched_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_research_cache_domain_hash ON research_cache(domain_hash);
+CREATE INDEX IF NOT EXISTS idx_research_cache_fetched_at ON research_cache(fetched_at);
+
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_packs_company ON packs(company_id);
 CREATE INDEX IF NOT EXISTS idx_packs_search ON packs(search_id);

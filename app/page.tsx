@@ -1,39 +1,100 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useCompletion } from '@ai-sdk/react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import LetterForm, { FormValues } from '@/components/LetterForm'
-import LetterOutput from '@/components/LetterOutput'
-import { parseOutput } from '@/lib/parse'
+import PipelineOutput from '@/components/PipelineOutput'
+import PipelineProgress, { createInitialSteps, type StepState } from '@/components/PipelineProgress'
 import { savePack } from '@/lib/history'
-import { FileText, Sparkles, Zap, ArrowRight, BarChart3, Network } from 'lucide-react'
+import { FileText, Sparkles, ArrowRight, BarChart3, Network } from 'lucide-react'
 import { HeroGlow, GradientBorder } from '@/components/MotionConfig'
 import { WritingAnimation } from '@/components/WritingAnimation'
+import type { PipelineOutput as PipelineOutputType } from '@/lib/pipeline/schemas'
 
 export default function Home() {
   const [submitted, setSubmitted] = useState(false)
   const [companyName, setCompanyName] = useState('')
-
-  const { complete, completion, isLoading, error } = useCompletion({
-    api: '/api/generate',
-    streamProtocol: 'text',
-  })
-
   const [formValues, setFormValues] = useState<FormValues | null>(null)
+
+  // Pipeline state
+  const [steps, setSteps] = useState<StepState[]>(createInitialSteps)
+  const [output, setOutput] = useState<PipelineOutputType | null>(null)
+  const [pipelineError, setPipelineError] = useState<Error | null>(null)
+  const [isRunning, setIsRunning] = useState(false)
+
+  const updateStep = useCallback((stepKey: string, status: StepState['status'], message?: string, data?: unknown) => {
+    setSteps((prev) =>
+      prev.map((s) => (s.key === stepKey ? { ...s, status, message, data } : s))
+    )
+  }, [])
 
   const handleSubmit = async (values: FormValues) => {
     setCompanyName(values.company)
     setFormValues(values)
     setSubmitted(true)
-    await complete('', { body: values })
+    setSteps(createInitialSteps())
+    setOutput(null)
+    setPipelineError(null)
+    setIsRunning(true)
+
+    try {
+      const res = await fetch('/api/pipeline', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(values),
+      })
+
+      if (!res.ok || !res.body) {
+        throw new Error(`Pipeline failed: ${res.statusText}`)
+      }
+
+      const reader = res.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        buffer = lines.pop() || ''
+
+        for (const line of lines) {
+          if (!line.trim()) continue
+          try {
+            const event = JSON.parse(line) as {
+              type: string
+              step?: string
+              message?: string
+              data?: unknown
+            }
+
+            if (event.type === 'step_start' && event.step) {
+              updateStep(event.step, 'running', event.message)
+            } else if (event.type === 'step_complete' && event.step) {
+              updateStep(event.step, 'complete', undefined, event.data)
+            } else if (event.type === 'step_error' && event.step) {
+              updateStep(event.step, 'error', event.message)
+            } else if (event.type === 'complete') {
+              setOutput(event.data as PipelineOutputType)
+            }
+          } catch {
+            // Ignore malformed lines
+          }
+        }
+      }
+    } catch (err) {
+      setPipelineError(err instanceof Error ? err : new Error('Unknown error'))
+    } finally {
+      setIsRunning(false)
+    }
   }
 
-  const parsed = completion ? parseOutput(completion) : null
-
-  // Auto-save to history when generation completes
+  // Auto-save to history when pipeline completes
   useEffect(() => {
-    if (!isLoading && completion && parsed && formValues) {
+    if (!isRunning && output && formValues) {
+      const completion = `---PART1---\n${output.part1}\n---PART2---\n${output.part2}\n---PART3---\n${output.part3}`
       savePack({
         company: formValues.company,
         recipientName: formValues.recipientName,
@@ -46,11 +107,12 @@ export default function Home() {
         erpScore: undefined,
       }).catch((err) => console.warn('Failed to auto-save pack:', err))
     }
-  }, [isLoading, completion, parsed, formValues])
+  }, [isRunning, output, formValues])
+
+  const anyComplete = steps.some((s) => s.status === 'complete')
 
   return (
     <main className="page-shell relative overflow-hidden">
-      {/* Animated mesh background */}
       <div className="absolute inset-0 gradient-mesh pointer-events-none z-0" />
 
       <div className="relative z-10">
@@ -66,7 +128,7 @@ export default function Home() {
                 <h1 className="page-title max-w-lg">Generate outreach pack</h1>
                 <p className="page-description text-[14px]">
                   Enter prospect details. The system researches the company and produces a
-                  personalised cover letter in under 60 seconds.
+                  personalised three-part letter pack in under 60 seconds.
                 </p>
               </div>
             </HeroGlow>
@@ -184,85 +246,72 @@ export default function Home() {
           </div>
         ) : (
           <div className="page-container">
-            {isLoading && !completion && (
-              <div className="py-20 flex flex-col items-center gap-8 max-w-lg mx-auto animate-fade-up">
-                <WritingAnimation text={`Researching ${companyName}...`} />
-                <div className="space-y-2.5 text-center">
-                  <p className="text-sm font-semibold text-gray-950 dark:text-white">
-                    Researching {companyName}...
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-[#555]">
-                    Reading the company website and gathering context.
-                  </p>
-                  <p className="text-xs text-gray-400 dark:text-[#444]">
-                    This takes around 15-30 seconds.
-                  </p>
-                </div>
-                <button
-                  onClick={() => setSubmitted(false)}
-                  className="text-xs text-gray-400 dark:text-[#444] hover:text-gray-600 dark:hover:text-[#888] underline underline-offset-2 transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-            )}
-
-            {isLoading && completion && (
-              <div className="mb-8 flex items-center gap-3 text-xs text-gray-500 dark:text-[#555] bg-gray-50/80 dark:bg-[#111]/80 border border-gray-200 dark:border-[#1e1e1e] rounded-xl px-4 py-3 w-fit animate-fade-in glow-green backdrop-blur-sm">
-                <Zap className="w-4 h-4 text-emerald-500 animate-pulse" />
-                <span className="font-semibold">Writing letter...</span>
-                <span className="text-gray-400 dark:text-[#444]">almost done</span>
-              </div>
-            )}
-
-            {error && (
-              <div className="bg-red-50 dark:bg-red-500/5 border border-red-200 dark:border-red-500/20 rounded-xl p-5 text-sm text-red-600 dark:text-red-400 max-w-lg animate-fade-up">
-                <div className="flex items-start gap-3">
-                  <div className="mt-0.5 w-5 h-5 rounded-full bg-red-100 dark:bg-red-500/10 flex items-center justify-center flex-shrink-0">
-                    <svg
-                      className="w-3 h-3 text-red-600 dark:text-red-400"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2.5}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="font-semibold">Generation failed</p>
-                    <p className="text-xs mt-1 opacity-80">{error.message}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {parsed && (
+            <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-10">
+              {/* Left: Pipeline Progress */}
               <div className="animate-fade-up">
-                <LetterOutput
-                  letter={parsed?.part1 || ''}
-                  businessCase={parsed?.part2 || ''}
-                  techMap={parsed?.part3 || ''}
-                  companyName={companyName}
-                  recipientName={formValues?.recipientName}
-                  jobTitle={formValues?.jobTitle}
-                  isStreaming={isLoading}
-                />
+                <PipelineProgress steps={steps} />
               </div>
-            )}
 
-            {!isLoading && !error && (
-              <button
-                onClick={() => setSubmitted(false)}
-                className="mt-8 text-xs text-gray-400 dark:text-[#444] hover:text-gray-600 dark:hover:text-[#888] underline underline-offset-2 transition-colors"
-              >
-                &larr; Generate another
-              </button>
-            )}
+              {/* Right: Output */}
+              <div className="animate-fade-up">
+                {isRunning && !anyComplete && (
+                  <div className="py-20 flex flex-col items-center gap-8 max-w-lg mx-auto">
+                    <WritingAnimation text={`Researching ${companyName}...`} />
+                    <div className="space-y-2.5 text-center">
+                      <p className="text-sm font-semibold text-gray-950 dark:text-white">
+                        Running pipeline for {companyName}...
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-[#555]">
+                        Researching, extracting insight, writing cover letter, business case, and tech map.
+                      </p>
+                      <p className="text-xs text-gray-400 dark:text-[#444]">
+                        This takes around 30-60 seconds.
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setSubmitted(false)}
+                      className="text-xs text-gray-400 dark:text-[#444] hover:text-gray-600 dark:hover:text-[#888] underline underline-offset-2 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                )}
+
+                {pipelineError && (
+                  <div className="bg-red-50 dark:bg-red-500/5 border border-red-200 dark:border-red-500/20 rounded-xl p-5 text-sm text-red-600 dark:text-red-400 max-w-lg animate-fade-up">
+                    <div className="flex items-start gap-3">
+                      <div className="mt-0.5 w-5 h-5 rounded-full bg-red-100 dark:bg-red-500/10 flex items-center justify-center flex-shrink-0">
+                        <svg className="w-3 h-3 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="font-semibold">Pipeline failed</p>
+                        <p className="text-xs mt-1 opacity-80">{pipelineError.message}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {output && (
+                  <PipelineOutput
+                    output={output}
+                    companyName={companyName}
+                    recipientName={formValues?.recipientName}
+                    jobTitle={formValues?.jobTitle}
+                  />
+                )}
+
+                {!isRunning && (
+                  <button
+                    onClick={() => setSubmitted(false)}
+                    className="mt-8 text-xs text-gray-400 dark:text-[#444] hover:text-gray-600 dark:hover:text-[#888] underline underline-offset-2 transition-colors"
+                  >
+                    &larr; Generate another
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         )}
 

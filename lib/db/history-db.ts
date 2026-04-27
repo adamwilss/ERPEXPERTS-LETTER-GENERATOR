@@ -314,3 +314,68 @@ export async function loadSequencesForPack(
 
   return { ...sequences, content };
 }
+
+// ── Research Cache ───────────────────────────────────────────────────────────
+
+export interface CachedResearch {
+  domain: string;
+  contentJson: unknown;
+  erpDetection: unknown;
+  fetchedAt: string;
+}
+
+export async function loadResearchCache(domain: string): Promise<CachedResearch | null> {
+  const sql = getSql();
+  const domainHash = await hashDomain(domain);
+
+  const result = await sql`
+    SELECT domain, content_json, erp_detection, fetched_at
+    FROM research_cache
+    WHERE domain_hash = ${domainHash}
+      AND fetched_at > CURRENT_TIMESTAMP - INTERVAL '24 hours'
+    LIMIT 1
+  `;
+
+  const row = getFirstRow<{
+    domain: string;
+    content_json: unknown;
+    erp_detection: unknown;
+    fetched_at: string;
+  }>(result);
+
+  if (!row) return null;
+
+  return {
+    domain: row.domain,
+    contentJson: row.content_json,
+    erpDetection: row.erp_detection,
+    fetchedAt: row.fetched_at,
+  };
+}
+
+export async function saveResearchCache(
+  domain: string,
+  contentJson: unknown,
+  erpDetection: unknown
+): Promise<void> {
+  const sql = getSql();
+  const domainHash = await hashDomain(domain);
+
+  await sql`
+    INSERT INTO research_cache (domain_hash, domain, content_json, erp_detection, fetched_at)
+    VALUES (${domainHash}, ${domain}, ${JSON.stringify(contentJson)}, ${JSON.stringify(erpDetection)}, CURRENT_TIMESTAMP)
+    ON CONFLICT (domain_hash) DO UPDATE SET
+      domain = EXCLUDED.domain,
+      content_json = EXCLUDED.content_json,
+      erp_detection = EXCLUDED.erp_detection,
+      fetched_at = EXCLUDED.fetched_at
+  `;
+}
+
+async function hashDomain(domain: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(domain.toLowerCase().trim());
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+}

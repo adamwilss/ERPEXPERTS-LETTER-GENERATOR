@@ -6,7 +6,11 @@
  *   2. Tavily (parallel queries) — business model, tech stack, executive context
  *   3. LinkedIn company page — supplementary metadata
  *   4. ERP Experts site cache — injected into prompts for current service context
+ *
+ * Results are cached in Postgres for 24h to avoid redundant fetches.
  */
+
+import { loadResearchCache, saveResearchCache } from './db/history-db'
 
 // ── ERP Detection ──────────────────────────────────────────────────────────────
 
@@ -130,6 +134,23 @@ export interface ResearchResult {
 }
 
 export async function fetchResearch(url: string, company: string): Promise<ResearchResult> {
+  // 1. Check cache first (24h TTL)
+  if (url) {
+    try {
+      const cached = await loadResearchCache(url)
+      if (cached) {
+        const erpExpertsContext = await fetchErpExpertsContext()
+        return {
+          text: String((cached.contentJson as Record<string, unknown>)?.text ?? ''),
+          erpDetection: (cached.erpDetection as ErpDetection) ?? { hasErp: false, erpName: null, isNetSuite: false, confidence: 'low' },
+          erpExpertsContext,
+        }
+      }
+    } catch {
+      // Cache lookup failed — proceed with live fetch
+    }
+  }
+
   const parts: string[] = []
 
   // Primary: Jina Reader
@@ -197,6 +218,15 @@ export async function fetchResearch(url: string, company: string): Promise<Resea
 
   const erpDetection = detectExistingErp(combined)
   const erpExpertsContext = await fetchErpExpertsContext()
+
+  // Save to cache
+  if (url) {
+    try {
+      await saveResearchCache(url, { text: combined }, erpDetection)
+    } catch {
+      // Cache save failed — non-critical
+    }
+  }
 
   return { text: combined, erpDetection, erpExpertsContext }
 }
