@@ -2,58 +2,67 @@
 
 import { motion } from 'framer-motion'
 import Image from 'next/image'
-
-// ── Animated Counter ───────────────────────────────────────────────────────────
-
-function AnimatedNumber({ target, suffix = '' }: { target: number; suffix?: string }) {
-  return (
-    <motion.span
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ delay: 0.3 }}
-    >
-      {target}{suffix}
-    </motion.span>
-  )
-}
+import { Unplug, Layers, ArrowRight, ArrowLeft } from 'lucide-react'
 
 // ── Before/After Cards ───────────────────────────────────────────────────────
 
 function BeforeAfterCards() {
   return (
-    <div className="grid grid-cols-2 gap-3 mb-6">
+    <div className="grid grid-cols-2 gap-4 mb-6">
+      {/* Current State */}
       <motion.div
-        initial={{ opacity: 0, y: 8 }}
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="rounded-xl border border-red-200 bg-red-50/50 p-4"
+        transition={{ delay: 0.2, type: 'spring', stiffness: 120 }}
+        className="relative overflow-hidden rounded-2xl border border-red-200/80 bg-gradient-to-br from-red-50 via-red-50/80 to-orange-50/50 p-5 shadow-sm"
       >
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-red-600 mb-1">
+        <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-red-100/80 flex items-center justify-center">
+          <Unplug className="w-4 h-4 text-red-500" />
+        </div>
+        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-red-500 mb-2">
           Current State
         </p>
-        <p className="text-[24px] font-bold text-gray-900 leading-none">
-          <AnimatedNumber target={5} suffix="+" />
+        <p className="text-[32px] font-bold text-gray-900 leading-none tracking-tight">
+          5<span className="text-red-400 text-[24px]">+</span>
         </p>
-        <p className="text-[12px] text-gray-500 mt-1">
+        <p className="text-[13px] font-medium text-gray-600 mt-2">
           disconnected tools
         </p>
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {['Shopify', 'Xero', 'Spreadsheets', '3PL', 'CRM'].map((tag) => (
+            <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-red-100/60 text-red-700 font-medium">
+              {tag}
+            </span>
+          ))}
+        </div>
       </motion.div>
 
+      {/* Future State */}
       <motion.div
-        initial={{ opacity: 0, y: 8 }}
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-        className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-4"
+        transition={{ delay: 0.4, type: 'spring', stiffness: 120 }}
+        className="relative overflow-hidden rounded-2xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 via-emerald-50/80 to-teal-50/50 p-5 shadow-sm"
       >
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-emerald-600 mb-1">
+        <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-emerald-100/80 flex items-center justify-center">
+          <Layers className="w-4 h-4 text-emerald-600" />
+        </div>
+        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-600 mb-2">
           Future State
         </p>
-        <p className="text-[24px] font-bold text-gray-900 leading-none">
+        <p className="text-[32px] font-bold text-gray-900 leading-none tracking-tight">
           1
         </p>
-        <p className="text-[12px] text-gray-500 mt-1">
+        <p className="text-[13px] font-medium text-gray-600 mt-2">
           unified platform
         </p>
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {['NetSuite'].map((tag) => (
+            <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100/60 text-emerald-800 font-semibold">
+              {tag}
+            </span>
+          ))}
+        </div>
       </motion.div>
     </div>
   )
@@ -62,51 +71,68 @@ function BeforeAfterCards() {
 // ── Integration Flow Diagram ───────────────────────────────────────────────────
 
 function IntegrationFlow() {
-  const leftSystems = ['Ecommerce', 'CRM', 'Warehouse']
-  const rightSystems = ['Finance', 'Reporting']
+  const leftSystems = [
+    { name: 'Ecommerce', color: 'bg-blue-50 border-blue-200 text-blue-700' },
+    { name: 'CRM', color: 'bg-indigo-50 border-indigo-200 text-indigo-700' },
+    { name: 'Warehouse', color: 'bg-sky-50 border-sky-200 text-sky-700' },
+  ]
+  const rightSystems = [
+    { name: 'Finance', color: 'bg-emerald-50 border-emerald-200 text-emerald-700' },
+    { name: 'Reporting', color: 'bg-teal-50 border-teal-200 text-teal-700' },
+  ]
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ delay: 0.7 }}
-      className="rounded-xl border border-gray-200 bg-white p-5 mb-6"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.6 }}
+      className="rounded-2xl border border-gray-200/80 bg-gradient-to-b from-white to-gray-50/50 p-6 mb-6 shadow-sm"
     >
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-4">
-        How NetSuite connects your operation
-      </p>
+      <div className="flex items-center gap-2 mb-5">
+        <div className="w-1 h-4 rounded-full bg-gray-950" />
+        <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-gray-500">
+          How NetSuite connects your operation
+        </p>
+      </div>
 
-      <div className="flex items-center justify-center gap-2 flex-wrap">
+      <div className="flex items-center justify-center gap-4 md:gap-6">
         {/* Left side systems */}
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2.5 min-w-[100px]">
           {leftSystems.map((s) => (
-            <div
-              key={s}
-              className="px-3 py-1.5 rounded-lg bg-blue-50 border border-blue-200 text-[11px] font-medium text-blue-700"
+            <motion.div
+              key={s.name}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.8 }}
+              className={`px-3.5 py-2 rounded-lg border text-[12px] font-semibold text-center shadow-sm ${s.color}`}
             >
-              {s}
-            </div>
+              {s.name}
+            </motion.div>
           ))}
         </div>
 
         {/* Arrows to centre */}
         <div className="flex flex-col items-center gap-3">
           {leftSystems.map((_, i) => (
-            <div key={i} className="flex items-center">
-              <div className="w-6 h-px bg-gray-300" />
-              <svg className="w-3 h-3 text-gray-300 -ml-0.5" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" />
-              </svg>
-            </div>
+            <motion.div
+              key={i}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1 + i * 0.1 }}
+              className="flex items-center"
+            >
+              <div className="w-5 h-px bg-gray-300" />
+              <ArrowRight className="w-3.5 h-3.5 text-gray-400 -ml-1" />
+            </motion.div>
           ))}
         </div>
 
         {/* NetSuite centre */}
         <motion.div
-          initial={{ scale: 0.9 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.8, type: 'spring' }}
-          className="px-5 py-3 rounded-xl bg-gray-950 text-white text-[13px] font-bold shadow-lg"
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 1.1, type: 'spring', stiffness: 200 }}
+          className="px-6 py-4 rounded-2xl bg-gray-950 text-white text-[14px] font-bold shadow-xl shadow-gray-950/20 min-w-[120px] text-center"
         >
           NetSuite
         </motion.div>
@@ -114,24 +140,31 @@ function IntegrationFlow() {
         {/* Arrows from centre */}
         <div className="flex flex-col items-center gap-3">
           {rightSystems.map((_, i) => (
-            <div key={i} className="flex items-center">
-              <svg className="w-3 h-3 text-gray-300 -mr-0.5" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" />
-              </svg>
-              <div className="w-6 h-px bg-gray-300" />
-            </div>
+            <motion.div
+              key={i}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.2 + i * 0.1 }}
+              className="flex items-center"
+            >
+              <ArrowRight className="w-3.5 h-3.5 text-gray-400 -mr-1" />
+              <div className="w-5 h-px bg-gray-300" />
+            </motion.div>
           ))}
         </div>
 
         {/* Right side systems */}
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2.5 min-w-[100px]">
           {rightSystems.map((s) => (
-            <div
-              key={s}
-              className="px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-[11px] font-medium text-emerald-700"
+            <motion.div
+              key={s.name}
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 1.3 }}
+              className={`px-3.5 py-2 rounded-lg border text-[12px] font-semibold text-center shadow-sm ${s.color}`}
             >
-              {s}
-            </div>
+              {s.name}
+            </motion.div>
           ))}
         </div>
       </div>
