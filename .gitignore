@@ -9,3 +9,5 @@ dev_log.txt
 test.js
 tsconfig.tsbuildinfo
 next-env.d.ts
+
+.vercel

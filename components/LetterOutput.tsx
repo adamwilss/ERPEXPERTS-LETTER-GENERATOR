@@ -3,17 +3,21 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { Plus, Archive, Check, Loader2 } from 'lucide-react'
+import { Plus, Archive, Check, Loader2, FileText, BarChart3, Network } from 'lucide-react'
 import CopyButton from './CopyButton'
 import DownloadMenu from './DownloadMenu'
 import SaveTemplateModal from './SaveTemplateModal'
 import InlineRewrite from './InlineRewrite'
+import BusinessCase from './BusinessCase'
+import TechMap from './TechMap'
 import { saveTemplate } from '@/lib/templates'
 import { savePack } from '@/lib/history'
 import { WritingAnimation } from './WritingAnimation'
 
 interface Props {
   letter: string
+  businessCase?: string
+  techMap?: string
   companyName?: string
   recipientName?: string
   jobTitle?: string
@@ -93,8 +97,9 @@ function CoverLetterView({ content }: { content: string }) {
 }
 
 export default function LetterOutput({
-  letter, companyName, recipientName, jobTitle, isStreaming,
+  letter, businessCase, techMap, companyName, recipientName, jobTitle, isStreaming,
 }: Props) {
+  const [activeTab, setActiveTab] = useState<'letter' | 'case' | 'tech'>('letter')
   const [showSaveModal, setShowSaveModal] = useState(false)
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
 
@@ -122,12 +127,39 @@ export default function LetterOutput({
     }
   }
 
+  const tabs = [
+    { key: 'letter' as const, label: 'Cover Letter', icon: FileText, hasContent: !!letter },
+    { key: 'case' as const, label: 'Business Case', icon: BarChart3, hasContent: !!businessCase },
+    { key: 'tech' as const, label: 'Tech Map', icon: Network, hasContent: !!techMap },
+  ]
+
+  const activeContent = activeTab === 'letter' ? letter : activeTab === 'case' ? businessCase : techMap
+
   return (
     <div>
+      {/* Tabs */}
+      <div className="flex items-center gap-1 mb-6 bg-gray-100/80 dark:bg-[#111]/80 border border-gray-200 dark:border-[#1e1e1e] rounded-xl p-1 w-fit">
+        {tabs.map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] font-medium transition-all ${
+              activeTab === tab.key
+                ? 'bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-white shadow-sm'
+                : 'text-gray-500 dark:text-[#555] hover:text-gray-700 dark:hover:text-[#999]'
+            } ${!tab.hasContent ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={!tab.hasContent}
+          >
+            <tab.icon className="w-4 h-4" />
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
       {/* Actions bar */}
       <div className="flex items-center gap-2 mb-6">
-        {letter && <CopyButton text={letter} label="Copy" />}
-        {!isStreaming && letter && (
+        {activeContent && <CopyButton text={activeContent} label="Copy" />}
+        {!isStreaming && activeContent && (
           <>
             <button
               onClick={handleSaveToHistory}
@@ -152,7 +184,7 @@ export default function LetterOutput({
               Save Template
             </button>
             <DownloadMenu
-              letter={letter}
+              letter={activeContent || ''}
               companyName={companyName}
             />
           </>
@@ -168,20 +200,23 @@ export default function LetterOutput({
         style={{ color: '#111' }}
         data-theme="light"
       >
-        {letter ? <CoverLetterView content={letter} /> : <Placeholder />}
+        {activeTab === 'letter' && (letter ? <CoverLetterView content={letter} /> : <Placeholder />)}
+        {activeTab === 'case' && (businessCase ? <BusinessCase content={businessCase} /> : <Placeholder />)}
+        {activeTab === 'tech' && (techMap ? <TechMap content={techMap} /> : <Placeholder />)}
       </motion.div>
 
       <SaveTemplateModal
         isOpen={showSaveModal}
         onClose={() => setShowSaveModal(false)}
-        initialContent={letter}
+        initialContent={activeContent || ''}
         onSave={({ name, description, industry, tags }) => {
+          const content = activeContent || ''
           saveTemplate({
             name,
             description,
             industry,
-            preview: letter.slice(0, 200),
-            fullContent: letter,
+            preview: content.slice(0, 200),
+            fullContent: content,
             createdBy: 'User',
             tags,
           })

@@ -7,7 +7,7 @@ import LetterForm, { FormValues } from '@/components/LetterForm'
 import LetterOutput from '@/components/LetterOutput'
 import { parseOutput } from '@/lib/parse'
 import { savePack } from '@/lib/history'
-import { FileText, Sparkles, Zap, ArrowRight } from 'lucide-react'
+import { FileText, Sparkles, Zap, ArrowRight, BarChart3, Network } from 'lucide-react'
 import { HeroGlow, GradientBorder } from '@/components/MotionConfig'
 import { WritingAnimation } from '@/components/WritingAnimation'
 
@@ -99,6 +99,24 @@ export default function Home() {
                           color: 'text-emerald-500',
                           bg: 'bg-emerald-50 dark:bg-emerald-500/10',
                           border: 'border-emerald-200 dark:border-emerald-500/20',
+                        },
+                        {
+                          num: '02',
+                          icon: BarChart3,
+                          title: 'Business case',
+                          desc: 'A focused page on their operational reality, the AI thread, and what good looks like.',
+                          color: 'text-blue-500',
+                          bg: 'bg-blue-50 dark:bg-blue-500/10',
+                          border: 'border-blue-200 dark:border-blue-500/20',
+                        },
+                        {
+                          num: '03',
+                          icon: Network,
+                          title: 'Technology map',
+                          desc: 'A structured table showing how NetSuite relates to each system in their stack.',
+                          color: 'text-amber-500',
+                          bg: 'bg-amber-50 dark:bg-amber-500/10',
+                          border: 'border-amber-200 dark:border-amber-500/20',
                         },
                       ].map(({ num, icon: Icon, title, desc, color, bg, border }, i) => (
                         <motion.div
@@ -227,6 +245,8 @@ export default function Home() {
               <div className="animate-fade-up">
                 <LetterOutput
                   letter={parsed?.part1 || ''}
+                  businessCase={parsed?.part2 || ''}
+                  techMap={parsed?.part3 || ''}
                   companyName={companyName}
                   recipientName={formValues?.recipientName}
                   jobTitle={formValues?.jobTitle}

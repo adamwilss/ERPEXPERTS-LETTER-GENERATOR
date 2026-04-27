@@ -134,6 +134,8 @@ export default function BatchOutput({ packs }: Props) {
                 <div className="border-t border-gray-100 dark:border-[#181818] p-6">
                   <LetterOutput
                     letter={parsed?.part1 || ''}
+                    businessCase={parsed?.part2 || ''}
+                    techMap={parsed?.part3 || ''}
                     companyName={pack.company}
                     isStreaming={false}
                   />
