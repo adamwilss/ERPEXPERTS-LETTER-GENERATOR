@@ -38,28 +38,6 @@ export function WritingAnimation({ text = 'Writing your letter...', className = 
           />
         ))}
 
-        {/* Faint scribble arc under the tip */}
-        <svg
-          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-6 overflow-visible"
-          viewBox="0 0 64 24"
-          fill="none"
-        >
-          <motion.path
-            d="M 4 20 Q 16 8, 32 18 T 60 14"
-            stroke="#d1d5db"
-            strokeWidth="1"
-            strokeLinecap="round"
-            fill="none"
-            initial={{ pathLength: 0, opacity: 0 }}
-            animate={{ pathLength: [0, 1, 1, 0], opacity: [0, 0.4, 0.4, 0] }}
-            transition={{
-              duration: 2.5,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-          />
-        </svg>
-
         {/* Vertical pencil — tip is the pivot */}
         <motion.div
           className="absolute bottom-0 left-1/2"
@@ -71,6 +49,7 @@ export function WritingAnimation({ text = 'Writing your letter...', className = 
           }}
           animate={{
             rotate: [-14, 10, -18, 22, -10, 16, -20, 12, -14],
+            x: [-18, 22, -12, 26, -8, 20, -24, 14, -18],
           }}
           transition={{
             duration: 4,
