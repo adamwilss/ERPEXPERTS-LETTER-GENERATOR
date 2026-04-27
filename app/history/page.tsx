@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
-import { Trash2, ChevronDown, ChevronRight, Printer, Mail, Plus, Database, History, Search } from 'lucide-react'
+import { Trash2, ChevronDown, ChevronRight, Printer, Mail, Plus, Database, History, Search, Link2 } from 'lucide-react'
 import EmptyState from '@/components/EmptyState'
 import {
   loadHistory, deletePack, clearHistory, updatePackStatus, initializeSequence,
@@ -358,6 +358,15 @@ export default function HistoryPage() {
                             Record Outcome
                           </button>
                         )}
+                        <a
+                          href={`/view/${pack.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn-ghost text-xs font-semibold px-3 py-1.5 inline-flex items-center gap-1.5"
+                        >
+                          <Link2 className="w-3 h-3" />
+                          Shared page
+                        </a>
                         <button
                           onClick={() => window.open(`/print?id=${pack.id}`, '_blank')}
                           className="btn-ghost text-xs font-semibold px-3 py-1.5"
@@ -376,8 +385,13 @@ export default function HistoryPage() {
                       <div className="pt-4 border-t border-gray-200 dark:border-[#1e1e1e]">
                         <LetterOutput
                           letter={parsed?.part1 || ''}
+                          businessCase={parsed?.part2 || ''}
+                          techMap={parsed?.part3 || ''}
                           companyName={pack.company}
+                          recipientName={pack.recipientName}
+                          jobTitle={pack.contactTitle}
                           isStreaming={false}
+                          savedPackId={pack.id}
                         />
                       </div>
                         </div>

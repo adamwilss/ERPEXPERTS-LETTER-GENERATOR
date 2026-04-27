@@ -188,6 +188,85 @@ export async function loadHistoryFromDB(): Promise<SavedPack[]> {
   }));
 }
 
+// Load a single pack by ID
+export async function loadPackById(id: string): Promise<SavedPack | null> {
+  const sql = getSql();
+
+  const result = await sql`
+    SELECT
+      p.id,
+      c.name as company,
+      c.website,
+      c.industry,
+      c.location,
+      c.employee_count as employees,
+      c.erp_score,
+      p.recipient_name,
+      p.contact_title,
+      p.content as completion,
+      p.status,
+      p.created_at as date,
+      o.sent_date,
+      o.response_date,
+      o.response_type,
+      o.meeting_booked,
+      o.notes
+    FROM packs p
+    JOIN companies c ON p.company_id = c.id
+    LEFT JOIN outcomes o ON o.pack_id = p.id
+    WHERE p.id = ${id}
+    LIMIT 1
+  `;
+
+  const row = getFirstRow<Record<string, unknown>>(result);
+  if (!row) return null;
+
+  return {
+    id: String(row.id ?? ''),
+    company: String(row.company ?? ''),
+    recipientName: String(row.recipient_name ?? ''),
+    contactTitle: String(row.contact_title ?? ''),
+    date: String(row.date ?? ''),
+    completion: String(row.completion ?? ''),
+    website: row.website ? String(row.website) : undefined,
+    location: row.location ? String(row.location) : undefined,
+    industry: row.industry ? String(row.industry) : undefined,
+    employees: row.employees ? String(row.employees) : undefined,
+    erpScore: row.erp_score ? Number(row.erp_score) : undefined,
+    status: (row.status as PackStatus) || undefined,
+    outcomes: row.sent_date ? {
+      sentDate: String(row.sent_date),
+      responseDate: row.response_date ? String(row.response_date) : undefined,
+      responseType: row.response_type as OutcomeData['responseType'],
+      meetingBooked: row.meeting_booked as boolean | undefined,
+      notes: row.notes ? String(row.notes) : undefined,
+    } : undefined,
+  };
+}
+
+// Track a view on a shared pack page
+export async function trackPackView(
+  packId: string,
+  ipAddress: string | null,
+  userAgent: string | null
+): Promise<void> {
+  const sql = getSql();
+  await sql`
+    INSERT INTO pack_views (pack_id, ip_address, user_agent)
+    VALUES (${packId}, ${ipAddress ?? null}, ${userAgent ?? null})
+  `;
+}
+
+// Get view count for a pack
+export async function getPackViewCount(packId: string): Promise<number> {
+  const sql = getSql();
+  const result = await sql`
+    SELECT COUNT(*) as count FROM pack_views WHERE pack_id = ${packId}
+  `;
+  const row = getFirstRow<{ count: number }>(result);
+  return row?.count ?? 0;
+}
+
 // Update pack status
 export async function updatePackStatusInDB(
   id: string,

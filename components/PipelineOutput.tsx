@@ -11,6 +11,7 @@ interface Props {
   companyName: string
   recipientName?: string
   jobTitle?: string
+  savedPackId?: string | null
 }
 
 function JsonPanel({ title, data }: { title: string; data: unknown }) {
@@ -48,7 +49,7 @@ function JsonPanel({ title, data }: { title: string; data: unknown }) {
   )
 }
 
-export default function PipelineOutput({ output, companyName, recipientName, jobTitle }: Props) {
+export default function PipelineOutput({ output, companyName, recipientName, jobTitle, savedPackId }: Props) {
   const [showDebug, setShowDebug] = useState(false)
 
   return (
@@ -62,6 +63,7 @@ export default function PipelineOutput({ output, companyName, recipientName, job
         recipientName={recipientName}
         jobTitle={jobTitle}
         isStreaming={false}
+        savedPackId={savedPackId}
       />
 
       {/* Debug toggle */}

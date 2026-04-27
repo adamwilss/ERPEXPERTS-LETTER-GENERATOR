@@ -109,6 +109,18 @@ CREATE TABLE IF NOT EXISTS research_cache (
 CREATE INDEX IF NOT EXISTS idx_research_cache_domain_hash ON research_cache(domain_hash);
 CREATE INDEX IF NOT EXISTS idx_research_cache_fetched_at ON research_cache(fetched_at);
 
+-- Pack views tracking (for shared link analytics)
+CREATE TABLE IF NOT EXISTS pack_views (
+  id SERIAL PRIMARY KEY,
+  pack_id INTEGER NOT NULL REFERENCES packs(id) ON DELETE CASCADE,
+  ip_address TEXT,
+  user_agent TEXT,
+  viewed_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_pack_views_pack ON pack_views(pack_id);
+CREATE INDEX IF NOT EXISTS idx_pack_views_viewed_at ON pack_views(viewed_at DESC);
+
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_packs_company ON packs(company_id);
 CREATE INDEX IF NOT EXISTS idx_packs_search ON packs(search_id);

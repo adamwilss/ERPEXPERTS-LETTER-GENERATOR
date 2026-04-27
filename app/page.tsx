@@ -21,6 +21,7 @@ export default function Home() {
   const [output, setOutput] = useState<PipelineOutputType | null>(null)
   const [pipelineError, setPipelineError] = useState<Error | null>(null)
   const [isRunning, setIsRunning] = useState(false)
+  const [savedPackId, setSavedPackId] = useState<string | null>(null)
 
   const updateStep = useCallback((stepKey: string, status: StepState['status'], message?: string, data?: unknown) => {
     setSteps((prev) =>
@@ -105,7 +106,9 @@ export default function Home() {
         industry: '',
         employees: '',
         erpScore: undefined,
-      }).catch((err) => console.warn('Failed to auto-save pack:', err))
+      })
+        .then((saved) => setSavedPackId(saved.id))
+        .catch((err) => console.warn('Failed to auto-save pack:', err))
     }
   }, [isRunning, output, formValues])
 
@@ -299,6 +302,7 @@ export default function Home() {
                     companyName={companyName}
                     recipientName={formValues?.recipientName}
                     jobTitle={formValues?.jobTitle}
+                    savedPackId={savedPackId}
                   />
                 )}
 

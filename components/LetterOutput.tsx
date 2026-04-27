@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { Plus, Archive, Check, Loader2, FileText, BarChart3, Network } from 'lucide-react'
+import { Plus, Archive, Check, Loader2, FileText, BarChart3, Network, Link2 } from 'lucide-react'
+import QRCode from 'qrcode'
 import CopyButton from './CopyButton'
 import DownloadMenu from './DownloadMenu'
 import SaveTemplateModal from './SaveTemplateModal'
@@ -22,9 +23,21 @@ interface Props {
   recipientName?: string
   jobTitle?: string
   isStreaming: boolean
+  savedPackId?: string | null
 }
 
-function CoverLetterView({ content }: { content: string }) {
+function CoverLetterView({ content, savedPackId }: { content: string; savedPackId?: string | null }) {
+  const [qrUrl, setQrUrl] = useState('')
+
+  useEffect(() => {
+    if (savedPackId) {
+      const url = `${window.location.origin}/view/${savedPackId}`
+      QRCode.toDataURL(url, { width: 120, margin: 1, color: { dark: '#111', light: '#fff' } })
+        .then(setQrUrl)
+        .catch(() => {})
+    }
+  }, [savedPackId])
+
   const paragraphs = content.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean)
 
   const salutationIdx = paragraphs.findIndex((p) => /^dear\s/i.test(p.trim()))
@@ -88,6 +101,17 @@ function CoverLetterView({ content }: { content: string }) {
         </div>
       )}
 
+      {/* QR Code footer */}
+      {qrUrl && (
+        <div className="mt-8 pt-6 border-t border-gray-100 flex items-center gap-4">
+          <img src={qrUrl} alt="QR Code" className="w-16 h-16 rounded-md border border-gray-200" />
+          <div>
+            <p className="text-[11px] font-semibold text-gray-700">Scan for the full business case &amp; tech map</p>
+            <p className="text-[10px] text-gray-400 mt-0.5">A detailed analysis prepared specifically for this company.</p>
+          </div>
+        </div>
+      )}
+
       <div className="mt-10 pt-5 border-t border-gray-100 text-[11px] text-gray-400 flex items-center justify-between tracking-wide">
         <span>ERP Experts Ltd · Manchester, UK</span>
         <span>www.erpexperts.co.uk</span>
@@ -97,7 +121,7 @@ function CoverLetterView({ content }: { content: string }) {
 }
 
 export default function LetterOutput({
-  letter, businessCase, techMap, companyName, recipientName, jobTitle, isStreaming,
+  letter, businessCase, techMap, companyName, recipientName, jobTitle, isStreaming, savedPackId,
 }: Props) {
   const [activeTab, setActiveTab] = useState<'letter' | 'case' | 'tech'>('letter')
   const [showSaveModal, setShowSaveModal] = useState(false)
@@ -189,6 +213,17 @@ export default function LetterOutput({
             />
           </>
         )}
+        {savedPackId && (
+          <a
+            href={`/view/${savedPackId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-secondary btn-sm flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400"
+          >
+            <Link2 className="w-3 h-3" />
+            Open shared page
+          </a>
+        )}
       </div>
 
       {/* Document — always light mode */}
@@ -200,7 +235,7 @@ export default function LetterOutput({
         style={{ color: '#111' }}
         data-theme="light"
       >
-        {activeTab === 'letter' && (letter ? <CoverLetterView content={letter} /> : <Placeholder />)}
+        {activeTab === 'letter' && (letter ? <CoverLetterView content={letter} savedPackId={savedPackId} /> : <Placeholder />)}
         {activeTab === 'case' && (businessCase ? <BusinessCase content={businessCase} /> : <Placeholder />)}
         {activeTab === 'tech' && (techMap ? <TechMap content={techMap} /> : <Placeholder />)}
       </motion.div>
