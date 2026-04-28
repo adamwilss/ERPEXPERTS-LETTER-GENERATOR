@@ -231,9 +231,7 @@ export default function LetterOutput({
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.25, ease: 'easeInOut' }}
-        className="letter-paper rounded-2xl max-w-2xl px-12 py-11"
-        style={{ color: '#111' }}
-        data-theme="light"
+        className="letter-paper force-light-theme rounded-2xl max-w-2xl px-12 py-11"
       >
         {activeTab === 'letter' && (letter ? <CoverLetterView content={letter} savedPackId={savedPackId} /> : <Placeholder />)}
         {activeTab === 'case' && (businessCase ? <BusinessCase content={businessCase} /> : <Placeholder />)}

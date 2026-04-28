@@ -195,14 +195,14 @@ export default function Home() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
-                              <span className="text-[10px] font-bold text-gray-300 dark:text-[#333]">{num}</span>
-                              <span className="text-[13px] font-semibold text-gray-800 dark:text-[#ddd]">{title}</span>
+                              <span className="text-[10px] font-bold text-cream-400 dark:text-[#333]">{num}</span>
+                              <span className="text-[13px] font-semibold text-cream-800 dark:text-[#ddd]">{title}</span>
                             </div>
-                            <div className="text-xs text-gray-500 dark:text-[#555] mt-0.5 leading-relaxed">
+                            <div className="text-xs text-cream-600 dark:text-[#555] mt-0.5 leading-relaxed">
                               {desc}
                             </div>
                           </div>
-                          <ArrowRight className="w-3.5 h-3.5 text-gray-200 dark:text-[#222] opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all self-center" />
+                          <ArrowRight className="w-3.5 h-3.5 text-cream-300 dark:text-[#222] opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all self-center" />
                         </motion.div>
                       ))}
                     </div>
@@ -210,7 +210,7 @@ export default function Home() {
                 </GradientBorder>
 
                 <GradientBorder>
-                  <div className="card-glass p-7 bg-gradient-to-br from-gray-50/60 to-white dark:from-[#111]/60 dark:to-[#0a0a0a]/60">
+                  <div className="card-glass p-7 bg-gradient-to-br from-cream-100/60 to-white dark:from-[#111]/60 dark:to-[#0a0a0a]/60">
                     <p className="label mb-5 flex items-center gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
                       Credentials
@@ -227,18 +227,18 @@ export default function Home() {
                           whileHover={{ x: 3 }}
                           transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                         >
-                          <span className="text-xs text-gray-500 dark:text-[#555]">{label}</span>
-                          <span className="text-xs font-bold text-gray-800 dark:text-[#ccc] group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors">{value}</span>
+                          <span className="text-xs text-cream-600 dark:text-[#555]">{label}</span>
+                          <span className="text-xs font-bold text-cream-800 dark:text-[#ccc] group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors">{value}</span>
                         </motion.div>
                       ))}
                     </div>
 
-                    <div className="mt-5 pt-4 border-t border-gray-100 dark:border-[#1e1e1e]">
+                    <div className="mt-5 pt-4 border-t border-cream-200 dark:border-[#1e1e1e]">
                       <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-gray-100 dark:bg-[#1a1a1a] flex items-center justify-center text-[9px] font-bold text-gray-400">RW</div>
+                        <div className="w-6 h-6 rounded-full bg-cream-200 dark:bg-[#1a1a1a] flex items-center justify-center text-[9px] font-bold text-cream-600">RW</div>
                         <div>
-                          <div className="text-[11px] font-semibold text-gray-700 dark:text-[#bbb]">Ric Wilson</div>
-                          <div className="text-[10px] text-gray-400 dark:text-[#444]">Managing Director</div>
+                          <div className="text-[11px] font-semibold text-cream-700 dark:text-[#bbb]">Ric Wilson</div>
+                          <div className="text-[10px] text-cream-500 dark:text-[#444]">Managing Director</div>
                         </div>
                       </div>
                     </div>
@@ -261,19 +261,19 @@ export default function Home() {
                   <div className="py-20 flex flex-col items-center gap-8 max-w-lg mx-auto">
                     <WritingAnimation text={`Researching ${companyName}...`} />
                     <div className="space-y-2.5 text-center">
-                      <p className="text-sm font-semibold text-gray-950 dark:text-white">
+                      <p className="text-sm font-semibold text-cream-950 dark:text-white">
                         Running pipeline for {companyName}...
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-[#555]">
+                      <p className="text-xs text-cream-600 dark:text-[#555]">
                         Researching, extracting insight, writing cover letter, business case, and tech map.
                       </p>
-                      <p className="text-xs text-gray-400 dark:text-[#444]">
+                      <p className="text-xs text-cream-500 dark:text-[#444]">
                         This takes around 30-60 seconds.
                       </p>
                     </div>
                     <button
                       onClick={() => setSubmitted(false)}
-                      className="text-xs text-gray-400 dark:text-[#444] hover:text-gray-600 dark:hover:text-[#888] underline underline-offset-2 transition-colors"
+                      className="text-xs text-cream-500 dark:text-[#444] hover:text-cream-700 dark:hover:text-[#888] underline underline-offset-2 transition-colors"
                     >
                       Cancel
                     </button>
@@ -309,7 +309,7 @@ export default function Home() {
                 {!isRunning && (
                   <button
                     onClick={() => setSubmitted(false)}
-                    className="mt-8 text-xs text-gray-400 dark:text-[#444] hover:text-gray-600 dark:hover:text-[#888] underline underline-offset-2 transition-colors"
+                    className="mt-8 text-xs text-cream-500 dark:text-[#444] hover:text-cream-700 dark:hover:text-[#888] underline underline-offset-2 transition-colors"
                   >
                     &larr; Generate another
                   </button>

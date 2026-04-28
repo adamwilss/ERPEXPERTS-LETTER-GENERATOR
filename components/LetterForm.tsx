@@ -71,7 +71,7 @@ export default function LetterForm({ onSubmit }: Props) {
             icon={<User className="w-3.5 h-3.5" />}
             required
           />
-          <p className="mt-1.5 text-[11px] text-gray-400 dark:text-[#555] leading-relaxed">
+          <p className="mt-1.5 text-[11px] text-cream-600 dark:text-[#555] leading-relaxed">
             We'll extract the first name automatically for the salutation.
           </p>
         </div>
@@ -89,7 +89,7 @@ export default function LetterForm({ onSubmit }: Props) {
         <label className="label flex items-center gap-1.5">
           <FileText className="w-3 h-3" />
           Notes{' '}
-          <span className="normal-case font-normal text-gray-300 dark:text-[#333]">
+          <span className="normal-case font-normal text-cream-400 dark:text-[#333]">
             (optional)
           </span>
         </label>
@@ -132,7 +132,7 @@ function Field({
   return (
     <div>
       <label className="label flex items-center gap-1.5">
-        {icon && <span className="text-gray-300 dark:text-[#444]">{icon}</span>}
+        {icon && <span className="text-cream-400 dark:text-[#444]">{icon}</span>}
         {label}
       </label>
       <input

@@ -4,11 +4,12 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { Loader2, Bell, BarChart3, LayoutTemplate, HelpCircle } from 'lucide-react'
+import { Loader2, Bell, BarChart3, LayoutTemplate, HelpCircle, Zap } from 'lucide-react'
 import { startTour } from './OnboardingTour'
 import ThemeToggle from './ThemeToggle'
 import { useDiscoverStore } from '@/lib/discover-store'
 import { getReminderCount, getOverdueReminders } from '@/lib/reminders'
+import { getApolloCredits, subscribeToCredits } from '@/lib/apollo-credits'
 // Cinematic mode is permanently enabled
 
 const nav = [
@@ -96,11 +97,41 @@ function SessionPill() {
   )
 }
 
+function ApolloCredits() {
+  const [credits, setCredits] = useState(getApolloCredits())
+
+  useEffect(() => {
+    setCredits(getApolloCredits())
+    return subscribeToCredits(setCredits)
+  }, [])
+
+  const isLow = credits.remaining < 200
+  const isCritical = credits.remaining < 50
+
+  return (
+    <div
+      className={`flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-lg border transition-all ${
+        isCritical
+          ? 'text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20'
+          : isLow
+            ? 'text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20'
+            : 'text-[#8a8a88] dark:text-[#555] bg-[#f2f2f0] dark:bg-[#181a20] border-[#e0e0dc] dark:border-[#25272d]'
+      }`}
+      title={`Apollo.io credits: ${credits.used} used / ${credits.total} total this month`}
+    >
+      <Zap className={`w-3 h-3 ${isCritical ? 'text-red-500' : isLow ? 'text-amber-500' : 'text-[#aaa]'}`} />
+      <span className={isCritical || isLow ? '' : 'hidden sm:inline'}>
+        {credits.remaining}
+      </span>
+      <span className="hidden sm:inline opacity-60">/ {credits.total}</span>
+    </div>
+  )
+}
 
 export default function Header() {
   const pathname = usePathname()
   return (
-    <header className="sticky top-0 z-50 border-b border-gray-200/40 dark:border-[#1e1e1e]/40 bg-white/60 dark:bg-[#0a0a0a]/60 backdrop-blur-2xl">
+    <header className="sticky top-0 z-50 border-b border-cream-300/40 dark:border-void-100/40 bg-white/60 dark:bg-void-700/60 backdrop-blur-2xl">
       <div className="max-w-5xl mx-auto px-6 flex items-center justify-between" style={{ height: '52px' }}>
         <div className="flex items-center gap-6">
           <Link href="/" className="flex items-center gap-2.5 group">
@@ -113,10 +144,10 @@ export default function Header() {
               priority
             />
             <div className="hidden sm:flex flex-col">
-              <span className="text-gray-950 dark:text-white font-bold tracking-[-0.03em] text-[13px] leading-none">
+              <span className="text-cream-950 dark:text-white font-bold tracking-[-0.03em] text-[13px] leading-none">
                 ERP EXPERTS
               </span>
-              <span className="text-gray-400 dark:text-[#444] text-[9px] leading-none mt-[3px] tracking-[0.12em] uppercase font-medium">
+              <span className="text-cream-600 dark:text-[#444] text-[9px] leading-none mt-[3px] tracking-[0.12em] uppercase font-medium">
                 Letter Portal
               </span>
             </div>
@@ -142,8 +173,8 @@ export default function Header() {
                   href={item.href}
                   className={`px-3 py-1.5 text-[13px] font-medium rounded-lg transition-all duration-150 ${
                     active
-                      ? 'bg-gray-100 text-gray-950 dark:bg-[#1a1a1a] dark:text-white'
-                      : 'text-gray-400 hover:text-gray-700 dark:text-[#555] dark:hover:text-[#ccc]'
+                      ? 'bg-cream-200 text-cream-950 dark:bg-[#1a1a1a] dark:text-white'
+                      : 'text-cream-600 hover:text-cream-800 dark:text-[#555] dark:hover:text-[#ccc]'
                   }`}
                 >
                   {item.label}
@@ -154,15 +185,16 @@ export default function Header() {
         </div>
 
         <div className="flex items-center gap-2">
+          <ApolloCredits />
           <ReminderBadge />
           <SessionPill />
-          <div className="w-px h-4 bg-gray-200 dark:bg-[#1e1e1e] mx-1" />
+          <div className="w-px h-4 bg-[#e0e0dc] dark:bg-[#25272d] mx-1" />
           <Link
             href="/analytics"
             className={`p-2 rounded-lg transition-all ${
               pathname === '/analytics'
-                ? 'bg-gray-100 text-gray-950 dark:bg-[#1a1a1a] dark:text-white'
-                : 'text-gray-400 hover:text-gray-700 dark:text-[#555] dark:hover:text-[#ccc]'
+                ? 'bg-cream-200 text-cream-950 dark:bg-[#1a1a1a] dark:text-white'
+                : 'text-cream-600 hover:text-cream-800 dark:text-[#555] dark:hover:text-[#ccc]'
             }`}
             title="Analytics"
           >
@@ -172,8 +204,8 @@ export default function Header() {
             href="/templates"
             className={`p-2 rounded-lg transition-all ${
               pathname === '/templates'
-                ? 'bg-gray-100 text-gray-950 dark:bg-[#1a1a1a] dark:text-white'
-                : 'text-gray-400 hover:text-gray-700 dark:text-[#555] dark:hover:text-[#ccc]'
+                ? 'bg-cream-200 text-cream-950 dark:bg-[#1a1a1a] dark:text-white'
+                : 'text-cream-600 hover:text-cream-800 dark:text-[#555] dark:hover:text-[#ccc]'
             }`}
             title="Templates"
           >
@@ -182,13 +214,13 @@ export default function Header() {
           <button
             id="tour-theme-toggle"
             onClick={() => startTour(true)}
-            className="p-2 rounded-lg text-gray-400 hover:text-gray-700 dark:text-[#555] dark:hover:text-[#ccc] transition-all"
+            className="p-2 rounded-lg text-cream-600 hover:text-cream-800 dark:text-[#555] dark:hover:text-[#ccc] transition-all"
             title="Replay tutorial"
           >
             <HelpCircle className="w-4 h-4" />
           </button>
           <ThemeToggle />
-          <span className="hidden md:inline text-[9px] text-gray-300 dark:text-[#333] uppercase tracking-[0.2em] font-semibold select-none ml-1">
+          <span className="hidden md:inline text-[9px] text-cream-500 dark:text-[#333] uppercase tracking-[0.2em] font-semibold select-none ml-1">
             Internal
           </span>
         </div>

@@ -3,6 +3,7 @@ import type { Lead, ReviewedLead } from '@/components/LeadReview'
 import type { PackStatus } from '@/components/BatchOutput'
 import { savePack } from '@/lib/history'
 import { markLeadAsGenerated } from '@/lib/db/search-db'
+import { recordApolloSearch, dispatchCreditUpdate } from '@/lib/apollo-credits'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -78,6 +79,8 @@ export const useDiscoverStore = create<DiscoverState>((set, get) => ({
   // Runs entirely in the store — survives component unmount / navigation.
 
   startSearch: async (params, preset) => {
+    recordApolloSearch()
+    dispatchCreditUpdate()
     set({
       searchError: null,
       leads: [],
