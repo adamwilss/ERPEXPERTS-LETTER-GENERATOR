@@ -18,7 +18,7 @@ The standard for tone, structure, specificity, and commercial sharpness is the G
 
 | Layer | Tool | Notes |
 |---|---|---|
-| Framework | Next.js 14+ (App Router) | Frontend and API routes in one project. Streaming support built in. |
+| Framework | Next.js 16 (App Router) | Frontend and API routes in one project. Streaming support built in. |
 | Language | TypeScript | Throughout — frontend, API routes, and generation logic. |
 | Styling | Tailwind CSS | Desktop-first internal tool. |
 | UI components | shadcn/ui | Form, button, card, tabs, textarea. No bespoke component library. |
@@ -50,6 +50,12 @@ The standard for tone, structure, specificity, and commercial sharpness is the G
 │   │   └── page.tsx              # Template library for reusable letters
 │   ├── reminders/
 │   │   └── page.tsx              # Follow-up reminder management
+│   ├── searches/
+│   │   └── page.tsx              # Saved Apollo searches & lead review
+│   ├── view/
+│   │   └── [id]/page.tsx         # Shareable letter pack view (QR + tracking)
+│   ├── print/
+│   │   └── page.tsx              # Print-optimised letter layout
 │   └── api/
 │       ├── generate/
 │       │   └── route.ts          # Core API — research + letter generation + streaming
@@ -59,6 +65,22 @@ The standard for tone, structure, specificity, and commercial sharpness is the G
 │       │   └── route.ts          # Streaming Apollo search with AI ranking
 │       ├── score/
 │       │   └── route.ts          # Lead scoring endpoint
+│       ├── pipeline/
+│       │   └── route.ts          # Agentic multi-step structured generation
+│       ├── rewrite/
+│       │   └── route.ts          # Inline section rewrite endpoint
+│       ├── searches/
+│       │   ├── route.ts          # GET/POST saved searches
+│       │   └── [id]/
+│       │       ├── route.ts      # DELETE single search
+│       │       └── leads/
+│       │           └── route.ts  # GET leads for a search
+│       ├── view/
+│       │   └── [id]/
+│       │       └── route.ts      # Public shareable pack endpoint
+│       ├── debug/
+│       │   └── db/
+│       │       └── route.ts      # DB connectivity diagnostic
 │       └── history/
 │           ├── route.ts          # GET/POST history
 │           ├── [id]/
@@ -78,10 +100,30 @@ The standard for tone, structure, specificity, and commercial sharpness is the G
 │   ├── CopyButton.tsx            # Clipboard copy with confirmation
 │   ├── DownloadMenu.tsx          # PDF/DOCX export triggers
 │   ├── Header.tsx                # Navigation with reminder badge
-│   └── ThemeToggle.tsx           # Dark/light mode toggle
+│   ├── ThemeToggle.tsx           # Dark/light mode toggle
+│   ├── BusinessCase.tsx           # Business case prose renderer
+│   ├── InlineRewrite.tsx          # One-click section rewrite UI
+│   ├── OnboardingTour.tsx         # First-time user walkthrough
+│   ├── PipelineOutput.tsx         # Agentic pipeline live progress
+│   ├── PipelineProgress.tsx       # Pipeline step-by-step visualisation
+│   ├── PdfDocument.tsx            # @react-pdf PDF layout
+│   ├── TechMapCharts.tsx          # Visual tech stack diagram
+│   ├── WritingAnimation.tsx       # Animated writing cursor
+│   ├── MotionConfig.tsx           # Shared Framer Motion configs
+│   ├── PageHeader.tsx             # Reusable page header
+│   └── EmptyState.tsx             # Empty state illustration
 ├── lib/
 │   ├── research.ts               # Jina Reader fetch + Tavily search
-│   ├── prompt.ts                 # System prompt + follow-up prompts
+│   ├── prompt.ts                 # Legacy monolithic prompt builder
+│   ├── prompts/                  # Modular prompt library
+│   │   ├── index.ts              # Prompt assembler
+│   │   ├── identity.ts           # Ric Wilson persona
+│   │   ├── tone.ts               # Tone rules
+│   │   ├── research.ts           # Research context builder
+│   │   ├── cover-letter.ts       # Cover letter prompts
+│   │   ├── business-case.ts      # Business case prompts
+│   │   ├── tech-map.ts           # Tech map prompts
+│   │   └── review.ts             # Review/polish prompts
 │   ├── parse.ts                  # Output parsing (part1/2/3)
 │   ├── history.ts                # Postgres + localStorage sync layer
 │   ├── templates.ts              # Template library storage
@@ -89,12 +131,17 @@ The standard for tone, structure, specificity, and commercial sharpness is the G
 │   ├── discover-store.ts         # Zustand store for discover flow
 │   ├── exportDocx.ts             # DOCX generation
 │   ├── netsuite-context.ts       # Industry-specific NetSuite context
+│   ├── apollo-variants.ts        # Apollo keyword mappings per industry
+│   ├── exportDocx.ts             # DOCX generation
+│   ├── pipeline/
+│   │   └── schemas.ts            # Zod schemas for structured generation
 │   └── db/
-│       ├── client.ts             # Neon database client
+│       ├── client.ts             # Neon database client (@neondatabase/serverless)
 │       ├── schema.sql            # Database tables
-│       └── history-db.ts         # Postgres CRUD operations
+│       ├── history-db.ts         # Pack / sequence / outcome CRUD
+│       └── search-db.ts          # Search / lead CRUD
 ├── public/
-│   └── logo.svg                  # ERP Experts logo
+│   └── erpexperts-logo.png       # ERP Experts logo
 ├── .env.local                    # API keys — not committed
 └── CLAUDE.md                     # This file
 ```
@@ -109,9 +156,10 @@ POST /api/generate
         ├── 1. Fetch r.jina.ai/<url>  →  clean markdown of company website
         ├── 2. Tavily search for company name  →  supplementary snippets (optional)
         ├── 3. Truncate research to ~6,000 tokens to stay within context budget
-        └── 4. Stream Claude API call
+        └── 4. Stream OpenAI API call
                     │  system prompt: condensed CLAUDE.md output rules + Ric persona
                     │  user message: inputs + research context + output format instructions
+                    │  model: gpt-4o via @ai-sdk/openai
                     │  maxOutputTokens: 6000 (initial) / 2000 (follow-ups)
                     ▼
         Streaming tokens → Vercel AI SDK → React UI
@@ -219,11 +267,12 @@ The dominant cost is the Vercel Pro subscription needed for password protection.
 ### Build order
 
 1. Scaffold with `npx create-next-app@latest --typescript`
-2. Install dependencies: `@anthropic-ai/sdk ai tailwindcss shadcn/ui @react-pdf/renderer docx`
+2. Install dependencies: `@ai-sdk/openai ai tailwindcss shadcn/ui @react-pdf/renderer docx`
 3. Build the five-field input form with loading state
 4. Implement `lib/research.ts` — Jina fetch, basic content cleaning, Tavily fallback
 5. Implement `lib/prompt.ts` — system prompt and user message builder, including callout stat and tech map table instructions
-6. Implement `/api/generate/route.ts` — research + Claude streaming + Edge Runtime
+6. Implement `/api/generate/route.ts` — research + OpenAI streaming + Edge Runtime
+6b. Implement `/api/pipeline/route.ts` — agentic multi-step structured generation (optional, higher quality)
 7. Implement `lib/parse.ts` — split output on `---PART1---`, `---PART2---`, `---PART3---` delimiters
 8. Build `LetterOutput.tsx` — three-tab display (Cover Letter / Business Case / Tech Map)
 9. Build `TechMapTable.tsx` — parse the markdown table from Part 3 and render as a styled HTML table
@@ -407,6 +456,49 @@ Access via `/reminders`:
 - Snooze, complete, or dismiss actions
 - Overdue reminder highlighting in header
 - Suggested actions based on industry
+
+### Agentic Pipeline Generation (v3)
+
+**API:** `/api/pipeline` — an alternative to the single-shot `/api/generate`.
+
+Instead of one long prompt, the pipeline breaks generation into discrete structured steps:
+
+1. **Research** — Jina + Tavily fetch
+2. **Insight Extraction** — AI extracts 3 sharp operational insights from research
+3. **Cover Letter** — structured generation with Zod schema
+4. **Business Case** — structured generation with Zod schema (stats, pains, case study)
+5. **Tech Map** — structured generation with Zod schema (table rows)
+6. **Review & Polish** — AI critique and final polish pass
+
+Each step streams NDJSON events to the frontend. The `PipelineOutput` component renders live progress. This approach produces more consistent, higher-quality output at the cost of slightly longer generation time.
+
+### Shareable View Pages
+
+Access via `/view/[id]`:
+
+- Public (unauthenticated) shareable page for any generated pack
+- Displays business case + tech map only (no cover letter)
+- QR code generation for physical handouts
+- View tracking with IP + user agent (stored in `pack_views` table)
+- Copy link button with branded URL
+
+### Inline Rewrite
+
+In the `LetterOutput` component, each section has a rewrite button that calls `/api/rewrite`:
+
+- Sends the current section + a rewrite instruction (e.g., "make it sharper", "add more specifics")
+- Returns a regenerated version of that section only
+- Preserves the rest of the pack untouched
+
+### Search Management
+
+Access via `/searches`:
+
+- Browse all saved Apollo searches from Discover
+- Expand a search to see its leads
+- Review lead data completeness scores
+- One-click "Generate Letter" from any lead
+- Delete old searches
 
 ---
 

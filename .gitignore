@@ -11,3 +11,5 @@ tsconfig.tsbuildinfo
 next-env.d.ts
 
 .vercel
+DEPLOYED.txt
+NetSuite Content/
