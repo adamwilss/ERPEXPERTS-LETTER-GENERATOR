@@ -87,7 +87,9 @@ This update significantly expands the ERP Experts Outreach Portal from a simple 
 - Added ReminderBadge component showing pending/overdue reminders
 - Real-time reminder count updates
 
-## Database Schema (localStorage)
+## Database Schema (Neon Postgres + localStorage cache)
+
+> **Note:** History is now persisted in Neon Postgres via `@neondatabase/serverless`. localStorage remains as a client-side cache only. Templates and reminders are still localStorage-only.
 
 ### erp_history
 Extended with:
@@ -156,7 +158,7 @@ Behavior:
 ## Bug Fixes (Post-Deployment)
 
 ### Build Errors Fixed
-1. **Missing `industry` property** - Added `industry?: string` to `SavedPack` interface in `lib/history.ts`
+1. **Missing `industry` property** - Added `industry?: string` to `SavedPack` interface in `lib/db/history-db.ts`
 2. **Incorrect import** - Fixed `FollowupType` import in `components/SequenceManager.tsx` to import from `@/lib/prompt` instead of `@/lib/history`
 
 ### Search Not Filtering by Industry

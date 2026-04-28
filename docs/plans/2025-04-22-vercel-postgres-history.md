@@ -1,5 +1,9 @@
 # Vercel Postgres History Storage Implementation Plan
 
+> **Status:** SUPERCEDED — implemented successfully, but with `@neondatabase/serverless` instead of `@vercel/postgres`.
+> 
+> **Why:** `@vercel/postgres` is deprecated and the actual client (`lib/db/client.ts`) uses `@neondatabase/serverless` directly. The schema and API routes in this plan were all implemented as described. See `lib/db/` and `app/api/history/` for the real code.
+
 > **Goal:** Replace localStorage-only history with persistent Vercel Postgres backend while maintaining localStorage as a cache.
 
 **Architecture:**

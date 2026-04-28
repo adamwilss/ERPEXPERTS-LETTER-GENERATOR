@@ -62,9 +62,9 @@ The output quality bar is the GolfBays letter pack. Every generated output must 
 
 | Layer | Tool |
 |---|---|
-| Framework | Next.js 14+ App Router, TypeScript |
+| Framework | Next.js 16 App Router, TypeScript |
 | Styling | Tailwind CSS |
-| AI model | claude-sonnet-4-6 via @ai-sdk/anthropic |
+| AI model | OpenAI GPT-4o via @ai-sdk/openai |
 | AI streaming | Vercel AI SDK (useCompletion) |
 | Web research primary | Jina Reader (r.jina.ai) |
 | Web research fallback | Tavily Search API |
@@ -75,7 +75,7 @@ The output quality bar is the GolfBays letter pack. Every generated output must 
 
 ## Claude output format
 
-Claude returns exactly this structure — parsed by lib/parse.ts:
+GPT-4o returns exactly this structure — parsed by lib/parse.ts:
 
 ```
 ---PART1---
