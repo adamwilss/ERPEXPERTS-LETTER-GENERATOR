@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { Plus, Archive, Check, Loader2, FileText, BarChart3, Network, Link2 } from 'lucide-react'
@@ -132,6 +132,10 @@ export default function LetterOutput({
   const [showSaveModal, setShowSaveModal] = useState(false)
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
 
+  const letterRef = useRef<HTMLDivElement>(null)
+  const caseRef = useRef<HTMLDivElement>(null)
+  const techRef = useRef<HTMLDivElement>(null)
+
   const isAlreadySaved = Boolean(savedPackId)
 
   const handleSaveToHistory = async () => {
@@ -233,6 +237,7 @@ export default function LetterOutput({
               businessCase={businessCase}
               techMap={techMap}
               companyName={companyName}
+              captureRefs={{ letter: letterRef, case: caseRef, tech: techRef }}
             />
           </>
         )}
@@ -278,6 +283,25 @@ export default function LetterOutput({
           })
         }}
       />
+
+      {/* Hidden PDF capture containers — rendered off-screen so html-to-image can screenshot each tab */}
+      <div style={{ position: 'fixed', left: -9999, top: 0, width: 794 }} className="z-[-1]">
+        {letter && (
+          <div ref={letterRef} className="letter-paper force-light-theme rounded-2xl max-w-2xl px-12 py-11 bg-white">
+            <CoverLetterView content={letter} savedPackId={savedPackId} />
+          </div>
+        )}
+        {businessCase && (
+          <div ref={caseRef} className="letter-paper force-light-theme rounded-2xl max-w-2xl px-12 py-11 bg-white">
+            <BusinessCase content={businessCase} />
+          </div>
+        )}
+        {techMap && (
+          <div ref={techRef} className="letter-paper force-light-theme rounded-2xl max-w-2xl px-12 py-11 bg-white">
+            <TechMap content={techMap} />
+          </div>
+        )}
+      </div>
     </div>
   )
 }

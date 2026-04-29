@@ -3,7 +3,8 @@
 import React, { useState } from 'react'
 import { Download, FileText, Loader2 } from 'lucide-react'
 import { pdf } from '@react-pdf/renderer'
-import { LetterPdfDocument } from './PdfDocument'
+import { toPng } from 'html-to-image'
+import { ScreenshotPdfDocument } from './PdfDocument'
 import { exportToDocx } from '@/lib/exportDocx'
 
 interface Props {
@@ -11,9 +12,14 @@ interface Props {
   businessCase?: string
   techMap?: string
   companyName?: string
+  captureRefs?: {
+    letter: React.RefObject<HTMLDivElement | null>
+    case: React.RefObject<HTMLDivElement | null>
+    tech: React.RefObject<HTMLDivElement | null>
+  }
 }
 
-export default function DownloadMenu({ letter, businessCase, techMap, companyName = 'Company' }: Props) {
+export default function DownloadMenu({ letter, businessCase, techMap, companyName = 'Company', captureRefs }: Props) {
   const [isOpen, setIsOpen] = useState(false)
   const [isGeneratingDocx, setIsGeneratingDocx] = useState(false)
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false)
@@ -34,7 +40,45 @@ export default function DownloadMenu({ letter, businessCase, techMap, companyNam
   const handlePdf = async () => {
     try {
       setIsGeneratingPdf(true)
-      const doc = <LetterPdfDocument letter={letter} businessCase={businessCase} techMap={techMap} companyName={companyName} />
+
+      if (!captureRefs) {
+        alert('PDF capture not ready')
+        return
+      }
+
+      // Allow any Framer Motion entrance animations to settle before capturing
+      await new Promise((r) => setTimeout(r, 800))
+
+      const images: string[] = []
+
+      if (captureRefs.letter.current) {
+        const dataUrl = await toPng(captureRefs.letter.current, {
+          pixelRatio: 2,
+          backgroundColor: '#ffffff',
+        })
+        images.push(dataUrl)
+      }
+      if (captureRefs.case.current) {
+        const dataUrl = await toPng(captureRefs.case.current, {
+          pixelRatio: 2,
+          backgroundColor: '#ffffff',
+        })
+        images.push(dataUrl)
+      }
+      if (captureRefs.tech.current) {
+        const dataUrl = await toPng(captureRefs.tech.current, {
+          pixelRatio: 2,
+          backgroundColor: '#ffffff',
+        })
+        images.push(dataUrl)
+      }
+
+      if (images.length === 0) {
+        alert('No content to export')
+        return
+      }
+
+      const doc = <ScreenshotPdfDocument images={images} />
       const asPdf = pdf(doc)
       const blob = await asPdf.toBlob()
 
@@ -46,7 +90,7 @@ export default function DownloadMenu({ letter, businessCase, techMap, companyNam
       URL.revokeObjectURL(url)
     } catch (err) {
       console.error(err)
-      alert("Failed to generate PDF")
+      alert('Failed to generate PDF')
     } finally {
       setIsGeneratingPdf(false)
       setIsOpen(false)
