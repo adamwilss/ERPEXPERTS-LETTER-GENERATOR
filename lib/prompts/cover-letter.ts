@@ -45,6 +45,8 @@ NEVER "Dear Chief," NEVER "Dear Growth," NEVER "Dear Director," NEVER "Hello,"
 "Drop me a line if it's worth a conversation."
 
 Yours,
+
+_________________________
 Ric Wilson
 ERP Experts`
 }
@@ -68,7 +70,7 @@ CRITICAL REQUIREMENTS:
 4. Use the provided pain hypothesis VERBATIM as your suspected challenge
 5. Write ONE short NetSuite paragraph (practical, not salesy)
 6. Close EXACTLY with: "Drop me a line if it's worth a conversation."
-7. Sign off EXACTLY as: "Yours,\\nRic Wilson\\nERP Experts"
+7. Sign off EXACTLY as: "Yours,\\n\\n_________________________\\nRic Wilson\\nERP Experts"
 8. NO em dashes, NO corporate speak, NO quantified benchmarks
 9. Short sentences. Conversational. Direct. One idea per sentence.
 10. NO subject line. NO postal address block. The UI adds those.

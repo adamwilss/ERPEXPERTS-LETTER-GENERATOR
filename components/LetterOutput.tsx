@@ -42,7 +42,7 @@ function CoverLetterView({ content, savedPackId }: { content: string; savedPackI
 
   const salutationIdx = paragraphs.findIndex((p) => /^dear\s/i.test(p.trim()))
   const signoffIdx = paragraphs.findIndex((p) =>
-    /^yours sincerely|^kind regards|^best regards/i.test(p.trim())
+    /^yours sincerely|^kind regards|^best regards|^yours,|^best,/i.test(p.trim())
   )
 
   const signoff = signoffIdx >= 0 ? paragraphs.slice(signoffIdx).join('\n\n') : null
@@ -96,8 +96,13 @@ function CoverLetterView({ content, savedPackId }: { content: string; savedPackI
 
       {/* Sign-off */}
       {signoff && (
-        <div className="mt-10 pt-7 border-t border-gray-100 font-sans text-[14px] text-gray-700 whitespace-pre-line leading-[1.7]">
-          {signoff}
+        <div className="mt-10 pt-7 border-t border-gray-100 font-sans text-[14px] text-gray-700 leading-[1.7]">
+          {signoff.split('\n').map((line, i) => {
+            if (/^[_\s]+$/.test(line)) {
+              return <div key={i} className="w-48 border-b border-gray-400 my-3" />
+            }
+            return <div key={i}>{line}</div>
+          })}
         </div>
       )}
 
@@ -127,15 +132,27 @@ export default function LetterOutput({
   const [showSaveModal, setShowSaveModal] = useState(false)
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
 
+  const isAlreadySaved = Boolean(savedPackId)
+
   const handleSaveToHistory = async () => {
-    if (!companyName) return
+    if (!companyName || isAlreadySaved) return
     setSaveStatus('saving')
     try {
-      await savePack({
+      // Reconstruct the full three-part completion so history shows cover letter, business case, and tech map
+      const completion = [
+        '---PART1---',
+        letter,
+        '---PART2---',
+        businessCase || '',
+        '---PART3---',
+        techMap || '',
+      ].join('\n')
+
+      const saved = await savePack({
         company: companyName,
         recipientName: recipientName || 'Unknown',
         contactTitle: jobTitle || '',
-        completion: letter,
+        completion,
         website: '',
         location: '',
         industry: '',
@@ -143,6 +160,10 @@ export default function LetterOutput({
         erpScore: undefined,
       })
       setSaveStatus('saved')
+      // Update savedPackId so the QR code can be generated for this newly saved pack
+      if (saved.id && !savedPackId) {
+        window.dispatchEvent(new CustomEvent('pack-saved', { detail: { id: saved.id } }))
+      }
       setTimeout(() => setSaveStatus('idle'), 2500)
     } catch (err) {
       console.warn('Failed to save to history:', err)
@@ -187,18 +208,18 @@ export default function LetterOutput({
           <>
             <button
               onClick={handleSaveToHistory}
-              disabled={saveStatus === 'saving'}
-              className={`btn-secondary btn-sm ${saveStatus === 'saved' ? 'text-emerald-600 dark:text-emerald-400' : ''}`}
-              title="Save to History"
+              disabled={saveStatus === 'saving' || isAlreadySaved}
+              className={`btn-secondary btn-sm ${saveStatus === 'saved' || isAlreadySaved ? 'text-emerald-600 dark:text-emerald-400' : ''}`}
+              title={isAlreadySaved ? 'Already saved to History' : 'Save to History'}
             >
               {saveStatus === 'saving' ? (
                 <Loader2 className="w-3 h-3 animate-spin" />
-              ) : saveStatus === 'saved' ? (
+              ) : saveStatus === 'saved' || isAlreadySaved ? (
                 <Check className="w-3 h-3" />
               ) : (
                 <Archive className="w-3 h-3" />
               )}
-              {saveStatus === 'saved' ? 'Saved' : saveStatus === 'error' ? 'Failed' : 'Save'}
+              {isAlreadySaved ? 'Saved' : saveStatus === 'saved' ? 'Saved' : saveStatus === 'error' ? 'Failed' : 'Save'}
             </button>
             <button
               onClick={() => setShowSaveModal(true)}
@@ -208,7 +229,9 @@ export default function LetterOutput({
               Save Template
             </button>
             <DownloadMenu
-              letter={activeContent || ''}
+              letter={letter}
+              businessCase={businessCase}
+              techMap={techMap}
               companyName={companyName}
             />
           </>

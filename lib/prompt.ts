@@ -168,6 +168,8 @@ NEVER "Dear Chief," NEVER "Dear Growth," NEVER "Dear Director," NEVER "Hello," -
 "Drop me a line if it's worth a conversation."
 
 Yours,
+
+_________________________
 Ric Wilson
 ERP Experts
 
@@ -181,7 +183,15 @@ The business case (Part 2) must follow this structure:
 
 3. THE OUTCOME: One short paragraph on what a single integrated platform actually means for them. Not features, but outcomes. What does good look like for this specific business?
 
-4. CASE STUDY: One brief case study reference. Two or three sentences. Focus on the mechanism, not the client's industry. Use Eco2Solar, Kynetec, Totalkare, or Carallon if relevant. If none fits closely, use an anonymised "similar profile" example.
+4. CASE STUDY: One brief case study reference. Two or three sentences. Focus on the mechanism, not the client's industry.
+
+   You MUST use one of these four specific ERP Experts case studies:
+   - ECO2SOLAR: Renewable energy installer, multi-site field ops. Before: spreadsheets + disconnected tools, 10-day month-end. After: live job margins, integrated purchasing, 4-day close.
+   - KYNETEC: Agricultural data, 5-country distribution. Before: manual Excel consolidation, 15-day month-end. After: real-time group consolidation, under 5 days.
+   - TOTALKARE: Heavy vehicle lifting equipment manufacturer. Before: separate BOMs, stock, finance, service systems. After: single platform, real-time product + service margins.
+   - CARALLON: Media technology, ecommerce + projects. Before: project profitability invisible, purchasing fragmented. After: unified project/product financials, live P&L.
+
+   NEVER use a generic or anonymised example. ALWAYS name one of the four above.
 
 5. CLOSE: Exactly this line: "Fixed price. Senior-led. No surprises."
 
@@ -210,7 +220,7 @@ The table must reflect what is actually known or credibly inferred about this co
 
 4. CTA: Close with the same call to action:
 "Book a 15-minute call with Ric Wilson"
-T: 01785 714 514 · E: ric@erpexperts.co.uk · W: www.erpexperts.co.uk
+T: 01785 336 253 · E: ric@erpexperts.co.uk · W: www.erpexperts.co.uk
 
 --- TONE RULES -- OBEY THESE STRICTLY ---
 
@@ -302,7 +312,7 @@ Before returning, verify EVERY item:
 4. The suspected challenge is framed as an assumption ("I suspect", "my guess is")
 5. The NetSuite paragraph is practical, not salesy
 6. The close is exactly: "Drop me a line if it's worth a conversation."
-7. Sign-off is exactly: "Yours,\nRic Wilson\nERP Experts"
+7. Sign-off is exactly: "Yours,\n\n_________________________\nRic Wilson\nERP Experts"
 8. ZERO forbidden phrases used
 9. No em dashes anywhere in the output
 10. No quantified benchmarks in the cover letter
@@ -378,7 +388,7 @@ CRITICAL REQUIREMENTS:
 4. Write ONE suspected challenge (2-3 sentences), framed as "I suspect" or "my guess is". Invite them to correct you.
 5. Write ONE short paragraph on how ERP Experts can help, referencing NetSuite specifically. Keep it practical, not salesy.
 6. Close EXACTLY with: "Drop me a line if it's worth a conversation."
-7. Sign off EXACTLY as: "Yours,\nRic Wilson\nERP Experts"
+7. Sign off EXACTLY as: "Yours,\n\n_________________________\nRic Wilson\nERP Experts"
 8. NO em dashes anywhere in the output.
 9. NO corporate speak or pain statement language.
 10. NO quantified benchmarks in the cover letter (no percentages, no "X days saved").
@@ -452,6 +462,8 @@ Dear [First Name or Job Title],
 Drop me a line if it's worth a conversation.
 
 Best,
+
+_________________________
 Ric Wilson
 ERP Experts
 
@@ -481,6 +493,8 @@ Dear [First Name or Job Title],
 Still worth a brief conversation?
 
 Best,
+
+_________________________
 Ric Wilson
 ERP Experts
 
@@ -508,6 +522,8 @@ Dear [First Name or Job Title],
 [2 very short paragraphs]
 
 Best,
+
+_________________________
 Ric Wilson
 ERP Experts
 

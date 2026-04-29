@@ -237,7 +237,7 @@ export function IntegrationFlow({ rows }: { rows: TableRow[] }) {
           initial={{ scale: 0.9 }}
           animate={{ scale: 1 }}
           transition={{ delay: 0.8, type: 'spring' }}
-          className="px-5 py-3 rounded-xl bg-gray-950 dark:bg-white text-white dark:text-gray-950 text-[13px] font-bold shadow-lg"
+          className="px-5 py-3 rounded-xl bg-emerald-600 text-white text-[13px] font-bold shadow-lg"
         >
           NetSuite
         </motion.div>

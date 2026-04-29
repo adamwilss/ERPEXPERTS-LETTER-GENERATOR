@@ -167,15 +167,55 @@ function createPipelineStream(input: PipelineInput): ReadableStream {
 
         send({ type: 'step_complete', step: 'techMap', data: techMap })
 
-        // ── Step 6: Review & Assemble ───────────────────────────────────
-        send({ type: 'step_start', step: 'review', message: 'Reviewing consistency...' })
+        // ── Step 6: Cross-Validation ─────────────────────────────────────
+        send({ type: 'step_start', step: 'review', message: 'Checking consistency...' })
+
+        // Enforce specific case study naming
+        const ALLOWED_CASE_STUDIES = ['Eco2Solar', 'Kynetec', 'Totalkare', 'Carallon']
+        const caseStudyText = businessCase.caseStudy || ''
+        const hasNamedCaseStudy = ALLOWED_CASE_STUDIES.some((name) =>
+          caseStudyText.includes(name)
+        )
+        if (!hasNamedCaseStudy) {
+          // Force Totalkare as the default — it covers manufacturing, distribution, and service
+          businessCase.caseStudy = `Totalkare, a UK manufacturer and distributor of heavy vehicle lifting equipment, faced the same structural issue: separate systems for manufacturing BOMs, stock management, finance, and service contracts meant no visibility of true product profitability. After moving to NetSuite, they have a single platform from order through production to service contract, with real-time visibility of product and service margins.`
+          // Re-assemble fullText with corrected case study
+          const parts = businessCase.fullText.split('\n\n')
+          const caseStudyIdx = parts.findIndex((p) =>
+            p.toLowerCase().includes('case study') || p.toLowerCase().includes('totalkare') || p.toLowerCase().includes('eco2solar') || p.toLowerCase().includes('kynetec') || p.toLowerCase().includes('carallon')
+          )
+          if (caseStudyIdx >= 0) {
+            parts[caseStudyIdx] = businessCase.caseStudy
+            businessCase.fullText = parts.join('\n\n')
+          }
+        }
+
+        // Ensure tech map includes systems from the business case insight
+        const techMapSystems = new Set(techMap.rows.map((r) => r.system.toLowerCase()))
+        const missingSystems = insight.likelySystems.filter(
+          (s) => !techMapSystems.has(s.toLowerCase()) && !techMapSystems.has(s.toLowerCase().replace(/[^a-z0-9]/g, ''))
+        )
+        if (missingSystems.length > 0 && techMap.rows.length < 10) {
+          // Add missing inferred systems as "Integrate" or "Replace" rows
+          for (const sys of missingSystems.slice(0, 3)) {
+            const isAccounting = /xero|sage|quickbooks|dynamics/.test(sys.toLowerCase())
+            const isSpreadsheet = /excel|spreadsheet|sheet/.test(sys.toLowerCase())
+            techMap.rows.push({
+              system: sys,
+              relationship: isSpreadsheet ? 'Eliminate' : isAccounting ? 'Replace' : 'Integrate',
+              meaning: `${sys} becomes part of the unified NetSuite record, removing manual reconciliation between systems.`,
+            })
+          }
+          // Re-assemble fullText
+          const tableLines = techMap.rows.map((r) =>
+            `| ${r.system} | ${r.relationship} | ${r.meaning} |`
+          )
+          techMap.fullText = `${techMap.title}\n\n${techMap.subtitle}\n\n| System | Relationship | What it means for ${input.company} |\n|---|---|---|\n${tableLines.join('\n')}\n\n${techMap.cta}`
+        }
 
         const part1 = coverLetter.fullText
         const part2 = businessCase.fullText
         const part3 = techMap.fullText
-
-        // Optional: run review through AI
-        // For now, just assemble and emit
 
         const output: PipelineOutput = {
           part1,
@@ -187,6 +227,7 @@ function createPipelineStream(input: PipelineInput): ReadableStream {
           techMap,
         }
 
+        send({ type: 'step_complete', step: 'review' })
         send({ type: 'complete', data: output })
         controller.close()
       } catch (err) {

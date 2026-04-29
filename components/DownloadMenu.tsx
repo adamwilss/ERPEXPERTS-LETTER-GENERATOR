@@ -8,10 +8,12 @@ import { exportToDocx } from '@/lib/exportDocx'
 
 interface Props {
   letter: string
+  businessCase?: string
+  techMap?: string
   companyName?: string
 }
 
-export default function DownloadMenu({ letter, companyName = 'Company' }: Props) {
+export default function DownloadMenu({ letter, businessCase, techMap, companyName = 'Company' }: Props) {
   const [isOpen, setIsOpen] = useState(false)
   const [isGeneratingDocx, setIsGeneratingDocx] = useState(false)
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false)
@@ -19,7 +21,7 @@ export default function DownloadMenu({ letter, companyName = 'Company' }: Props)
   const handleDocx = async () => {
     try {
       setIsGeneratingDocx(true)
-      await exportToDocx(letter, companyName)
+      await exportToDocx(letter, businessCase, techMap, companyName)
     } catch (err) {
       console.error(err)
       alert("Failed to generated DOCX")
@@ -32,14 +34,14 @@ export default function DownloadMenu({ letter, companyName = 'Company' }: Props)
   const handlePdf = async () => {
     try {
       setIsGeneratingPdf(true)
-      const doc = <LetterPdfDocument letter={letter} />
+      const doc = <LetterPdfDocument letter={letter} businessCase={businessCase} techMap={techMap} companyName={companyName} />
       const asPdf = pdf(doc)
       const blob = await asPdf.toBlob()
 
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.download = `${companyName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_erp_letter.pdf`
+      link.download = `${companyName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_erp_letter_pack.pdf`
       link.click()
       URL.revokeObjectURL(url)
     } catch (err) {
