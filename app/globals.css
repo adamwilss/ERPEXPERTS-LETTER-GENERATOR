@@ -303,185 +303,18 @@
   .force-light-theme .bg-gray-50 { background-color: #fafaf8 !important; }
   .force-light-theme .bg-gray-100 { background-color: #f2f2f0 !important; }
 
-  /* ── Letter Style 1: Executive Classic ──────────────────────── */
-  /* Traditional formal letter — tight, proper, law-firm feel */
-  .style-executive.letter-paper,
-  .style-executive .letter-paper {
-    background: #FDFCF7 !important;
-    color: #1a1a1a !important;
-  }
-  .style-executive .letter-body-text {
-    font-family: Georgia, 'Times New Roman', serif;
-    font-size: 14.5px;
-    line-height: 1.7;
-    color: #1a1a1a;
-  }
-  .style-executive .letter-body-text p {
-    margin-bottom: 20px;
-  }
-  .style-executive .letter-body-text p:first-of-type {
-    font-size: 16px;
-    font-weight: 700;
-    color: #111;
-    line-height: 1.35;
-    letter-spacing: -0.005em;
-  }
-  /* Executive: commanding subject line */
-  .style-executive .letter-subject-line {
-    font-family: 'Inter', system-ui, sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    color: #1e3a5f;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
-    margin-bottom: 24px;
-  }
-  .style-executive .letter-accent-line {
-    height: 2px;
-    background: #1e3a5f;
-    margin-bottom: 28px;
-  }
-  .style-executive .stat-box {
-    border-left: 3px solid #1e3a5f;
-    background: #f4f6f9;
-    padding: 14px 18px;
-    border-radius: 0 6px 6px 0;
-    font-size: 14px;
-  }
-  .style-executive .page-footer-text {
-    color: #6a6a68;
-    font-size: 10px;
-    border-top: 1px solid #d8d8d4;
-  }
-  .style-executive .letter-salutation {
-    font-family: Georgia, 'Times New Roman', serif;
-    font-size: 14.5px;
-    color: #1a1a1a;
-    margin-bottom: 24px;
-  }
-  /* Executive: formal address block styling */
-  .style-executive .recipient-block {
-    font-family: 'Inter', system-ui, sans-serif;
-    font-size: 13px;
-    line-height: 1.5;
-    color: #333;
-    margin-bottom: 28px;
-  }
-
-  /* ── Letter Style 2: Modern Punchy ──────────────────────────── */
-  /* High-impact scannable — bold hook, crisp spacing, Inter throughout */
-  .style-modern.letter-paper,
-  .style-modern .letter-paper {
-    background: #FFFFFF !important;
-    color: #111 !important;
-  }
-  .style-modern .letter-body-text {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    font-size: 16px;
-    line-height: 1.6;
-    color: #222;
-    font-weight: 400;
-  }
-  .style-modern .letter-body-text p {
-    margin-bottom: 28px;
-  }
-  .style-modern .letter-body-text p:first-of-type {
-    font-size: 22px;
-    font-weight: 700;
-    color: #111;
-    line-height: 1.2;
-    letter-spacing: -0.02em;
-    margin-bottom: 32px;
-  }
-  .style-modern .letter-accent-line {
-    height: 1px;
-    background: #d4d4d8;
-    margin-bottom: 32px;
-  }
-  .style-modern .stat-box {
-    border: 1px solid #e4e4e7;
-    background: #fafafa;
-    padding: 20px 24px;
-    border-radius: 12px;
-    font-family: 'Inter', system-ui, sans-serif;
-    font-size: 15px;
-  }
-  .style-modern .page-footer-text {
-    color: #a1a1aa;
-    font-size: 10px;
-    border-top: 1px solid #f4f4f5;
-    font-family: 'Inter', system-ui, sans-serif;
-  }
-
-  /* ── Letter Style 3: Boutique Warm ───────────────────────────── */
-  /* Personal, crafted, oversized — boutique hotel correspondence */
-  .style-warm.letter-paper,
-  .style-warm .letter-paper {
-    background: #FDFBF5 !important;
-    color: #2a2a28 !important;
-  }
-  .style-warm .letter-body-text {
-    font-family: Georgia, 'Times New Roman', serif;
-    font-size: 17.5px;
-    line-height: 2.1;
-    color: #2a2a28;
-  }
-  .style-warm .letter-body-text p {
-    margin-bottom: 36px;
-  }
-  .style-warm .letter-body-text p:first-of-type {
-    font-size: 20px;
-    font-weight: 400;
-    color: #1a1a18;
-    line-height: 1.55;
-    font-style: italic;
-    margin-bottom: 40px;
-  }
-  .style-warm .letter-accent-line {
-    height: 1.5px;
-    background: #d4d0c8;
-    margin-bottom: 40px;
-  }
-  .style-warm .stat-box {
-    border-top: 2px solid #059669;
-    border-bottom: 1px solid #e0dcd4;
-    background: transparent;
-    padding: 22px 16px;
-    font-size: 16.5px;
-    font-family: Georgia, 'Times New Roman', serif;
-  }
-  .style-warm .page-footer-text {
-    color: #8a8a80;
-    font-size: 10px;
-    border-top: 1px solid #e0dcd4;
-    font-family: Georgia, 'Times New Roman', serif;
-    font-style: italic;
-  }
-  .style-warm .letter-salutation {
-    font-family: Georgia, 'Times New Roman', serif;
-    font-size: 17.5px;
-    color: #2a2a28;
-    margin-bottom: 36px;
-  }
-
-  /* ── Letter Style 4: Bold Authority ──────────────────────────── */
-  /* Punchy, numbers-forward, McKinsey-memo confidence */
-  .style-dark.letter-paper,
-  .style-dark .letter-paper {
-    background: #FFFFFF !important;
-    color: #111 !important;
-  }
-  .style-dark .letter-body-text {
+  /* ── Letter Typography (Authority — premium print default) ──── */
+  .letter-body-text {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     font-size: 16px;
     line-height: 1.65;
     color: #1a1a1a;
     font-weight: 400;
   }
-  .style-dark .letter-body-text p {
+  .letter-body-text p {
     margin-bottom: 24px;
   }
-  .style-dark .letter-body-text p:first-of-type {
+  .letter-body-text p:first-of-type {
     font-size: 20px;
     font-weight: 700;
     color: #000;
@@ -489,17 +322,36 @@
     letter-spacing: -0.015em;
     margin-bottom: 28px;
   }
-  .style-dark .letter-body-text strong,
-  .style-dark .letter-body-text b {
+  .letter-body-text strong,
+  .letter-body-text b {
     font-weight: 700;
     color: #000;
   }
-  .style-dark .letter-accent-line {
-    height: 3px;
-    background: #111;
-    margin-bottom: 32px;
+  .letter-body-text em,
+  .letter-body-text i {
+    color: #444;
   }
-  .style-dark .stat-box {
+
+  /* Salutation — slightly more weight than body */
+  .letter-salutation {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 28px;
+  }
+
+  /* Signature name — more prominent than surrounding text */
+  .letter-signature-name {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: #111;
+    letter-spacing: -0.01em;
+  }
+
+  /* Stat highlight boxes */
+  .stat-box {
     border: 2px solid #111;
     background: #fff;
     padding: 18px 22px;
@@ -508,24 +360,7 @@
     font-weight: 700;
     font-size: 15px;
   }
-  .style-dark .page-footer-text {
-    color: #555;
-    font-size: 10px;
-    border-top: 2px solid #111;
-    font-family: 'Inter', system-ui, sans-serif;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-  .style-dark .letter-salutation {
-    font-family: 'Inter', system-ui, sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    color: #111;
-    margin-bottom: 24px;
-  }
-  /* Authority stat callout emphasis */
-  .style-dark .stat-box .stat-figure {
+  .stat-box .stat-figure {
     font-size: 38px;
     font-weight: 800;
     color: #000;
@@ -534,58 +369,16 @@
     letter-spacing: -0.02em;
   }
 
-  /* ── Letter Style 5: Contemporary Studio ────────────────────── */
-  /* Design-forward — asymmetric, emerald accents, modern editorial */
-  .style-studio.letter-paper,
-  .style-studio .letter-paper {
-    background: #FFFFFF !important;
-    color: #1a1a1a !important;
-    border-left: 4px solid #059669 !important;
-    padding-left: calc(3rem - 4px) !important;
-  }
-  .style-studio .letter-body-text {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    font-size: 15px;
-    line-height: 1.75;
-    color: #2a2a28;
-  }
-  .style-studio .letter-body-text p {
-    margin-bottom: 28px;
-  }
-  .style-studio .letter-body-text p:first-of-type {
-    font-size: 20px;
-    font-weight: 600;
-    color: #111;
-    line-height: 1.3;
-    letter-spacing: -0.015em;
-    margin-bottom: 32px;
-  }
-  .style-studio .letter-accent-line {
-    height: 4px;
-    background: linear-gradient(90deg, #059669 0%, #34d399 50%, #059669 100%);
-    border-radius: 2px;
-    margin-bottom: 36px;
-  }
-  .style-studio .stat-box {
-    border-left: 4px solid #059669;
-    background: #f9fdfb;
-    padding: 18px 22px;
-    border-radius: 0 10px 10px 0;
-    font-family: 'Inter', system-ui, sans-serif;
-    font-size: 14px;
-  }
-  .style-studio .page-footer-text {
-    color: #8a8a86;
+  /* Page footer */
+  .page-footer-text {
+    color: #555;
     font-size: 10px;
-    border-top: 1px solid #e8e8e4;
+    border-top: 2px solid #111;
     font-family: 'Inter', system-ui, sans-serif;
-  }
-  .style-studio .letter-salutation {
-    font-family: 'Inter', system-ui, sans-serif;
-    font-size: 15px;
-    font-weight: 500;
-    color: #111;
-    margin-bottom: 28px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding-top: 12px;
   }
 
   /* ── Loading ────────────────────────────────────────────────── */

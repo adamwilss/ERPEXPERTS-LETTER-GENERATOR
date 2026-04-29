@@ -1,7 +1,5 @@
 import Image from 'next/image'
 import { parseTechTable, TableRow } from '@/lib/parse'
-import { BeforeAfterCards } from './TechMapCharts'
-import { LetterStyle } from './StyleSelector'
 
 // ── Relationship normalizer ────────────────────────────────────────────────────
 
@@ -9,13 +7,9 @@ const RELATIONSHIP_KEYWORDS = ['Integrate', 'Replace', 'Eliminate', 'Native'] as
 
 function normalizeRelationship(text: string): string {
   const lower = text.toLowerCase()
-  // Check if any keyword appears in the text
   for (const kw of RELATIONSHIP_KEYWORDS) {
-    if (lower.includes(kw.toLowerCase())) {
-      return kw
-    }
+    if (lower.includes(kw.toLowerCase())) return kw
   }
-  // Fallback: check for close matches
   if (lower.includes('integrat') || lower.includes('connect') || lower.includes('sync')) return 'Integrate'
   if (lower.includes('replac') || lower.includes('substitut') || lower.includes('migrate')) return 'Replace'
   if (lower.includes('eliminat') || lower.includes('remove') || lower.includes('remov')) return 'Eliminate'
@@ -23,153 +17,119 @@ function normalizeRelationship(text: string): string {
   return 'Other'
 }
 
-// ── Config ─────────────────────────────────────────────────────────────────────
+// ── Visual config per relationship ─────────────────────────────────────────────
 
-const RELATIONSHIP_ORDER = ['Integrate', 'Replace', 'Eliminate', 'Native']
-
-const CONFIG: Record<string, {
-  badge: string
-  rowBg: string
-  groupLabel: string
-  dot: string
-}> = {
+const RELATIONSHIP_STYLE: Record<string, { color: string; bg: string; border: string; label: string }> = {
   Integrate: {
-    badge: 'bg-blue-100 text-blue-800 ring-1 ring-blue-200',
-    rowBg: 'bg-blue-50/40',
-    groupLabel: 'Integrates with NetSuite',
-    dot: 'bg-blue-400',
+    color: '#3b82f6',
+    bg: '#f0f7ff',
+    border: 'border-l-blue-500',
+    label: 'Connects to NetSuite',
   },
   Replace: {
-    badge: 'bg-amber-100 text-amber-800 ring-1 ring-amber-200',
-    rowBg: 'bg-amber-50/40',
-    groupLabel: 'Replaced by NetSuite',
-    dot: 'bg-amber-400',
+    color: '#f59e0b',
+    bg: '#fffcf0',
+    border: 'border-l-amber-500',
+    label: 'Replaced by NetSuite',
   },
   Eliminate: {
-    badge: 'bg-red-100 text-red-700 ring-1 ring-red-200',
-    rowBg: 'bg-red-50/30',
-    groupLabel: 'Eliminated entirely',
-    dot: 'bg-red-400',
+    color: '#ef4444',
+    bg: '#fff8f8',
+    border: 'border-l-red-500',
+    label: 'Eliminated',
   },
   Native: {
-    badge: 'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-200',
-    rowBg: 'bg-emerald-50/40',
-    groupLabel: 'Handled natively by NetSuite',
-    dot: 'bg-emerald-400',
+    color: '#10b981',
+    bg: '#f4fdf9',
+    border: 'border-l-emerald-500',
+    label: 'Handled natively',
   },
 }
 
-const FALLBACK_CONFIG = {
-  badge: 'bg-gray-100 text-gray-700 ring-1 ring-gray-200',
-  rowBg: 'bg-gray-50/40',
-  groupLabel: 'Other',
-  dot: 'bg-gray-400',
-}
+// ── Before / After summary cards ────────────────────────────────────────────────
 
-// ── CTA parser ─────────────────────────────────────────────────────────────────
+function SummaryCards({ rows }: { rows: TableRow[] }) {
+  const count = rows.length
+  const eliminated = rows.filter((r) => /replace|eliminat/i.test(r.relationship)).length
 
-function parseCTA(text: string): { intro: string | null; phone: string | null; email: string | null; web: string | null } {
-  const phone = text.match(/T:\s*([^\s·]+)/)?.[1] ?? null
-  const email = text.match(/E:\s*([^\s·]+)/)?.[1] ?? null
-  const web = text.match(/W:\s*([^\s·\n]+)/)?.[1] ?? null
-  const intro = text.split('\n').find(l => l.trim() && !/^T:|^E:|^W:/.test(l.trim())) ?? null
-  return { intro, phone, email, web }
-}
-
-// ── Sub-components ─────────────────────────────────────────────────────────────
-
-function RelationshipGroup({ label, rows, cfg }: {
-  label: string
-  rows: TableRow[]
-  cfg: typeof FALLBACK_CONFIG
-}) {
   return (
-    <div>
-      {/* Group header */}
-      <div className="flex items-center gap-2 px-4 py-2.5 bg-gray-50/80 border-y border-gray-100">
-        <span className={`w-2 h-2 rounded-full flex-shrink-0 ${cfg.dot}`} />
-        <span className="text-[11px] font-semibold text-gray-500 uppercase tracking-[0.08em]">
-          {label}
-        </span>
-        <span className="text-[11px] text-gray-400 ml-auto">{rows.length}</span>
+    <div className="grid grid-cols-2 gap-4 mb-10">
+      <div className="border border-gray-200 bg-gray-50/50 p-5">
+        <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-gray-400 mb-2">
+          Likely Current State
+        </p>
+        <p className="text-[32px] font-extrabold text-gray-900 leading-none">{count}</p>
+        <p className="text-[11px] text-gray-500 mt-1.5">disconnected systems</p>
+        <p className="text-[9px] text-gray-400 mt-2 leading-relaxed">
+          {eliminated} can be replaced or eliminated
+        </p>
       </div>
 
-      {/* Rows */}
-      {rows.map((row, i) => {
-        const normalizedRel = normalizeRelationship(row.relationship)
-        const rowCfg = CONFIG[normalizedRel] ?? FALLBACK_CONFIG
-        return (
-          <div
-            key={i}
-            className={`flex gap-5 px-4 py-5 border-b border-gray-100 last:border-b-0 ${rowCfg.rowBg}`}
-          >
-            {/* System name */}
-            <div className="w-32 flex-shrink-0 pt-0.5 min-w-0">
-              <span className="text-[14px] font-semibold text-gray-900 leading-snug">
-                {row.system}
-              </span>
-            </div>
-
-            {/* Badge */}
-            <div className="w-28 flex-shrink-0 pt-0.5">
-              <span className={`inline-block text-[11px] font-semibold px-2.5 py-1 rounded-full whitespace-nowrap ${rowCfg.badge}`}>
-                {normalizedRel}
-              </span>
-            </div>
-
-            {/* Meaning */}
-            <p className="flex-1 text-[14px] text-gray-600 leading-relaxed min-w-0">
-              {row.meaning}
-            </p>
-
-            {/* Impact (4th column) */}
-            {row.impact && (
-              <div className="w-52 flex-shrink-0 pt-0.5 hidden lg:block min-w-0">
-                <p className="text-[13px] text-gray-700 leading-relaxed">
-                  {row.impact}
-                </p>
-              </div>
-            )}
-          </div>
-        )
-      })}
+      <div className="border-2 border-gray-900 bg-white p-5">
+        <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-gray-600 mb-2">
+          Future State
+        </p>
+        <p className="text-[32px] font-extrabold text-gray-900 leading-none">1</p>
+        <p className="text-[11px] text-gray-700 mt-1.5 font-medium">unified platform</p>
+        <p className="text-[9px] text-gray-500 mt-2 leading-relaxed">
+          NetSuite at the centre
+        </p>
+      </div>
     </div>
   )
 }
 
-function CTABlock({ text }: { text: string }) {
-  const { intro, phone, email, web } = parseCTA(text)
-  if (!phone && !email) {
-    return (
-      <div className="mt-6 pt-5 border-t border-gray-200 text-sm text-gray-600 whitespace-pre-line">
-        {text}
-      </div>
-    )
-  }
+// ── Single system row — editorial card style ────────────────────────────────────
+
+function SystemCard({ row }: { row: TableRow }) {
+  const rel = normalizeRelationship(row.relationship)
+  const style = RELATIONSHIP_STYLE[rel] ?? RELATIONSHIP_STYLE.Integrate
+
   return (
-    <div className="mt-6 pt-5 border-t border-gray-200">
-      {intro && (
-        <p className="text-sm font-semibold text-gray-800 mb-3">{intro.trim()}</p>
+    <div
+      className="border-l-[3px] pl-5 py-5 border-b border-gray-100 last:border-b-0"
+      style={{ borderLeftColor: style.color, backgroundColor: style.bg }}
+    >
+      <div className="flex items-baseline gap-3 mb-2">
+        <span className="text-[15px] font-bold text-gray-900 leading-tight">
+          {row.system}
+        </span>
+        <span
+          className="text-[10px] font-semibold uppercase tracking-[0.06em] px-2 py-0.5 rounded-full"
+          style={{ color: style.color, backgroundColor: style.bg }}
+        >
+          {rel}
+        </span>
+      </div>
+      <p className="text-[13px] text-gray-600 leading-relaxed max-w-prose">
+        {row.meaning}
+      </p>
+      {row.impact && (
+        <p className="text-[12px] text-gray-500 mt-1.5 leading-relaxed italic">
+          {row.impact}
+        </p>
       )}
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-600">
-        {phone && (
-          <span className="flex items-center gap-1.5">
-            <span className="text-gray-400 text-[11px] font-medium uppercase tracking-wide">Tel</span>
-            <span>{phone}</span>
-          </span>
-        )}
-        {email && (
-          <span className="flex items-center gap-1.5">
-            <span className="text-gray-400 text-[11px] font-medium uppercase tracking-wide">Email</span>
-            <a href={`mailto:${email}`} className="text-blue-600 hover:underline">{email}</a>
-          </span>
-        )}
-        {web && (
-          <span className="flex items-center gap-1.5">
-            <span className="text-gray-400 text-[11px] font-medium uppercase tracking-wide">Web</span>
-            <span>{web}</span>
-          </span>
-        )}
+    </div>
+  )
+}
+
+// ── CTA block ───────────────────────────────────────────────────────────────────
+
+function CTABlock({ text }: { text: string }) {
+  const phone = text.match(/T:\s*([^\s·]+)/)?.[1] ?? '01785 336 253'
+  const email = text.match(/E:\s*([^\s·]+)/)?.[1] ?? 'hello@erpexperts.co.uk'
+  const web = text.match(/W:\s*([^\s·\n]+)/)?.[1] ?? 'www.erpexperts.co.uk'
+  const introLine = text.split('\n').find(l => l.trim() && !/^T:|^E:|^W:/.test(l.trim()))?.trim()
+
+  return (
+    <div className="mt-10 pt-6 border-t border-gray-200">
+      {introLine && (
+        <p className="text-[14px] font-semibold text-gray-900 mb-3">{introLine}</p>
+      )}
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-1.5 text-[13px] text-gray-600">
+        <span>T: {phone}</span>
+        <span>E: {email}</span>
+        <span>W: {web}</span>
       </div>
     </div>
   )
@@ -177,83 +137,87 @@ function CTABlock({ text }: { text: string }) {
 
 // ── Main component ─────────────────────────────────────────────────────────────
 
-export default function TechMap({ content, style = 'warm' }: { content: string; style?: LetterStyle }) {
+export default function TechMap({ content }: { content: string }) {
   const { rows, before, after } = parseTechTable(content)
 
   const lines = before.split('\n').filter(Boolean)
-  const title = lines.find((l) => l.startsWith('TITLE:'))?.replace('TITLE:', '').trim() ?? ''
+  const title = lines.find((l) => l.startsWith('TITLE:'))?.replace('TITLE:', '').trim() ?? 'Technology Integration Map'
   const subtitle = lines.find((l) => l.startsWith('SUBTITLE:'))?.replace('SUBTITLE:', '').trim() ?? ''
 
-  // Group rows by normalized relationship type, preserving AI order within each group
+  // Group and order rows
+  const relationshipOrder = ['Integrate', 'Replace', 'Eliminate', 'Native']
   const grouped: Record<string, TableRow[]> = {}
   for (const row of rows) {
     const key = normalizeRelationship(row.relationship)
     if (!grouped[key]) grouped[key] = []
     grouped[key].push(row)
   }
-
   const orderedKeys = [
-    ...RELATIONSHIP_ORDER.filter(k => grouped[k]),
-    ...Object.keys(grouped).filter(k => !RELATIONSHIP_ORDER.includes(k)),
+    ...relationshipOrder.filter(k => grouped[k]),
+    ...Object.keys(grouped).filter(k => !relationshipOrder.includes(k)),
   ]
-
-  const logoHeight = style === 'warm' || style === 'studio' ? 'h-28' : 'h-24'
 
   return (
     <div>
-      {/* Letterhead with Logo */}
-      <div className="flex items-start justify-between pb-7 mb-7 border-b border-gray-200">
+      {/* Letterhead — stacked left-aligned */}
+      <div className="mb-10">
         <Image
           src="/erpexperts-logo.png"
           alt="ERP Experts"
-          width={style === 'warm' || style === 'studio' ? 360 : 280}
-          height={style === 'warm' || style === 'studio' ? 112 : 96}
-          className={`${logoHeight} w-auto object-contain`}
+          width={280}
+          height={96}
+          className="h-24 w-auto object-contain"
         />
       </div>
 
-      {/* Accent line */}
-      <div className="letter-accent-line mb-7" />
-
       {/* Title */}
       {title && (
-        <h2 className="text-[22px] font-semibold text-gray-900 tracking-[-0.02em] leading-tight mb-3">{title}</h2>
+        <h2 className="text-[22px] font-bold text-gray-900 tracking-[-0.02em] leading-tight mb-2">
+          {title}
+        </h2>
       )}
       {subtitle && (
-        <p className="text-[14px] text-gray-500 mb-7 pb-7 border-b border-gray-200 leading-relaxed">{subtitle}</p>
+        <p className="text-[13px] text-gray-500 mb-10 leading-relaxed">
+          {subtitle}
+        </p>
       )}
 
       {rows.length > 0 && (
         <>
-          <BeforeAfterCards rows={rows} />
+          <SummaryCards rows={rows} />
 
-          {/* Grouped table */}
-          <div className="border border-gray-200 rounded-xl overflow-hidden">
-            {/* Column headers */}
-            <div className="flex gap-5 px-4 py-2.5 bg-white border-b border-gray-200">
-              <span className="w-32 flex-shrink-0 text-[11px] font-semibold text-gray-400 uppercase tracking-[0.08em]">System</span>
-              <span className="w-28 flex-shrink-0 text-[11px] font-semibold text-gray-400 uppercase tracking-[0.08em]">Status</span>
-              <span className="flex-1 text-[11px] font-semibold text-gray-400 uppercase tracking-[0.08em]">What it means</span>
-              <span className="w-52 flex-shrink-0 text-[11px] font-semibold text-gray-400 uppercase tracking-[0.08em] hidden lg:block">Impact</span>
-            </div>
-
-            {orderedKeys.map(key => (
-              <RelationshipGroup
-                key={key}
-                label={(CONFIG[key] ?? FALLBACK_CONFIG).groupLabel}
-                rows={grouped[key]}
-                cfg={CONFIG[key] ?? FALLBACK_CONFIG}
-              />
-            ))}
-          </div>
+          {/* System cards by relationship group */}
+          {orderedKeys.map(key => {
+            const groupRows = grouped[key]
+            const style = RELATIONSHIP_STYLE[key] ?? RELATIONSHIP_STYLE.Integrate
+            return (
+              <div key={key} className="mb-8">
+                <div className="flex items-center gap-2 mb-2 px-1">
+                  <span
+                    className="w-2 h-2 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: style.color }}
+                  />
+                  <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-[0.1em]">
+                    {style.label}
+                  </span>
+                  <span className="text-[10px] text-gray-300 ml-auto">{groupRows.length}</span>
+                </div>
+                <div className="border border-gray-200 rounded-lg overflow-hidden">
+                  {groupRows.map((row, i) => (
+                    <SystemCard key={i} row={row} />
+                  ))}
+                </div>
+              </div>
+            )
+          })}
         </>
       )}
 
       {after && <CTABlock text={after} />}
 
-      <div className="mt-10 pt-5 page-footer-text flex items-center justify-between tracking-wide">
-        <span>ERP Experts Ltd · Manchester, UK · 01785 336 253</span>
-        <span>hello@erpexperts.co.uk · www.erpexperts.co.uk</span>
+      <div className="mt-12 page-footer-text flex items-center justify-between tracking-wide">
+        <span>ERP Experts Ltd &middot; Manchester, UK &middot; 01785 336 253</span>
+        <span>hello@erpexperts.co.uk &middot; www.erpexperts.co.uk</span>
       </div>
     </div>
   )
