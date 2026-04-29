@@ -7,9 +7,9 @@ export type LetterStyle = 'executive' | 'modern' | 'warm' | 'dark' | 'studio'
 
 const STYLES: { key: LetterStyle; label: string }[] = [
   { key: 'executive', label: 'Executive' },
-  { key: 'modern', label: 'Minimal' },
-  { key: 'warm', label: 'Warm' },
-  { key: 'dark', label: 'Bold' },
+  { key: 'modern', label: 'Punchy' },
+  { key: 'warm', label: 'Boutique' },
+  { key: 'dark', label: 'Authority' },
   { key: 'studio', label: 'Studio' },
 ]
 
