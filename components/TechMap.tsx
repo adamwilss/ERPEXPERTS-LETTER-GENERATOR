@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import { parseTechTable, TableRow } from '@/lib/parse'
-import { DonutChart, BeforeAfterCards, CostCallout, IntegrationFlow } from './TechMapCharts'
+import { BeforeAfterCards } from './TechMapCharts'
 
 // ── Relationship normalizer ────────────────────────────────────────────────────
 
@@ -196,13 +196,6 @@ export default function TechMap({ content }: { content: string }) {
     ...Object.keys(grouped).filter(k => !RELATIONSHIP_ORDER.includes(k)),
   ]
 
-  // Legend summary counts
-  const legendItems = orderedKeys.map(key => ({
-    key,
-    count: grouped[key].length,
-    cfg: CONFIG[key] ?? FALLBACK_CONFIG,
-  }))
-
   return (
     <div>
       {/* Letterhead with Logo */}
@@ -226,29 +219,7 @@ export default function TechMap({ content }: { content: string }) {
 
       {rows.length > 0 && (
         <>
-          {/* Charts section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <div className="rounded-xl border border-gray-200 dark:border-[#1e1e1e] bg-white dark:bg-[#111] p-5 flex items-center justify-center">
-              <DonutChart rows={rows} />
-            </div>
-            <div className="space-y-3">
-              <BeforeAfterCards rows={rows} />
-              <CostCallout systemCount={rows.length} />
-            </div>
-          </div>
-
-          <IntegrationFlow rows={rows} />
-
-          {/* Legend pills */}
-          <div className="flex flex-wrap gap-2 mb-5 mt-6">
-            {legendItems.map(({ key, count, cfg }) => (
-              <span key={key} className="flex items-center gap-1.5 text-[12px] text-gray-500">
-                <span className={`w-2 h-2 rounded-full flex-shrink-0 ${cfg.dot}`} />
-                <span className="font-medium text-gray-700">{key}</span>
-                <span className="text-gray-400">({count})</span>
-              </span>
-            ))}
-          </div>
+          <BeforeAfterCards rows={rows} />
 
           {/* Grouped table */}
           <div className="border border-gray-200 rounded-xl overflow-hidden">

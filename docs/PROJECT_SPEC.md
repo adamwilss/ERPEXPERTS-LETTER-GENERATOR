@@ -49,7 +49,7 @@ The output quality bar is the GolfBays letter pack. Every generated output must 
 - Named or anonymised ERP Experts case study
 - Post-NetSuite picture paragraph
 - Fixed Ric Wilson credentials paragraph
-- "Book a 15-minute call" CTA: T: 01785 714 514 · E: ric@erpexperts.co.uk · W: www.erpexperts.co.uk
+- "Book a 15-minute call" CTA: T: 01785 336 253 · E: hello@erpexperts.co.uk · W: www.erpexperts.co.uk
 
 ### Part 3: Technology integration map
 - Title: "[Company]: technology integration map"
@@ -109,7 +109,7 @@ Source: APQC Financial Management Benchmarking Study
 
 ## Fixed contact details in all output
 
-- T: 01785 714 514
-- E: ric@erpexperts.co.uk
+- T: 01785 336 253
+- E: hello@erpexperts.co.uk
 - W: www.erpexperts.co.uk
 - Location: Manchester, UK

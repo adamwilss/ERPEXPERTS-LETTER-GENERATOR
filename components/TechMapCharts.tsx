@@ -105,12 +105,12 @@ export function BeforeAfterCards({ rows }: { rows: TableRow[] }) {
         </p>
       </div>
 
-      <div className="border border-gray-900 bg-gray-900 text-white p-4">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">
+      <div className="border-2 border-emerald-500 bg-white p-4">
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-emerald-600 mb-1">
           Future State
         </p>
-        <p className="text-[28px] font-bold text-white leading-none">1</p>
-        <p className="text-[12px] text-gray-300 mt-1">unified platform</p>
+        <p className="text-[28px] font-bold text-gray-900 leading-none">1</p>
+        <p className="text-[12px] text-gray-600 mt-1">unified platform</p>
         <p className="text-[10px] text-gray-400 mt-2 leading-relaxed">
           NetSuite at the centre
         </p>
@@ -140,70 +140,6 @@ export function CostCallout({ systemCount }: { systemCount: number }) {
           <span className="font-bold text-amber-700 dark:text-amber-400">12–18%</span>{' '}
           of finance team capacity to reconciliation and data assembly.
         </p>
-      </div>
-    </div>
-  )
-}
-
-// ── Integration Architecture ──────────────────────────────────────────────────
-
-const RELATIONSHIP_COLORS: Record<string, string> = {
-  Integrate: '#2563eb',
-  Replace: '#d97706',
-  Eliminate: '#dc2626',
-  Native: '#059669',
-}
-
-function rel(r: string): string {
-  const l = r.toLowerCase()
-  if (l.includes('integrat') || l.includes('connect') || l.includes('sync')) return 'Integrate'
-  if (l.includes('replac') || l.includes('substitut') || l.includes('migrat')) return 'Replace'
-  if (l.includes('eliminat') || l.includes('remov') || l.includes('retir')) return 'Eliminate'
-  if (l.includes('nativ') || l.includes('built-in') || l.includes('internal')) return 'Native'
-  return 'Other'
-}
-
-export function IntegrationFlow({ rows }: { rows: TableRow[] }) {
-  if (rows.length === 0) return null
-
-  return (
-    <div className="rounded-xl border border-gray-200 bg-white p-5">
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-4">
-        Integration architecture — NetSuite at the centre
-      </p>
-
-      <div className="divide-y divide-gray-100 border border-gray-100 rounded-lg">
-        {rows.map((s, i) => {
-          const color = RELATIONSHIP_COLORS[rel(s.relationship)] ?? '#94a3b8'
-          return (
-            <div key={i} className="flex items-start gap-4 px-4 py-3 first:rounded-t-lg last:rounded-b-lg">
-              <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 mt-1.5" style={{ backgroundColor: color }} />
-              <div className="w-36 flex-shrink-0">
-                <p className="text-[13px] font-semibold text-gray-900">{s.system}</p>
-              </div>
-              <span className="text-[10px] font-semibold text-gray-500 bg-gray-50 border border-gray-200 px-2 py-0.5 rounded-full flex-shrink-0 mt-0.5">
-                {rel(s.relationship)}
-              </span>
-              <p className="flex-1 text-[12px] text-gray-600 leading-relaxed min-w-0">
-                {s.meaning}
-              </p>
-            </div>
-          )
-        })}
-      </div>
-
-      <div className="flex flex-wrap items-center gap-4 mt-3 pt-3 border-t border-gray-100">
-        {['Integrate', 'Replace', 'Eliminate', 'Native'].map((relType) => {
-          const count = rows.filter((r) => rel(r.relationship) === relType).length
-          if (count === 0) return null
-          return (
-            <div key={relType} className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: RELATIONSHIP_COLORS[relType] }} />
-              <span className="text-[11px] font-medium text-gray-500">{relType}</span>
-              <span className="text-[10px] text-gray-400">{count}</span>
-            </div>
-          )
-        })}
       </div>
     </div>
   )
