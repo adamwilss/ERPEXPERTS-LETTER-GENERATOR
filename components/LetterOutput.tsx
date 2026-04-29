@@ -52,18 +52,18 @@ function CoverLetterView({ content, savedPackId }: { content: string; savedPackI
         <Image
           src="/erpexperts-logo.png"
           alt="ERP Experts"
-          width={200}
-          height={70}
-          className="h-12 w-auto object-contain"
+          width={280}
+          height={96}
+          className="h-16 w-auto object-contain"
         />
-        <div className="text-[12px] text-gray-400 text-right leading-relaxed">
+        <div className="text-[13px] text-gray-400 text-right leading-relaxed">
           {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
         </div>
       </div>
 
       {/* Body */}
       <InlineRewrite context={content} part="letter">
-        <div className="font-letter text-[16px] leading-[1.9] text-gray-800 space-y-7">
+        <div className="font-letter text-[17px] leading-[1.9] text-gray-800 space-y-7">
           {paragraphs
             .filter((_, i) => {
               if (i === salutationIdx) return false
@@ -86,10 +86,10 @@ function CoverLetterView({ content, savedPackId }: { content: string; savedPackI
 
       {/* Sign-off */}
       {signoff && (
-        <div className="mt-10 pt-7 border-t border-gray-100 font-sans text-[14px] text-gray-700 leading-[1.7]">
+        <div className="mt-14 pt-10 border-t border-gray-100 font-sans text-[14px] text-gray-700 leading-[1.7]">
           {signoff.split('\n').map((line, i) => {
             if (/^[_\s]+$/.test(line)) {
-              return <div key={i} className="w-48 border-b border-gray-400 my-3" />
+              return <div key={i} className="w-72 border-b border-gray-400 my-6" />
             }
             return <div key={i}>{line}</div>
           })}
@@ -99,7 +99,7 @@ function CoverLetterView({ content, savedPackId }: { content: string; savedPackI
       {/* QR Code footer */}
       {qrUrl && (
         <div className="mt-8 pt-6 border-t border-gray-100 flex items-center gap-4">
-          <img src={qrUrl} alt="QR Code" className="w-16 h-16 rounded-md border border-gray-200" />
+          <img src={qrUrl} alt="QR Code" className="w-20 h-20 rounded-md border border-gray-200" />
           <div>
             <p className="text-[11px] font-semibold text-gray-700">Visit www.erpexperts.co.uk</p>
             <p className="text-[10px] text-gray-400 mt-0.5">NetSuite implementation &amp; aftercare.</p>
@@ -275,19 +275,19 @@ export default function LetterOutput({
       />
 
       {/* Hidden PDF capture containers — rendered off-screen so html-to-image can screenshot each tab */}
-      <div style={{ position: 'fixed', left: -9999, top: 0, width: 794 }} className="z-[-1]">
+      <div style={{ position: 'fixed', left: -9999, top: 0, width: 850 }} className="z-[-1]">
         {letter && (
-          <div ref={letterRef} className="letter-paper force-light-theme w-[794px] px-12 py-11 bg-white">
+          <div ref={letterRef} className="letter-paper force-light-theme w-[850px] px-14 py-12 bg-white">
             <CoverLetterView content={letter} savedPackId={savedPackId} />
           </div>
         )}
         {businessCase && (
-          <div ref={caseRef} className="letter-paper force-light-theme w-[794px] px-12 py-11 bg-white">
+          <div ref={caseRef} className="letter-paper force-light-theme w-[850px] px-14 py-12 bg-white">
             <BusinessCase content={businessCase} />
           </div>
         )}
         {techMap && (
-          <div ref={techRef} className="letter-paper force-light-theme w-[900px] px-12 py-11 bg-white">
+          <div ref={techRef} className="letter-paper force-light-theme w-[900px] px-14 py-12 bg-white">
             <TechMap content={techMap} />
           </div>
         )}

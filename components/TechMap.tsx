@@ -210,9 +210,9 @@ export default function TechMap({ content }: { content: string }) {
         <Image
           src="/erpexperts-logo.png"
           alt="ERP Experts"
-          width={200}
-          height={70}
-          className="h-12 w-auto object-contain"
+          width={280}
+          height={96}
+          className="h-16 w-auto object-contain"
         />
       </div>
 
