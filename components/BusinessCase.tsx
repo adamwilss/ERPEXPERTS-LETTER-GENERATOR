@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 import Image from 'next/image'
-import { Unplug, Layers, ArrowRight, ArrowLeft } from 'lucide-react'
+import { Unplug, Layers } from 'lucide-react'
 
 // ── Before/After Cards ───────────────────────────────────────────────────────
 
@@ -68,105 +68,165 @@ function BeforeAfterCards() {
   )
 }
 
-// ── Integration Flow Diagram ───────────────────────────────────────────────────
+// ── Integration Architecture Diagram ────────────────────────────────────────────
+
+const HUB_SYSTEMS = [
+  { name: 'Ecommerce', examples: 'Shopify, Magento, WooCommerce', relationship: 'Integrate', color: '#2563eb' },
+  { name: 'CRM', examples: 'Salesforce, HubSpot, Pipedrive', relationship: 'Integrate', color: '#6366f1' },
+  { name: 'Warehouse / 3PL', examples: 'ShipStation, Peoplevox, Mintsoft', relationship: 'Integrate', color: '#0284c7' },
+  { name: 'Accounting', examples: 'Xero, Sage, QuickBooks', relationship: 'Replace', color: '#d97706' },
+  { name: 'Spreadsheets', examples: 'Stock tracking, month-end, reporting', relationship: 'Eliminate', color: '#dc2626' },
+  { name: 'Multi-Currency / VAT', examples: 'International orders, entities', relationship: 'Native', color: '#059669' },
+]
+
+function SystemNode({ system, index, total }: { system: typeof HUB_SYSTEMS[number]; index: number; total: number }) {
+  const angle = (index / total) * 2 * Math.PI - Math.PI / 2
+  const radius = 180
+  const cx = 220
+  const cy = 220
+  const x = cx + Math.cos(angle) * radius
+  const y = cy + Math.sin(angle) * radius
+
+  // Calculate position for the label relative to center
+  const labelOffset = 70
+  const lx = cx + Math.cos(angle) * labelOffset
+  const ly = cy + Math.sin(angle) * labelOffset
+
+  return (
+    <motion.g
+      initial={{ opacity: 0, scale: 0 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay: 0.3 + index * 0.08, type: 'spring', stiffness: 200 }}
+    >
+      {/* Connection line from hub to system */}
+      <motion.line
+        x1={cx} y1={cy} x2={x} y2={y}
+        stroke={system.color}
+        strokeWidth={1.5}
+        strokeDasharray="4 3"
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ delay: 0.5 + index * 0.08, duration: 0.6 }}
+        style={{ strokeLinecap: 'round' }}
+      />
+
+      {/* Animated dot along the connection */}
+      <circle
+        r={3}
+        fill={system.color}
+        opacity={0.7}
+      >
+        <animateMotion dur="3s" repeatCount="indefinite" path={`M${cx},${cy} L${x},${y}`} />
+      </circle>
+
+      {/* System node */}
+      <rect
+        x={x - 62} y={y - 19}
+        width={124} height={38}
+        rx={10}
+        fill="white"
+        stroke={system.color}
+        strokeWidth={1.5}
+        filter="url(#cardShadow)"
+      />
+      <text
+        x={x} y={y - 1}
+        textAnchor="middle"
+        dominantBaseline="central"
+        style={{ fontFamily: 'system-ui', fontSize: '12px', fontWeight: 600, fill: '#111827' }}
+      >
+        {system.name}
+      </text>
+      <text
+        x={x} y={y + 12}
+        textAnchor="middle"
+        dominantBaseline="central"
+        style={{ fontFamily: 'system-ui', fontSize: '9px', fontWeight: 500, fill: '#9ca3af' }}
+      >
+        {system.relationship}
+      </text>
+    </motion.g>
+  )
+}
 
 function IntegrationFlow() {
-  const leftSystems = [
-    { name: 'Ecommerce', color: 'bg-blue-50 border-blue-200 text-blue-700' },
-    { name: 'CRM', color: 'bg-indigo-50 border-indigo-200 text-indigo-700' },
-    { name: 'Warehouse', color: 'bg-sky-50 border-sky-200 text-sky-700' },
-  ]
-  const rightSystems = [
-    { name: 'Finance', color: 'bg-emerald-50 border-emerald-200 text-emerald-700' },
-    { name: 'Reporting', color: 'bg-teal-50 border-teal-200 text-teal-700' },
-  ]
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.6 }}
-      className="rounded-2xl border border-gray-200/80 bg-gradient-to-b from-white to-gray-50/50 p-6 mb-6 shadow-sm"
+      className="rounded-2xl border border-gray-200/80 bg-white p-6 mb-6 shadow-sm overflow-hidden"
     >
       <div className="flex items-center gap-2 mb-5">
-        <div className="w-1 h-4 rounded-full bg-gray-950" />
+        <div className="w-1 h-4 rounded-full bg-blue-600" />
         <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-gray-500">
           How NetSuite connects your operation
         </p>
       </div>
 
-      <div className="flex items-center justify-center gap-4 md:gap-6">
-        {/* Left side systems */}
-        <div className="flex flex-col gap-2.5 min-w-[100px]">
-          {leftSystems.map((s) => (
-            <motion.div
-              key={s.name}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.8 }}
-              className={`px-3.5 py-2 rounded-lg border text-[12px] font-semibold text-center shadow-sm ${s.color}`}
-            >
-              {s.name}
-            </motion.div>
-          ))}
-        </div>
+      <div className="flex justify-center">
+        <svg viewBox="0 0 440 440" className="w-full max-w-[440px] h-auto">
+          <defs>
+            <filter id="cardShadow" x="-10%" y="-10%" width="130%" height="140%">
+              <feDropShadow dx="0" dy="1" stdDeviation="2" floodOpacity="0.06" />
+            </filter>
+            <filter id="hubShadow" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="2" stdDeviation="4" floodColor="#2563eb" floodOpacity="0.12" />
+            </filter>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="1.5" />
+            </filter>
+          </defs>
 
-        {/* Arrows to centre */}
-        <div className="flex flex-col items-center gap-3">
-          {leftSystems.map((_, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1 + i * 0.1 }}
-              className="flex items-center"
-            >
-              <div className="w-5 h-px bg-gray-300" />
-              <ArrowRight className="w-3.5 h-3.5 text-gray-400 -ml-1" />
-            </motion.div>
-          ))}
-        </div>
+          {/* Subtle outer ring */}
+          <circle cx="220" cy="220" r="195" fill="none" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="3 5" />
 
-        {/* NetSuite centre */}
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 1.1, type: 'spring', stiffness: 200 }}
-          className="px-6 py-4 rounded-2xl bg-gray-950 text-white text-[14px] font-bold shadow-xl shadow-gray-950/20 min-w-[120px] text-center"
-        >
-          NetSuite
-        </motion.div>
-
-        {/* Arrows from centre */}
-        <div className="flex flex-col items-center gap-3">
-          {rightSystems.map((_, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.2 + i * 0.1 }}
-              className="flex items-center"
+          {/* Hub - NetSuite */}
+          <motion.g
+            initial={{ scale: 0.7, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.8, type: 'spring', stiffness: 200 }}
+          >
+            <circle cx="220" cy="220" r="50" fill="white" stroke="#e2e8f0" strokeWidth="1.5" filter="url(#hubShadow)" />
+            <circle cx="220" cy="220" r="44" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="0.5" />
+            <text
+              x="220" y="214"
+              textAnchor="middle"
+              dominantBaseline="central"
+              style={{ fontFamily: 'system-ui', fontSize: '15px', fontWeight: 700, fill: '#0f172a' }}
             >
-              <div className="w-5 h-px bg-gray-300" />
-              <ArrowRight className="w-3.5 h-3.5 text-gray-400 -ml-1" />
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Right side systems */}
-        <div className="flex flex-col gap-2.5 min-w-[100px]">
-          {rightSystems.map((s) => (
-            <motion.div
-              key={s.name}
-              initial={{ opacity: 0, x: 10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 1.3 }}
-              className={`px-3.5 py-2 rounded-lg border text-[12px] font-semibold text-center shadow-sm ${s.color}`}
+              NetSuite
+            </text>
+            <text
+              x="220" y="232"
+              textAnchor="middle"
+              dominantBaseline="central"
+              style={{ fontFamily: 'system-ui', fontSize: '10px', fontWeight: 500, fill: '#94a3b8' }}
             >
-              {s.name}
-            </motion.div>
+              Unified Platform
+            </text>
+          </motion.g>
+
+          {/* System nodes around the hub */}
+          {HUB_SYSTEMS.map((s, i) => (
+            <SystemNode key={s.name} system={s} index={i} total={HUB_SYSTEMS.length} />
           ))}
-        </div>
+        </svg>
+      </div>
+
+      {/* Legend */}
+      <div className="flex flex-wrap items-center justify-center gap-4 mt-5 pt-4 border-t border-gray-100">
+        {[
+          { label: 'Integrate', color: '#2563eb' },
+          { label: 'Replace', color: '#d97706' },
+          { label: 'Eliminate', color: '#dc2626' },
+          { label: 'Native', color: '#059669' },
+        ].map((item) => (
+          <div key={item.label} className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }} />
+            <span className="text-[11px] font-medium text-gray-500">{item.label}</span>
+          </div>
+        ))}
       </div>
     </motion.div>
   )
@@ -184,9 +244,9 @@ export default function BusinessCase({ content }: { content: string }) {
         <Image
           src="/erpexperts-logo.png"
           alt="ERP Experts"
-          width={120}
-          height={40}
-          className="h-8 w-auto object-contain"
+          width={200}
+          height={70}
+          className="h-12 w-auto object-contain"
         />
       </div>
 

@@ -152,8 +152,8 @@ export default function ViewPageClient({
             <div className="flex items-center justify-center gap-6 mt-5 text-[13px]">
               <span>T: 01785 336 253</span>
               <span className="text-gray-600">·</span>
-              <a href="mailto:ric@erpexperts.co.uk" className="text-emerald-400 hover:text-emerald-300 transition-colors">
-                ric@erpexperts.co.uk
+              <a href="mailto:hello@erpexperts.co.uk" className="text-emerald-400 hover:text-emerald-300 transition-colors">
+                hello@erpexperts.co.uk
               </a>
               <span className="text-gray-600">·</span>
               <a href="https://www.erpexperts.co.uk" target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:text-emerald-300 transition-colors">

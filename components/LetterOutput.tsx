@@ -52,9 +52,9 @@ function CoverLetterView({ content, savedPackId }: { content: string; savedPackI
         <Image
           src="/erpexperts-logo.png"
           alt="ERP Experts"
-          width={120}
-          height={40}
-          className="h-8 w-auto object-contain"
+          width={200}
+          height={70}
+          className="h-12 w-auto object-contain"
         />
         <div className="text-[12px] text-gray-400 text-right leading-relaxed">
           {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}

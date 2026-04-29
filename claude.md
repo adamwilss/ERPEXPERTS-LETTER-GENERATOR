@@ -716,7 +716,7 @@ The business case must close with this block, which should appear near-verbatim:
 Followed by:
 
 "Book a 15-minute call with Ric Wilson, MD"
-T: 01785 714 514 · E: ric@erpexperts.co.uk · W: www.erpexperts.co.uk
+T: 01785 336 253 · E: hello@erpexperts.co.uk · W: www.erpexperts.co.uk
 
 ---
 
@@ -752,7 +752,7 @@ The table must reflect what is actually known or credibly inferred about this co
 The map page closes with the same call to action:
 
 "Book a 15-minute call with Ric Wilson"
-T: 01785 714 514 · E: ric@erpexperts.co.uk · W: www.erpexperts.co.uk
+T: 01785 336 253 · E: hello@erpexperts.co.uk · W: www.erpexperts.co.uk
 
 ---
 
