@@ -49,6 +49,11 @@ export default function DownloadMenu({ letter, businessCase, techMap, companyNam
       // Allow any Framer Motion entrance animations to settle before capturing
       await new Promise((r) => setTimeout(r, 800))
 
+      // Temporarily disable dark mode so html-to-image captures light-mode styles
+      const html = document.documentElement
+      const hadDark = html.classList.contains('dark')
+      if (hadDark) html.classList.remove('dark')
+
       const images: string[] = []
 
       if (captureRefs.letter.current) {
@@ -72,6 +77,9 @@ export default function DownloadMenu({ letter, businessCase, techMap, companyNam
         })
         images.push(dataUrl)
       }
+
+      // Restore dark mode
+      if (hadDark) html.classList.add('dark')
 
       if (images.length === 0) {
         alert('No content to export')

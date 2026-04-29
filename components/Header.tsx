@@ -4,12 +4,11 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { Loader2, Bell, BarChart3, LayoutTemplate, HelpCircle, Zap } from 'lucide-react'
+import { Loader2, Bell, BarChart3, LayoutTemplate, HelpCircle } from 'lucide-react'
 import { startTour } from './OnboardingTour'
 import ThemeToggle from './ThemeToggle'
 import { useDiscoverStore } from '@/lib/discover-store'
 import { getReminderCount, getOverdueReminders } from '@/lib/reminders'
-import { getApolloCredits, subscribeToCredits } from '@/lib/apollo-credits'
 // Cinematic mode is permanently enabled
 
 const nav = [
@@ -97,37 +96,6 @@ function SessionPill() {
   )
 }
 
-function ApolloCredits() {
-  const [credits, setCredits] = useState(getApolloCredits())
-
-  useEffect(() => {
-    setCredits(getApolloCredits())
-    return subscribeToCredits(setCredits)
-  }, [])
-
-  const isLow = credits.remaining < 200
-  const isCritical = credits.remaining < 50
-
-  return (
-    <div
-      className={`flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-lg border transition-all ${
-        isCritical
-          ? 'text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20'
-          : isLow
-            ? 'text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20'
-            : 'text-[#8a8a88] dark:text-[#555] bg-[#f2f2f0] dark:bg-[#181a20] border-[#e0e0dc] dark:border-[#25272d]'
-      }`}
-      title={`Apollo.io credits: ${credits.used} used / ${credits.total} total this month`}
-    >
-      <Zap className={`w-3 h-3 ${isCritical ? 'text-red-500' : isLow ? 'text-amber-500' : 'text-[#aaa]'}`} />
-      <span className={isCritical || isLow ? '' : 'hidden sm:inline'}>
-        {credits.remaining}
-      </span>
-      <span className="hidden sm:inline opacity-60">/ {credits.total}</span>
-    </div>
-  )
-}
-
 export default function Header() {
   const pathname = usePathname()
   return (
@@ -143,14 +111,6 @@ export default function Header() {
               className="h-7 w-auto object-contain opacity-90 group-hover:opacity-100 transition-opacity"
               priority
             />
-            <div className="hidden sm:flex flex-col">
-              <span className="text-cream-950 dark:text-white font-bold tracking-[-0.03em] text-[13px] leading-none">
-                ERP EXPERTS
-              </span>
-              <span className="text-cream-600 dark:text-[#444] text-[9px] leading-none mt-[3px] tracking-[0.12em] uppercase font-medium">
-                Letter Portal
-              </span>
-            </div>
           </Link>
 
           <div className="hidden sm:block w-px h-4 bg-gray-200 dark:bg-[#1e1e1e]" />
@@ -185,7 +145,6 @@ export default function Header() {
         </div>
 
         <div className="flex items-center gap-2">
-          <ApolloCredits />
           <ReminderBadge />
           <SessionPill />
           <div className="w-px h-4 bg-[#e0e0dc] dark:bg-[#25272d] mx-1" />

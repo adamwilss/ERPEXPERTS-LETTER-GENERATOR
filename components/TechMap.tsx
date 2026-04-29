@@ -207,21 +207,13 @@ export default function TechMap({ content }: { content: string }) {
     <div>
       {/* Letterhead with Logo */}
       <div className="flex items-start justify-between pb-7 mb-7 border-b border-gray-200">
-        <div className="flex items-start gap-4">
-          <Image
-            src="/erpexperts-logo.png"
-            alt="ERP Experts"
-            width={80}
-            height={28}
-            className="h-7 w-auto object-contain"
-          />
-          <div>
-            <div className="text-[13px] font-bold tracking-[0.06em] text-gray-900">ERP EXPERTS</div>
-            <div className="text-[11px] text-gray-400 mt-1 tracking-wide">
-              NetSuite Implementation · Manchester, UK
-            </div>
-          </div>
-        </div>
+        <Image
+          src="/erpexperts-logo.png"
+          alt="ERP Experts"
+          width={120}
+          height={40}
+          className="h-8 w-auto object-contain"
+        />
       </div>
 
       {/* Title */}

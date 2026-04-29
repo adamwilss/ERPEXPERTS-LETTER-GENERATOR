@@ -147,8 +147,8 @@ function IntegrationFlow() {
               transition={{ delay: 1.2 + i * 0.1 }}
               className="flex items-center"
             >
-              <ArrowRight className="w-3.5 h-3.5 text-gray-400 -mr-1" />
               <div className="w-5 h-px bg-gray-300" />
+              <ArrowRight className="w-3.5 h-3.5 text-gray-400 -ml-1" />
             </motion.div>
           ))}
         </div>
@@ -181,21 +181,13 @@ export default function BusinessCase({ content }: { content: string }) {
     <div>
       {/* Letterhead */}
       <div className="flex items-start justify-between pb-7 mb-7 border-b border-gray-200">
-        <div className="flex items-start gap-4">
-          <Image
-            src="/erpexperts-logo.png"
-            alt="ERP Experts"
-            width={80}
-            height={28}
-            className="h-7 w-auto object-contain"
-          />
-          <div>
-            <div className="text-[13px] font-bold tracking-[0.06em] text-gray-900">ERP EXPERTS</div>
-            <div className="text-[11px] text-gray-400 mt-1 tracking-wide">
-              NetSuite Implementation · Manchester, UK
-            </div>
-          </div>
-        </div>
+        <Image
+          src="/erpexperts-logo.png"
+          alt="ERP Experts"
+          width={120}
+          height={40}
+          className="h-8 w-auto object-contain"
+        />
       </div>
 
       {/* Charts */}

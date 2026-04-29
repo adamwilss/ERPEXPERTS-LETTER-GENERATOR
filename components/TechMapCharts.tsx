@@ -246,10 +246,10 @@ export function IntegrationFlow({ rows }: { rows: TableRow[] }) {
         <div className="flex flex-col items-center gap-3">
           {rightSystems.map((_, i) => (
             <div key={i} className="flex items-center">
-              <svg className="w-3 h-3 text-gray-300 dark:text-[#444] -mr-0.5" fill="currentColor" viewBox="0 0 20 20">
+              <div className="w-6 h-px bg-gray-300 dark:bg-[#333]" />
+              <svg className="w-3 h-3 text-gray-300 dark:text-[#444] -ml-0.5" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" />
               </svg>
-              <div className="w-6 h-px bg-gray-300 dark:bg-[#333]" />
             </div>
           ))}
         </div>

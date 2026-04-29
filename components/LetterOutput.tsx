@@ -30,13 +30,11 @@ function CoverLetterView({ content, savedPackId }: { content: string; savedPackI
   const [qrUrl, setQrUrl] = useState('')
 
   useEffect(() => {
-    if (savedPackId) {
-      const url = `${window.location.origin}/view/${savedPackId}`
-      QRCode.toDataURL(url, { width: 120, margin: 1, color: { dark: '#111', light: '#fff' } })
-        .then(setQrUrl)
-        .catch(() => {})
-    }
-  }, [savedPackId])
+    const url = 'https://www.erpexperts.co.uk'
+    QRCode.toDataURL(url, { width: 120, margin: 1, color: { dark: '#111', light: '#fff' } })
+      .then(setQrUrl)
+      .catch(() => {})
+  }, [])
 
   const paragraphs = content.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean)
 
@@ -51,21 +49,13 @@ function CoverLetterView({ content, savedPackId }: { content: string; savedPackI
     <div>
       {/* Letterhead */}
       <div className="flex items-start justify-between pb-7 mb-7 border-b border-gray-200">
-        <div className="flex items-start gap-4">
-          <Image
-            src="/erpexperts-logo.png"
-            alt="ERP Experts"
-            width={80}
-            height={28}
-            className="h-7 w-auto object-contain"
-          />
-          <div>
-            <div className="text-[13px] font-bold tracking-[0.06em] text-gray-900">ERP EXPERTS</div>
-            <div className="text-[11px] text-gray-400 mt-1 tracking-wide">
-              NetSuite Implementation · Manchester, UK
-            </div>
-          </div>
-        </div>
+        <Image
+          src="/erpexperts-logo.png"
+          alt="ERP Experts"
+          width={120}
+          height={40}
+          className="h-8 w-auto object-contain"
+        />
         <div className="text-[12px] text-gray-400 text-right leading-relaxed">
           {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
         </div>
@@ -111,8 +101,8 @@ function CoverLetterView({ content, savedPackId }: { content: string; savedPackI
         <div className="mt-8 pt-6 border-t border-gray-100 flex items-center gap-4">
           <img src={qrUrl} alt="QR Code" className="w-16 h-16 rounded-md border border-gray-200" />
           <div>
-            <p className="text-[11px] font-semibold text-gray-700">Scan for the full business case &amp; tech map</p>
-            <p className="text-[10px] text-gray-400 mt-0.5">A detailed analysis prepared specifically for this company.</p>
+            <p className="text-[11px] font-semibold text-gray-700">Visit www.erpexperts.co.uk</p>
+            <p className="text-[10px] text-gray-400 mt-0.5">NetSuite implementation &amp; aftercare.</p>
           </div>
         </div>
       )}
@@ -287,17 +277,17 @@ export default function LetterOutput({
       {/* Hidden PDF capture containers — rendered off-screen so html-to-image can screenshot each tab */}
       <div style={{ position: 'fixed', left: -9999, top: 0, width: 794 }} className="z-[-1]">
         {letter && (
-          <div ref={letterRef} className="letter-paper force-light-theme rounded-2xl max-w-2xl px-12 py-11 bg-white">
+          <div ref={letterRef} className="letter-paper force-light-theme w-[794px] px-12 py-11 bg-white">
             <CoverLetterView content={letter} savedPackId={savedPackId} />
           </div>
         )}
         {businessCase && (
-          <div ref={caseRef} className="letter-paper force-light-theme rounded-2xl max-w-2xl px-12 py-11 bg-white">
+          <div ref={caseRef} className="letter-paper force-light-theme w-[794px] px-12 py-11 bg-white">
             <BusinessCase content={businessCase} />
           </div>
         )}
         {techMap && (
-          <div ref={techRef} className="letter-paper force-light-theme rounded-2xl max-w-2xl px-12 py-11 bg-white">
+          <div ref={techRef} className="letter-paper force-light-theme w-[900px] px-12 py-11 bg-white">
             <TechMap content={techMap} />
           </div>
         )}
