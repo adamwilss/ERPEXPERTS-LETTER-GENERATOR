@@ -92,7 +92,7 @@ export function BeforeAfterCards({ rows }: { rows: TableRow[] }) {
     <div className="grid grid-cols-2 gap-3">
       <div className="border border-gray-300 bg-white p-4">
         <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 mb-1">
-          Current State
+          Likely Current State
         </p>
         <p className="text-[28px] font-bold text-gray-900 leading-none">
           <AnimatedNumber target={current} />

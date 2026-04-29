@@ -11,6 +11,7 @@ import SaveTemplateModal from './SaveTemplateModal'
 import InlineRewrite from './InlineRewrite'
 import BusinessCase from './BusinessCase'
 import TechMap from './TechMap'
+import StyleSelector, { LetterStyle } from './StyleSelector'
 import { saveTemplate } from '@/lib/templates'
 import { savePack } from '@/lib/history'
 import { WritingAnimation } from './WritingAnimation'
@@ -26,7 +27,7 @@ interface Props {
   savedPackId?: string | null
 }
 
-function CoverLetterView({ content, savedPackId }: { content: string; savedPackId?: string | null }) {
+function CoverLetterView({ content, savedPackId, style = 'warm' }: { content: string; savedPackId?: string | null; style?: LetterStyle }) {
   const [qrUrl, setQrUrl] = useState('')
 
   useEffect(() => {
@@ -44,6 +45,7 @@ function CoverLetterView({ content, savedPackId }: { content: string; savedPackI
   )
 
   const signoff = signoffIdx >= 0 ? paragraphs.slice(signoffIdx).join('\n\n') : null
+  const logoHeight = style === 'warm' || style === 'studio' ? 'h-28' : 'h-24'
 
   return (
     <div>
@@ -52,18 +54,21 @@ function CoverLetterView({ content, savedPackId }: { content: string; savedPackI
         <Image
           src="/erpexperts-logo.png"
           alt="ERP Experts"
-          width={280}
-          height={96}
-          className="h-16 w-auto object-contain"
+          width={style === 'warm' || style === 'studio' ? 360 : 280}
+          height={style === 'warm' || style === 'studio' ? 112 : 96}
+          className={`${logoHeight} w-auto object-contain`}
         />
         <div className="text-[13px] text-gray-400 text-right leading-relaxed">
           {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
         </div>
       </div>
 
+      {/* Accent line */}
+      <div className="letter-accent-line mb-7" />
+
       {/* Body */}
       <InlineRewrite context={content} part="letter">
-        <div className="font-letter text-[17px] leading-[1.9] text-gray-800 space-y-7">
+        <div className="letter-body-text space-y-7">
           {paragraphs
             .filter((_, i) => {
               if (i === salutationIdx) return false
@@ -107,9 +112,9 @@ function CoverLetterView({ content, savedPackId }: { content: string; savedPackI
         </div>
       )}
 
-      <div className="mt-10 pt-5 border-t border-gray-100 text-[11px] text-gray-400 flex items-center justify-between tracking-wide">
-        <span>ERP Experts Ltd · Manchester, UK</span>
-        <span>www.erpexperts.co.uk</span>
+      <div className="mt-10 pt-5 page-footer-text flex items-center justify-between tracking-wide">
+        <span>ERP Experts Ltd · Manchester, UK · 01785 336 253</span>
+        <span>hello@erpexperts.co.uk · www.erpexperts.co.uk</span>
       </div>
     </div>
   )
@@ -121,6 +126,20 @@ export default function LetterOutput({
   const [activeTab, setActiveTab] = useState<'letter' | 'case' | 'tech'>('letter')
   const [showSaveModal, setShowSaveModal] = useState(false)
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const [selectedStyle, setSelectedStyle] = useState<LetterStyle>('warm')
+
+  // Load style preference on mount
+  useEffect(() => {
+    const stored = localStorage.getItem('letter-style') as LetterStyle | null
+    if (stored && ['executive', 'modern', 'warm', 'dark', 'studio'].includes(stored)) {
+      setSelectedStyle(stored)
+    }
+  }, [])
+
+  const handleStyleChange = (style: LetterStyle) => {
+    setSelectedStyle(style)
+    localStorage.setItem('letter-style', style)
+  }
 
   const letterRef = useRef<HTMLDivElement>(null)
   const caseRef = useRef<HTMLDivElement>(null)
@@ -200,6 +219,7 @@ export default function LetterOutput({
         {activeContent && <CopyButton text={activeContent} label="Copy" />}
         {!isStreaming && activeContent && (
           <>
+            <StyleSelector value={selectedStyle} onChange={handleStyleChange} />
             <button
               onClick={handleSaveToHistory}
               disabled={saveStatus === 'saving' || isAlreadySaved}
@@ -249,11 +269,11 @@ export default function LetterOutput({
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.25, ease: 'easeInOut' }}
-        className="letter-paper force-light-theme rounded-2xl max-w-2xl px-12 py-11"
+        className={`letter-paper rounded-2xl max-w-2xl px-12 py-11 style-${selectedStyle}`}
       >
-        {activeTab === 'letter' && (letter ? <CoverLetterView content={letter} savedPackId={savedPackId} /> : <Placeholder />)}
-        {activeTab === 'case' && (businessCase ? <BusinessCase content={businessCase} /> : <Placeholder />)}
-        {activeTab === 'tech' && (techMap ? <TechMap content={techMap} /> : <Placeholder />)}
+        {activeTab === 'letter' && (letter ? <CoverLetterView content={letter} savedPackId={savedPackId} style={selectedStyle} /> : <Placeholder />)}
+        {activeTab === 'case' && (businessCase ? <BusinessCase content={businessCase} style={selectedStyle} /> : <Placeholder />)}
+        {activeTab === 'tech' && (techMap ? <TechMap content={techMap} style={selectedStyle} /> : <Placeholder />)}
       </motion.div>
 
       <SaveTemplateModal
@@ -277,18 +297,18 @@ export default function LetterOutput({
       {/* Hidden PDF capture containers — rendered off-screen so html-to-image can screenshot each tab */}
       <div style={{ position: 'fixed', left: -9999, top: 0, width: 850 }} className="z-[-1]">
         {letter && (
-          <div ref={letterRef} className="letter-paper force-light-theme w-[850px] px-14 py-12 bg-white">
-            <CoverLetterView content={letter} savedPackId={savedPackId} />
+          <div ref={letterRef} className={`letter-paper w-[850px] px-14 py-12 bg-white style-${selectedStyle}`}>
+            <CoverLetterView content={letter} savedPackId={savedPackId} style={selectedStyle} />
           </div>
         )}
         {businessCase && (
-          <div ref={caseRef} className="letter-paper force-light-theme w-[850px] px-14 py-12 bg-white">
-            <BusinessCase content={businessCase} />
+          <div ref={caseRef} className={`letter-paper w-[850px] px-14 py-12 bg-white style-${selectedStyle}`}>
+            <BusinessCase content={businessCase} style={selectedStyle} />
           </div>
         )}
         {techMap && (
-          <div ref={techRef} className="letter-paper force-light-theme w-[900px] px-14 py-12 bg-white">
-            <TechMap content={techMap} />
+          <div ref={techRef} className={`letter-paper w-[900px] px-14 py-12 bg-white style-${selectedStyle}`}>
+            <TechMap content={techMap} style={selectedStyle} />
           </div>
         )}
       </div>

@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import { parseTechTable, TableRow } from '@/lib/parse'
 import { BeforeAfterCards } from './TechMapCharts'
+import { LetterStyle } from './StyleSelector'
 
 // ── Relationship normalizer ────────────────────────────────────────────────────
 
@@ -176,7 +177,7 @@ function CTABlock({ text }: { text: string }) {
 
 // ── Main component ─────────────────────────────────────────────────────────────
 
-export default function TechMap({ content }: { content: string }) {
+export default function TechMap({ content, style = 'warm' }: { content: string; style?: LetterStyle }) {
   const { rows, before, after } = parseTechTable(content)
 
   const lines = before.split('\n').filter(Boolean)
@@ -196,6 +197,8 @@ export default function TechMap({ content }: { content: string }) {
     ...Object.keys(grouped).filter(k => !RELATIONSHIP_ORDER.includes(k)),
   ]
 
+  const logoHeight = style === 'warm' || style === 'studio' ? 'h-28' : 'h-24'
+
   return (
     <div>
       {/* Letterhead with Logo */}
@@ -203,11 +206,14 @@ export default function TechMap({ content }: { content: string }) {
         <Image
           src="/erpexperts-logo.png"
           alt="ERP Experts"
-          width={280}
-          height={96}
-          className="h-16 w-auto object-contain"
+          width={style === 'warm' || style === 'studio' ? 360 : 280}
+          height={style === 'warm' || style === 'studio' ? 112 : 96}
+          className={`${logoHeight} w-auto object-contain`}
         />
       </div>
+
+      {/* Accent line */}
+      <div className="letter-accent-line mb-7" />
 
       {/* Title */}
       {title && (
@@ -245,9 +251,9 @@ export default function TechMap({ content }: { content: string }) {
 
       {after && <CTABlock text={after} />}
 
-      <div className="mt-10 pt-5 border-t border-gray-100 text-[11px] text-gray-400 flex items-center justify-between tracking-wide">
-        <span>ERP Experts Ltd · Manchester, UK</span>
-        <span>www.erpexperts.co.uk</span>
+      <div className="mt-10 pt-5 page-footer-text flex items-center justify-between tracking-wide">
+        <span>ERP Experts Ltd · Manchester, UK · 01785 336 253</span>
+        <span>hello@erpexperts.co.uk · www.erpexperts.co.uk</span>
       </div>
     </div>
   )

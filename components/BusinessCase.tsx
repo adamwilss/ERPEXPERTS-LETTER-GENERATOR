@@ -1,6 +1,8 @@
 'use client'
 
 import Image from 'next/image'
+import InlineRewrite from './InlineRewrite'
+import { LetterStyle } from './StyleSelector'
 
 // ── Before/After Cards ───────────────────────────────────────────────────────
 
@@ -9,7 +11,7 @@ function BeforeAfterCards() {
     <div className="grid grid-cols-2 gap-5 mb-7">
       <div className="border border-gray-300 bg-white p-5">
         <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-gray-500 mb-3">
-          Current state
+          Likely current state
         </p>
         <p className="text-[36px] font-bold text-gray-900 leading-none">5+</p>
         <p className="text-[13px] text-gray-600 mt-2 font-medium">disconnected tools</p>
@@ -34,8 +36,10 @@ function BeforeAfterCards() {
 
 // ── Main Business Case Component ─────────────────────────────────────────────
 
-export default function BusinessCase({ content }: { content: string }) {
+export default function BusinessCase({ content, style = 'warm' }: { content: string; style?: LetterStyle }) {
   const paragraphs = content.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean)
+
+  const logoHeight = style === 'warm' || style === 'studio' ? 'h-28' : 'h-24'
 
   return (
     <div>
@@ -44,24 +48,29 @@ export default function BusinessCase({ content }: { content: string }) {
         <Image
           src="/erpexperts-logo.png"
           alt="ERP Experts"
-          width={280}
-          height={96}
-          className="h-16 w-auto object-contain"
+          width={style === 'warm' || style === 'studio' ? 360 : 280}
+          height={style === 'warm' || style === 'studio' ? 112 : 96}
+          className={`${logoHeight} w-auto object-contain`}
         />
       </div>
+
+      {/* Accent line */}
+      <div className="letter-accent-line mb-7" />
 
       <BeforeAfterCards />
 
       {/* Prose */}
-      <div className="font-letter text-[17px] leading-[1.9] text-gray-800 space-y-7">
-        {paragraphs.map((para, i) => (
-          <p key={i}>{para.trim()}</p>
-        ))}
-      </div>
+      <InlineRewrite context={content} part="case">
+        <div className="letter-body-text space-y-7">
+          {paragraphs.map((para, i) => (
+            <p key={i}>{para.trim()}</p>
+          ))}
+        </div>
+      </InlineRewrite>
 
-      <div className="mt-10 pt-5 border-t border-gray-100 text-[11px] text-gray-400 flex items-center justify-between tracking-wide">
-        <span>ERP Experts Ltd · Manchester, UK</span>
-        <span>www.erpexperts.co.uk</span>
+      <div className="mt-10 pt-5 page-footer-text flex items-center justify-between tracking-wide">
+        <span>ERP Experts Ltd · Manchester, UK · 01785 336 253</span>
+        <span>hello@erpexperts.co.uk · www.erpexperts.co.uk</span>
       </div>
     </div>
   )

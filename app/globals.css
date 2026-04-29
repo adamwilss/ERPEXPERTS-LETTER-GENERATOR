@@ -303,6 +303,213 @@
   .force-light-theme .bg-gray-50 { background-color: #fafaf8 !important; }
   .force-light-theme .bg-gray-100 { background-color: #f2f2f0 !important; }
 
+  /* ── Letter Style 1: Executive Classic ──────────────────────── */
+  .style-executive.letter-paper,
+  .style-executive .letter-paper {
+    background: #FDFCF7 !important;
+    color: #1a1a1a !important;
+  }
+  .style-executive .letter-body-text {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 16px;
+    line-height: 1.85;
+    color: #1a1a1a;
+  }
+  .style-executive .letter-accent-line {
+    height: 3px;
+    background: linear-gradient(90deg, #1e3a5f 0%, #c4a33e 100%);
+    border-radius: 2px;
+  }
+  .style-executive .stat-box {
+    border-left: 3px solid #1e3a5f;
+    background: #f4f6f9;
+    padding: 16px 20px;
+    border-radius: 0 8px 8px 0;
+  }
+  .style-executive .page-footer-text {
+    color: #6a6a68;
+    font-size: 11px;
+    border-top: 1px solid #d8d8d4;
+  }
+
+  /* ── Letter Style 2: Modern Minimal ─────────────────────────── */
+  .style-modern.letter-paper,
+  .style-modern .letter-paper {
+    background: #FFFFFF !important;
+    color: #1a1a1a !important;
+  }
+  .style-modern .letter-body-text {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.8;
+    color: #333;
+  }
+  .style-modern .letter-accent-line {
+    height: 1px;
+    background: #e2e8f0;
+  }
+  .style-modern .stat-box {
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    padding: 20px 24px;
+    border-radius: 12px;
+  }
+  .style-modern .page-footer-text {
+    color: #94a3b8;
+    font-size: 11px;
+    border-top: 1px solid #f1f5f9;
+  }
+
+  /* ── Letter Style 3: Warm Premium ──────────────────────────── */
+  .style-warm.letter-paper,
+  .style-warm .letter-paper {
+    background: #FDFBF5 !important;
+    color: #1a1a1a !important;
+  }
+  .style-warm .letter-body-text {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 16.5px;
+    line-height: 2.0;
+    color: #2a2a28;
+  }
+  .style-warm .letter-accent-line {
+    height: 2px;
+    background: linear-gradient(90deg, #059669 0%, #34d399 100%);
+    border-radius: 1px;
+  }
+  .style-warm .stat-box {
+    border-top: 2px solid #059669;
+    background: #f0faf6;
+    padding: 18px 22px;
+    border-radius: 0 0 8px 8px;
+  }
+  .style-warm .page-footer-text {
+    color: #7a7a76;
+    font-size: 11px;
+    border-top: 1px solid #e0ded6;
+  }
+
+  /* ── Letter Style 4: Bold Dark ──────────────────────────────── */
+  .style-dark.letter-paper,
+  .style-dark .letter-paper {
+    background: #1a1f2e !important;
+    color: #e8e8e6 !important;
+  }
+  .style-dark .letter-body-text {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.8;
+    color: #d4d4d2;
+  }
+  .style-dark .letter-accent-line {
+    height: 2px;
+    background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);
+    border-radius: 1px;
+  }
+  .style-dark .stat-box {
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    background: rgba(245, 158, 11, 0.06);
+    padding: 16px 20px;
+    border-radius: 8px;
+    color: #e8e8e6;
+  }
+  .style-dark .page-footer-text {
+    color: #888896;
+    font-size: 11px;
+    border-top: 1px solid #2a3040;
+  }
+  /* Dark style overrides: text must be light on dark bg */
+  .style-dark.letter-paper p,
+  .style-dark.letter-paper span,
+  .style-dark.letter-paper div,
+  .style-dark.letter-paper h2,
+  .style-dark.letter-paper h3,
+  .style-dark.letter-paper h4,
+  .style-dark .letter-paper p,
+  .style-dark .letter-paper span,
+  .style-dark .letter-paper div,
+  .style-dark .letter-paper h2,
+  .style-dark .letter-paper h3,
+  .style-dark .letter-paper h4 {
+    color: #e8e8e6 !important;
+  }
+  .style-dark.letter-paper .text-gray-400,
+  .style-dark.letter-paper .text-gray-500,
+  .style-dark.letter-paper .text-gray-600,
+  .style-dark.letter-paper .text-gray-700,
+  .style-dark.letter-paper .text-gray-800,
+  .style-dark.letter-paper .text-gray-900,
+  .style-dark .letter-paper .text-gray-400,
+  .style-dark .letter-paper .text-gray-500,
+  .style-dark .letter-paper .text-gray-600,
+  .style-dark .letter-paper .text-gray-700,
+  .style-dark .letter-paper .text-gray-800,
+  .style-dark .letter-paper .text-gray-900 {
+    color: #b0b0ae !important;
+  }
+  .style-dark.letter-paper .border-gray-100,
+  .style-dark .letter-paper .border-gray-100 { border-color: #2a3040 !important; }
+  .style-dark.letter-paper .border-gray-200,
+  .style-dark .letter-paper .border-gray-200 { border-color: #2a3040 !important; }
+  .style-dark.letter-paper .bg-white,
+  .style-dark .letter-paper .bg-white { background-color: #1a1f2e !important; }
+  .style-dark.letter-paper .bg-gray-50,
+  .style-dark .letter-paper .bg-gray-50 { background-color: #222838 !important; }
+  .style-dark.letter-paper .bg-gray-100,
+  .style-dark .letter-paper .bg-gray-100 { background-color: #222838 !important; }
+  .style-dark.letter-paper .text-gray-900,
+  .style-dark .letter-paper .text-gray-900 { color: #f0f0ee !important; }
+  .style-dark.letter-paper .text-gray-800,
+  .style-dark .letter-paper .text-gray-800 { color: #e8e8e6 !important; }
+  .style-dark.letter-paper .text-blue-600,
+  .style-dark .letter-paper .text-blue-600 { color: #60a5fa !important; }
+  .style-dark.letter-paper .text-emerald-600,
+  .style-dark .letter-paper .text-emerald-600 { color: #34d399 !important; }
+  .style-dark.letter-paper .text-emerald-700,
+  .style-dark .letter-paper .text-emerald-700 { color: #6ee7b7 !important; }
+  .style-dark.letter-paper .text-emerald-800,
+  .style-dark .letter-paper .text-emerald-800 { color: #6ee7b7 !important; }
+  .style-dark.letter-paper .text-gray-700,
+  .style-dark .letter-paper .text-gray-700 { color: #c0c0be !important; }
+
+  /* ── Letter Style 5: Contemporary Studio ────────────────────── */
+  .style-studio.letter-paper,
+  .style-studio .letter-paper {
+    background: #FFFFFF !important;
+    color: #1a1a1a !important;
+  }
+  .style-studio .letter-body-text {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.75;
+    color: #2a2a28;
+  }
+  .style-studio .letter-accent-line {
+    height: 4px;
+    background: linear-gradient(90deg, #059669 0%, #34d399 50%, #059669 100%);
+    border-radius: 2px;
+  }
+  .style-studio .stat-box {
+    border-left: 4px solid #059669;
+    background: #f9fdfb;
+    padding: 16px 20px;
+    border-radius: 0 8px 8px 0;
+  }
+  .style-studio .left-sidebar-accent {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, #059669 0%, #34d399 50%, #059669 100%);
+    border-radius: 2px 0 0 2px;
+  }
+  .style-studio .page-footer-text {
+    color: #8a8a86;
+    font-size: 11px;
+    border-top: 1px solid #e8e8e4;
+  }
+
   /* ── Loading ────────────────────────────────────────────────── */
   .loading-ring {
     @apply relative w-5 h-5;

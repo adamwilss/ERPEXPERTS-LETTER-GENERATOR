@@ -34,7 +34,11 @@ The business case must follow this structure:
 
    NEVER invent a generic or anonymised case study. ALWAYS name one of the four above.
 
-5. CLOSE: Exactly this line: "Fixed price. Senior-led. No surprises."`
+5. CLOSE: "Fixed price. Senior-led. No surprises."
+
+	6. CTA: After the close, add exactly:
+	"Book a 15-minute call with Ric Wilson, MD"
+	T: 01785 336 253 · E: hello@erpexperts.co.uk · W: www.erpexperts.co.uk`
 }
 
 export function businessCaseUserPrompt(args: BusinessCaseArgs): string {
@@ -55,6 +59,7 @@ CRITICAL REQUIREMENTS:
 3. One short paragraph on what a single integrated platform actually means for them -- outcomes, not features.
 4. One brief case study reference (2-3 sentences). You MUST name one of: Eco2Solar, Kynetec, Totalkare, or Carallon. NEVER use a generic or anonymised example.
 5. Close EXACTLY with: "Fixed price. Senior-led. No surprises."
+	6. Add CTA EXACTLY: "Book a 15-minute call with Ric Wilson, MD" followed by "T: 01785 336 253 · E: hello@erpexperts.co.uk · W: www.erpexperts.co.uk"
 6. No em dashes. No generic openers. No "fragmented systems", "manual reconciliation", "operational chaos".
 7. Short sentences. Specific. Direct. Label nothing as "illustrative".
 ${notes ? `\nAdditional notes from the user:\n${notes}` : ''}
