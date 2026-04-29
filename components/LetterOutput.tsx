@@ -46,8 +46,12 @@ function CoverLetterView({ content, savedPackId }: { content: string; savedPackI
           height={96}
           className="h-24 w-auto object-contain"
         />
-        <div className="mt-3 text-[10px] font-semibold text-gray-400 uppercase tracking-[0.08em]">
-          {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+        <div className="mt-3 flex items-center gap-5 text-[10px] text-gray-400 font-medium">
+          <span>{new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+          <span className="text-gray-300">|</span>
+          <span>T: 01785 336 253</span>
+          <span>E: hello@erpexperts.co.uk</span>
+          <span>W: www.erpexperts.co.uk</span>
         </div>
       </div>
 

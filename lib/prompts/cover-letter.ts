@@ -42,13 +42,15 @@ NEVER "Dear Chief," NEVER "Dear Growth," NEVER "Dear Director," NEVER "Hello,"
 - Mention ERP Experts' experience (21 years, brands like theirs)
 
 6. CLOSE AND SIGN-OFF (copy exactly):
-"Drop me a line if it's worth a conversation."
+"I would welcome a brief call. You can reach me directly on 01785 336 253."
 
 Yours,
 
 _________________________
 Ric Wilson
-ERP Experts`
+Managing Director, ERP Experts
+T: 01785 336 253  ·  E: hello@erpexperts.co.uk
+21 years NetSuite experience  ·  350+ completed projects`
 }
 
 export function coverLetterUserPrompt(args: CoverLetterArgs): string {
@@ -69,8 +71,8 @@ CRITICAL REQUIREMENTS:
 3. Use the provided observation VERBATIM as your genuine observation
 4. Use the provided pain hypothesis VERBATIM as your suspected challenge
 5. Write ONE short NetSuite paragraph (practical, not salesy)
-6. Close EXACTLY with: "Drop me a line if it's worth a conversation."
-7. Sign off EXACTLY as: "Yours,\\n\\n_________________________\\nRic Wilson\\nERP Experts"
+6. Close EXACTLY with: "I would welcome a brief call. You can reach me directly on 01785 336 253."
+7. Sign off EXACTLY as: "Yours,\\n\\n_________________________\\nRic Wilson\\nManaging Director, ERP Experts\\nT: 01785 336 253  ·  E: hello@erpexperts.co.uk\\n21 years NetSuite experience  ·  350+ completed projects"
 8. NO em dashes, NO corporate speak, NO quantified benchmarks
 9. Short sentences. Conversational. Direct. One idea per sentence.
 10. NO subject line. NO postal address block. The UI adds those.

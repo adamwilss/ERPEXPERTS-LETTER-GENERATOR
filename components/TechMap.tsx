@@ -90,24 +90,30 @@ function SystemCard({ row }: { row: TableRow }) {
       className="border-l-[3px] pl-5 py-5 border-b border-gray-100 last:border-b-0"
       style={{ borderLeftColor: style.color, backgroundColor: style.bg }}
     >
-      <div className="flex items-baseline gap-3 mb-2">
-        <span className="text-[15px] font-bold text-gray-900 leading-tight">
+      <div className="flex items-baseline gap-3 mb-2.5">
+        <span className="text-[15px] font-bold text-gray-900 leading-tight tracking-[-0.01em]">
           {row.system}
         </span>
         <span
-          className="text-[10px] font-semibold uppercase tracking-[0.06em] px-2 py-0.5 rounded-full"
-          style={{ color: style.color, backgroundColor: style.bg }}
+          className="text-[9px] font-bold uppercase tracking-[0.08em] px-2.5 py-0.5 rounded-full border"
+          style={{
+            color: style.color,
+            borderColor: style.color,
+            backgroundColor: 'transparent',
+          }}
         >
           {rel}
         </span>
       </div>
-      <p className="text-[13px] text-gray-600 leading-relaxed max-w-prose">
+      <p className="text-[13px] text-gray-700 leading-relaxed max-w-prose">
         {row.meaning}
       </p>
       {row.impact && (
-        <p className="text-[12px] text-gray-500 mt-1.5 leading-relaxed italic">
-          {row.impact}
-        </p>
+        <div className="mt-2.5 pl-3 border-l-2 border-gray-200" style={{ borderLeftColor: style.color + '40' }}>
+          <p className="text-[12px] text-gray-500 leading-relaxed">
+            {row.impact}
+          </p>
+        </div>
       )}
     </div>
   )
@@ -168,6 +174,11 @@ export default function TechMap({ content }: { content: string }) {
           height={96}
           className="h-24 w-auto object-contain"
         />
+        <div className="mt-3 flex items-center gap-5 text-[10px] text-gray-400 font-medium">
+          <span>T: 01785 336 253</span>
+          <span>E: hello@erpexperts.co.uk</span>
+          <span>W: www.erpexperts.co.uk</span>
+        </div>
       </div>
 
       {/* Title */}

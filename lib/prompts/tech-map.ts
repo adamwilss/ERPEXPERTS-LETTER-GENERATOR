@@ -15,25 +15,26 @@ The technology integration map must follow this structure:
 1. TITLE: "[Company]: technology integration map"
 2. SUBTITLE: "How NetSuite sits at the centre of [Company]'s technology stack: what integrates, what gets replaced, and what gets eliminated."
 
-3. TABLE: A markdown table with these columns:
-| System | Relationship | What it means for [Company] |
+3. TABLE: A markdown table with FOUR columns:
+| System | Relationship | What it means for [Company] | Real-world impact |
 
 The Relationship column must use one of four values only: Integrate, Replace, Eliminate, or Native.
-Each row must name a specific system (real or strongly inferred), assign the correct relationship, and write one to two sentences explaining what that means in practical terms for this company specifically.
+
+The "What it means" column: One to two sentences explaining what this relationship means in practical terms for this company specifically. Be concrete — name the actual data flow, process change, or capability gained.
+
+The "Real-world impact" column: One sentence on the tangible outcome. Shorter month-end? Fewer spreadsheets? Live inventory across channels? One team member freed up? Make it specific and credible.
 
 Typical rows for an ecommerce or product business:
-- Shopify -> Integrate
-- Xero / Sage -> Replace
-- Excel / Spreadsheets -> Eliminate
-- ShipStation / 3PL -> Integrate
-- Warehouse / physical locations -> Integrate
-- International orders -> Native
+- Shopify -> Integrate -> "Orders and inventory sync automatically..." -> "..."
+- Xero / Sage -> Replace -> "Finance moves into NetSuite..." -> "..."
+- Excel / Spreadsheets -> Eliminate -> "Reporting moves out of offline files..." -> "..."
+- International orders -> Native -> "Multi-currency and VAT handled natively..." -> "..."
 
-The table must reflect what is actually known or credibly inferred about this company, not a generic template. Do not include systems that have no basis in the research.
+Generate 6-10 rows. The table must reflect what is actually known or credibly inferred about this company. Do not include systems with no basis in the research.
 
-4. CTA: Close with the same call to action:
-"Book a 15-minute call with Ric Wilson"
-T: 01785 336 253 · E: hello@erpexperts.co.uk · W: www.erpexperts.co.uk`
+4. CTA (copy exactly):
+"Book a 15-minute call with Ric Wilson, MD"
+T: 01785 336 253  ·  E: hello@erpexperts.co.uk  ·  W: www.erpexperts.co.uk`
 }
 
 export function techMapUserPrompt(args: TechMapArgs): string {
@@ -51,13 +52,15 @@ NetSuite reference guide:
 - Native: Multi-currency, VAT, entity-level reporting, cross-border operational visibility
 
 CRITICAL REQUIREMENTS:
-1. Generate a markdown table with columns: System | Relationship | What it means for ${company}
+1. Generate a markdown table with FOUR columns: System | Relationship | What it means for ${company} | Real-world impact
 2. Relationship must be one of: Integrate, Replace, Eliminate, Native
-3. Only include systems that are plausibly connected to this company's channels and operations
-4. Each row must have a specific, practical explanation for THIS company
-5. Include TITLE and SUBTITLE at the top
-6. Include the CTA block at the bottom
-7. No em dashes. Short sentences. Specific. Direct.
+3. "What it means" = 1-2 sentences, practical and specific to their operations
+4. "Real-world impact" = 1 sentence, tangible outcome they would notice
+5. Only include systems plausibly connected to this company's channels
+6. Generate 6-10 rows — be thorough but credible
+7. Include TITLE and SUBTITLE at the top
+8. Include the CTA block at the bottom EXACTLY as specified
+9. No em dashes. Short sentences. Specific. Direct.
 ${notes ? `\nAdditional notes from the user:\n${notes}` : ''}
 
 Now write the technology integration map.`

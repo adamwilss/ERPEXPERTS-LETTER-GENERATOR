@@ -45,6 +45,11 @@ export default function BusinessCase({ content }: { content: string }) {
           height={96}
           className="h-24 w-auto object-contain"
         />
+        <div className="mt-3 flex items-center gap-5 text-[10px] text-gray-400 font-medium">
+          <span>T: 01785 336 253</span>
+          <span>E: hello@erpexperts.co.uk</span>
+          <span>W: www.erpexperts.co.uk</span>
+        </div>
       </div>
 
       <BeforeAfterCards />
