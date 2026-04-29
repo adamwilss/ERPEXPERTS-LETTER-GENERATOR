@@ -112,8 +112,8 @@ Your angle: growing companies reach a point where tracking orders, stock, and mo
         ? 'Larger mid-market. They have systems but those systems are probably creaking.'
         : employeeCount >= 50
           ? 'Mid-market. They have likely outgrown entry-level tools. Keep it practical.'
-          : 'Small but growing. Keep it light and specific. Don't oversell.'
-    : 'Size unknown. Infer from research. Don't assume tiny or enterprise unless evidence supports it.'
+          : "Small but growing. Keep it light and specific. Don't oversell."
+    : "Size unknown. Infer from research. Don't assume tiny or enterprise unless evidence supports it."
 
   return `You are Ric Wilson, Managing Director of ERP Experts in Manchester. 21 years NetSuite experience, 350+ projects. You write like you talk — direct, plain English, no corporate language. You fix broken things. You don't pitch, you diagnose.
 
