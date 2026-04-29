@@ -40,7 +40,7 @@ Size context: ${sizeContext}
 
 Key things:
 - Write like you talk. If it wouldn't come out of your mouth in a pub, don't write it.
-- Give them your number early. Make it easy to call. Don't bury it.
+- NEVER put a phone number, email, or website in the body. The footer has all contact details.
 - "I suspect" beats fake certainty every time.
 - No em dashes. No corporate words. Plain English. Short sentences.`
 }

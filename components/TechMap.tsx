@@ -119,32 +119,10 @@ function SystemCard({ row }: { row: TableRow }) {
   )
 }
 
-// ── CTA block ───────────────────────────────────────────────────────────────────
-
-function CTABlock({ text }: { text: string }) {
-  const phone = text.match(/T:\s*([^\s·]+)/)?.[1] ?? '01785 336 253'
-  const email = text.match(/E:\s*([^\s·]+)/)?.[1] ?? 'hello@erpexperts.co.uk'
-  const web = text.match(/W:\s*([^\s·\n]+)/)?.[1] ?? 'www.erpexperts.co.uk'
-  const introLine = text.split('\n').find(l => l.trim() && !/^T:|^E:|^W:/.test(l.trim()))?.trim()
-
-  return (
-    <div className="mt-10 pt-6 border-t border-gray-200">
-      {introLine && (
-        <p className="text-[14px] font-semibold text-gray-900 mb-3">{introLine}</p>
-      )}
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-1.5 text-[13px] text-gray-600">
-        <span>T: {phone}</span>
-        <span>E: {email}</span>
-        <span>W: {web}</span>
-      </div>
-    </div>
-  )
-}
-
 // ── Main component ─────────────────────────────────────────────────────────────
 
 export default function TechMap({ content }: { content: string }) {
-  const { rows, before, after } = parseTechTable(content)
+  const { rows, before } = parseTechTable(content)
 
   const lines = before.split('\n').filter(Boolean)
   const title = lines.find((l) => l.startsWith('TITLE:'))?.replace('TITLE:', '').trim() ?? 'Technology Integration Map'
@@ -165,7 +143,7 @@ export default function TechMap({ content }: { content: string }) {
 
   return (
     <div>
-      {/* Letterhead — stacked left-aligned */}
+      {/* Letterhead — logo only */}
       <div className="mb-10">
         <Image
           src="/erpexperts-logo.png"
@@ -174,11 +152,6 @@ export default function TechMap({ content }: { content: string }) {
           height={96}
           className="h-24 w-auto object-contain"
         />
-        <div className="mt-3 flex items-center gap-5 text-[10px] text-gray-400 font-medium">
-          <span>T: 01785 336 253</span>
-          <span>E: hello@erpexperts.co.uk</span>
-          <span>W: www.erpexperts.co.uk</span>
-        </div>
       </div>
 
       {/* Title */}
@@ -223,8 +196,6 @@ export default function TechMap({ content }: { content: string }) {
           })}
         </>
       )}
-
-      {after && <CTABlock text={after} />}
 
       <div className="mt-12 page-footer-text flex items-center justify-between tracking-wide">
         <span>ERP Experts Ltd &middot; Manchester, UK &middot; 01785 336 253</span>

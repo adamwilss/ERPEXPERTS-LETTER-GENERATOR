@@ -37,7 +37,7 @@ function CoverLetterView({ content, savedPackId }: { content: string; savedPackI
 
   return (
     <div>
-      {/* Letterhead — stacked left-aligned */}
+      {/* Letterhead — logo only */}
       <div className="mb-10">
         <Image
           src="/erpexperts-logo.png"
@@ -46,13 +46,6 @@ function CoverLetterView({ content, savedPackId }: { content: string; savedPackI
           height={96}
           className="h-24 w-auto object-contain"
         />
-        <div className="mt-3 flex items-center gap-5 text-[10px] text-gray-400 font-medium">
-          <span>{new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
-          <span className="text-gray-300">|</span>
-          <span>T: 01785 336 253</span>
-          <span>E: hello@erpexperts.co.uk</span>
-          <span>W: www.erpexperts.co.uk</span>
-        </div>
       </div>
 
       {/* Body */}
@@ -278,19 +271,19 @@ export default function LetterOutput({
       />
 
       {/* Hidden PDF capture containers */}
-      <div style={{ position: 'fixed', left: -9999, top: 0, width: 850 }} className="z-[-1]">
+      <div style={{ position: 'absolute', left: '-9999px', top: 0, width: 850, overflow: 'visible' }} className="z-[-1]">
         {letter && (
-          <div ref={letterRef} className="letter-paper w-[850px] px-14 py-12 bg-white">
+          <div ref={letterRef} className="letter-paper w-[850px] px-14 py-12 bg-white" style={{ overflow: 'visible' }}>
             <CoverLetterView content={letter} savedPackId={savedPackId} />
           </div>
         )}
         {businessCase && (
-          <div ref={caseRef} className="letter-paper w-[850px] px-14 py-12 bg-white">
+          <div ref={caseRef} className="letter-paper w-[850px] px-14 py-12 bg-white" style={{ overflow: 'visible' }}>
             <BusinessCase content={businessCase} />
           </div>
         )}
         {techMap && (
-          <div ref={techRef} className="letter-paper w-[900px] px-14 py-12 bg-white">
+          <div ref={techRef} className="letter-paper w-[900px] px-14 py-12 bg-white" style={{ overflow: 'visible' }}>
             <TechMap content={techMap} />
           </div>
         )}

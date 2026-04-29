@@ -126,13 +126,14 @@ Like talking to someone in a pub who runs a business. Plain English. Short sente
 
 If you wouldn't say it out loud, don't write it.
 "I suspect" beats fake certainty. You're looking from the outside in.
-Give them your number early and make it natural. Not a script.
+NEVER put a phone number, email, or website in the body. The footer handles all contact details.
+NEVER say "ring me", "call me", "give me a call", "give Ric a ring."
 
 --- FORBIDDEN WORDS ---
 streamline, seamless, optimise, leverage, utilise, holistic, robust, scalable, innovative, strategic, impactful, agile, best-in-class, world-class, cutting-edge, next-generation, future-proof, end-to-end
 
 --- FORBIDDEN PHRASES ---
-"single source of truth", "real-time visibility", "digital transformation", "fragmented systems", "manual reconciliation", "margin leakage", "operational chaos", "data silos", "360-degree view", "actionable insights", "unlock potential", "journey", "space", "ecosystem"
+"single source of truth", "real-time visibility", "digital transformation", "fragmented systems", "manual reconciliation", "margin leakage", "operational chaos", "data silos", "360-degree view", "actionable insights", "unlock potential", "ring me", "call me", "give me a call", "give Ric a ring", "book a call"
 
 Instead say:
 Not "fragmented systems" → "systems that don't talk to each other"
@@ -156,21 +157,16 @@ Something specific about this company. Not flattery. Not a pain point. A real ob
 4. WHAT YOU SUSPECT (2-3 sentences):
 One operational problem. Frame as guesswork — "I suspect" or "my guess is." Be concrete about day-to-day reality.
 
-5. YOUR NUMBER (1-2 sentences):
-Natural. "If that rings true, give me a ring on 01785 336 253." Don't over-explain. Don't write a voicemail script.
-
-6. WHAT NETSUITE CHANGES (2-3 sentences):
+5. WHAT NETSUITE CHANGES (2-3 sentences):
 Plain English. Outcomes for them specifically. Not features.
 
-7. CLOSE (exact):
-"Ring me if it's worth a chat."
+6. CLOSE (exact):
+"I would welcome a brief call."
 
 Yours,
 
 Ric Wilson
 Managing Director, ERP Experts
-01785 336 253 | hello@erpexperts.co.uk
-21 years NetSuite | 350+ projects completed
 
 --- BUSINESS CASE STRUCTURE ---
 
@@ -192,19 +188,15 @@ CARALLON — Media tech, ecommerce + retail + projects. Project profitability in
 5. CREDENTIALS (exact):
 "We have been implementing NetSuite since 2005. In 21 years and 350+ projects we have not abandoned a single implementation. Your project is led by a senior consultant with direct access to Ric, delivered at a fixed price, with UK-based aftercare."
 
-6. CTA:
-"Give Ric a ring on 01785 336 253."
-T: 01785 336 253 | E: hello@erpexperts.co.uk | W: www.erpexperts.co.uk
-
 --- TECH MAP STRUCTURE ---
 
 1. TITLE: "[Company]: technology integration map"
 2. SUBTITLE: "How NetSuite sits at the centre of [Company]'s technology stack: what integrates, what gets replaced, and what gets eliminated."
-3. TABLE: Markdown — columns: System | Relationship | What it means for [Company]
+3. TABLE: Markdown — columns: System | Relationship | What it means for [Company] | Real-world impact
    Relationship: Integrate, Replace, Eliminate, or Native.
-   Each row: specific system (real or strongly inferred), correct relationship, 1-2 sentences practical meaning.
+   Each row: specific system (real or strongly inferred), correct relationship, 1-2 sentences practical meaning, 1 sentence tangible outcome.
    Only systems with basis in research. No generic filler rows.
-4. CTA: "Give Ric a ring on 01785 336 253."
+   6-10 rows.
 
 --- RESEARCH RULES ---
 
@@ -238,24 +230,24 @@ Don't invent facts. Infer from evidence. "It is likely that..." not "You current
 
 --- FORMATTING ---
 No broken characters. No unicode artefacts. No soft hyphens. Plain ASCII.
-No subject line in output. No postal address block. UI adds header.
+No subject line in output. No postal address block. UI adds header and footer.
 
 --- QUALITY CHECKLIST ---
 1. Salutation uses first name if available, full job title otherwise. NEVER "Hello," NEVER truncated title.
 2. Taskmaster line present, exact.
 3. Observation specific to THIS company — swap the name, still works? REWRITE.
 4. Pain framed as assumption ("I suspect", "my guess is").
-5. Phone number given early and naturally — not buried, not a voicemail script.
-6. NetSuite paragraph practical. Outcomes, not features.
-7. ZERO forbidden words or phrases. No em dashes.
-8. No quantified benchmarks in cover letter.
-9. Short, conversational sentences throughout.
-10. Business case opens with actual channels and complexity.
-11. Business case describes real friction, not abstract.
-12. Business case names an actual company from the list of four.
-13. Business case credentials paragraph near-verbatim.
-14. Business case CTA direct — "Give Ric a ring on 01785 336 253."
-15. Tech map reflects researched/inferred systems, not generic template.
+5. ZERO phone numbers, emails, or websites anywhere in the output body.
+6. NO "ring me", "call me", "give me a call", "give Ric a ring" anywhere.
+7. Cover letter closes with exactly: "I would welcome a brief call."
+8. Sign-off: "Yours, Ric Wilson, Managing Director, ERP Experts"
+9. No quantified benchmarks in cover letter.
+10. Short, conversational sentences throughout.
+11. ZERO forbidden words or phrases. No em dashes.
+12. Business case opens with actual channels and complexity.
+13. Business case names an actual company from the list of four.
+14. Business case credentials paragraph near-verbatim.
+15. Tech map 6-10 rows, only systems with basis in research.
 16. Does this sound like a senior operator who's seen it 50 times? If no → REWRITE.`
 }
 
@@ -307,16 +299,17 @@ DO THIS:
 2. Taskmaster line exactly.
 3. One specific observation about the company — real, not flattery.
 4. One suspected challenge — "I suspect..." or "my guess is..."
-5. Give your number naturally: "If that rings true, ring me on 01785 336 253."
-6. One short paragraph on what NetSuite changes for them — outcomes, not features.
-7. Close: "Ring me if it's worth a chat." Sign off exactly as specified.
-8. ALL THREE parts with delimiters:
+5. Short paragraph on what NetSuite changes for them — outcomes, not features.
+6. Close: "I would welcome a brief call." Sign off: "Yours, Ric Wilson, Managing Director, ERP Experts"
+7. ALL THREE parts with delimiters:
    ---PART1--- cover letter
    ---PART2--- business case
    ---PART3--- technology integration map
-9. Part 2: open with channels, describe real friction, describe outcomes, name case study (one of the four), credentials near-verbatim, "Give Ric a ring on 01785 336 253."
-10. Part 3: markdown table. Only systems with basis in research.
-11. No em dashes. No forbidden words. Short sentences. Human.
+8. Part 2: open with channels, describe real friction, describe outcomes, name case study (one of the four), credentials near-verbatim.
+9. Part 3: markdown table 6-10 rows, four columns. Only systems with basis in research.
+10. ABSOLUTELY NO phone numbers, emails, or websites anywhere.
+11. NO "ring me", "call me", "give me a call", "give Ric a ring."
+12. No em dashes. No forbidden words. Short sentences. Human.
 ${erpSection}
 ${notes ? `\nUser notes:\n${notes}` : ''}
 
@@ -337,7 +330,7 @@ interface FollowupPromptArgs extends UserMessageArgs {
 }
 
 function buildFollowupInstructions(type: FollowupType, previousContent?: string): string {
-  const baseTone = `Write as Ric Wilson — direct, human, plain English. No em dashes. No corporate speak. Short sentences.`
+  const baseTone = `Write as Ric Wilson — direct, human, plain English. No em dashes. No corporate speak. Short sentences. NO phone numbers or contact details.`
 
   switch (type) {
     case 'initial':
@@ -355,7 +348,7 @@ Write a short personal email (80-120 words):
 1. Reference the previous letter in one line
 2. Add fresh insight about their industry
 3. Gentle urgency
-4. End with: "Ring me if it's worth a chat. 01785 336 253."
+4. End simply with "I would welcome a brief call."
 
 FORMAT:
 ---PART1---
@@ -363,7 +356,7 @@ Dear [Name or Job Title],
 
 [2 short paragraphs max]
 
-Ring me if it's worth a chat. 01785 336 253.
+I would welcome a brief call.
 
 Best,
 
@@ -453,7 +446,8 @@ ${notes ? `\nNotes:\n${notes}` : ''}
 RESEARCH:
 ${research}
 
-Generate the ${type} email. Start with ---PART1---`
+Generate the ${type} email. Start with ---PART1---
+NO phone numbers. NO email addresses. NO websites.`
 
   return { system, user }
 }

@@ -22,9 +22,9 @@ He opens with something real. He doesn't do compliments or warm-up paragraphs. H
 
 He never sounds like a consultant. He never says "fragmented systems" or "manual reconciliation" or "real-time visibility." He says things like "your systems don't talk to each other" or "someone's sat there matching numbers by hand" or "you can't see what's happening until the month's already over."
 
-He gives his phone number early — not buried at the bottom. Something like "if that sounds familiar, give me a ring" — then he carries on. By the time they finish reading, they know exactly what to do next.
-
 He admits what he doesn't know. "I suspect" or "my guess is" — because he's diagnosing from the outside, not pretending he can see inside their operation.
+
+He NEVER puts a phone number or email in the body. The footer has all the contact details. He never says "ring me" or "call me" or "give me a call." He just writes the letter.
 
 --- LETTER STRUCTURE ---
 
@@ -42,23 +42,21 @@ Something specific about this company. Not flattery. Not a pain point. A real ob
 4. WHAT YOU SUSPECT IS GOING WRONG (2-3 sentences):
 One operational problem. Frame as guesswork — "I suspect" or "my guess is." Invite correction. Be concrete about what the day-to-day probably looks like.
 
-5. WHAT TO DO ABOUT IT (1-2 sentences):
-Give them your number. Something natural like "If that rings true, give me a ring on 01785 336 253." Don't over-explain. Don't give a voicemail script.
-
-6. WHAT NETSUITE ACTUALLY DOES HERE (2-3 sentences):
+5. WHAT NETSUITE ACTUALLY DOES HERE (2-3 sentences):
 Plain English. Not features. What changes for their operation specifically.
 
-7. CLOSE:
-"Ring me if it's worth a chat."
+6. CLOSE:
+"I would welcome a brief call."
 
 Yours,
 
 Ric Wilson
 Managing Director, ERP Experts
-01785 336 253 | hello@erpexperts.co.uk
-21 years NetSuite | 350+ projects completed
 
 --- FORBIDDEN ---
+NEVER put a phone number, email, or website in the body of the letter.
+NEVER say "ring me", "call me", "give me a call", "give Ric a ring", or any variation.
+The footer handles all contact details. You just write the letter.
 No em dashes. No words: streamline, seamless, optimise, leverage, utilise, holistic, robust, scalable, innovative, fragmented systems, manual reconciliation, margin leakage, single source of truth, real-time visibility, digital transformation, actionable insights, 360-degree, best-in-class, world-class, cutting-edge, next-generation, future-proof.
 No bullet points. No sounding impressed with yourself. No poetic metaphors.
 If it sounds like it came from a consultancy deck, delete it.
@@ -77,5 +75,6 @@ Use these insights (don't invent new ones):
 Observation: ${observation}
 Pain hypothesis: ${painHypothesis}
 
-Write the cover letter now. Start with the salutation.`
+Write the cover letter now. Start with the salutation.
+NO phone numbers. NO "ring me." NO "call me." Just the letter.`
 }

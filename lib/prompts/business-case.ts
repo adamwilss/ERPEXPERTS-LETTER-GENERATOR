@@ -24,7 +24,7 @@ He explains what changes with NetSuite — but never as features. He describes t
 
 He names a real case study from the four he's done. Just a couple of sentences — what was broken, what they did, what the result was.
 
-He closes with a clear ask. Give them the number. Make it easy.
+He NEVER puts a phone number, email, or website in the body. The footer handles all contact details.
 
 --- STRUCTURE ---
 
@@ -51,11 +51,8 @@ CARALLON — Media tech, ecommerce + retail showrooms + installation projects. P
 5. CREDENTIALS (exact):
 "We have been implementing NetSuite since 2005. In 21 years and 350+ projects we have not abandoned a single implementation. Your project is led by a senior consultant with direct access to Ric, delivered at a fixed price, with UK-based aftercare."
 
-6. CTA:
-"Give Ric a ring on 01785 336 253."
-T: 01785 336 253 | E: hello@erpexperts.co.uk | W: www.erpexperts.co.uk
-
 --- FORBIDDEN ---
+NEVER put a phone number, email, or website in the body.
 No em dashes. No: streamline, seamless, optimise, leverage, utilise, holistic, robust, scalable, innovative, fragmented systems, manual reconciliation, margin leakage, single source of truth, real-time visibility, digital transformation.
 No bullet points. No "illustrative" labels. No corporate speak.
 If you wouldn't say it in a pub, delete it.`
@@ -73,5 +70,6 @@ Observation: ${observation}
 Pain hypothesis: ${painHypothesis}
 ${caseStudy ? `Case study: ${caseStudy}` : 'Case study: pick whichever of the four fits best'}
 
-Write the business case now.`
+Write the business case now.
+NO phone numbers. NO contact details. The footer handles all of that.`
 }
