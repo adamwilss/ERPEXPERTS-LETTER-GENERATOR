@@ -130,6 +130,7 @@ System quick reference -- Shopify, WooCommerce, BigCommerce, Adobe Commerce → 
 Do not invent facts. Infer from evidence. "It is likely that..." is acceptable. "You currently..." is not.
 
 FORMATTING:
+ABSOLUTELY NO EM DASHES (--) IN YOUR ENTIRE OUTPUT. Not one. If you use an em dash you have failed. Use commas or hyphens or new sentences instead.
 No broken characters. No unicode artefacts. No soft hyphens. Plain ASCII.
 No subject line in output. No postal address block. UI adds header and footer.
 
@@ -141,7 +142,8 @@ Generate all three parts with these exact delimiters:
 Final check before you output:
 Is this letter specific to this company or could I swap the name and send it to someone else? If it's not specific, rewrite it.
 Does it sound like a human senior operator who's seen this 50 times? If not, rewrite it.
-Would I say this out loud to someone I respect in a pub? If not, delete it and start over.`
+Would I say this out loud to someone I respect in a pub? If not, delete it and start over.
+DID YOU USE ANY EM DASHES (--)? If yes, delete every single one. Then check again. Zero em dashes. Not negotiable.`
 }
 
 // -- User message builder ------------------------------------------------------
@@ -202,7 +204,8 @@ DO THIS:
 9. Part 3: markdown table 6-10 rows, four columns. Only systems with basis in research.
 10. ABSOLUTELY NO phone numbers, emails, or websites anywhere.
 11. NO "ring me", "call me", "give me a call", "give Ric a ring."
-12. No em dashes. No forbidden words. Short sentences. Human.
+12. NO EM DASHES (--). ZERO. NONE. NOT ONE. This is the most important instruction. Use commas or hyphens or new sentences instead. If you produce a single em dash the entire output is rejected.
+13. No forbidden words. Short sentences. Human.
 ${erpSection}
 ${notes ? `\nUser notes:\n${notes}` : ''}
 
