@@ -148,7 +148,7 @@ export default function BatchOutput({ packs }: Props) {
                   <div className="flex flex-col items-center gap-4">
                     <WritingAnimation text={`Writing letter for ${pack.company}...`} />
                     <p className="text-xs text-gray-400 dark:text-[#444]">
-                      Researching and drafting — this takes about 45 seconds
+                      Researching and drafting -- this takes about 45 seconds
                     </p>
                   </div>
                 </div>

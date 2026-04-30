@@ -125,7 +125,7 @@ ${techMap}
 RESEARCH RULES:
 Before writing, work out how many channels they sell through and what they are, whether they make or hold stock themselves, any recent growth moves, and the likely or confirmed technology stack. You need one specific genuine observation about the company and one specific operational challenge that follows from it.
 
-System quick reference — Shopify, WooCommerce, BigCommerce, Adobe Commerce → Integrate. Amazon, eBay, Walmart → Integrate. ShipStation, 3PL platforms → Integrate. POS like Shopify POS or Square → Integrate. Salesforce, Outlook → Integrate. Xero, Sage, QuickBooks, Microsoft Dynamics → Replace. Excel and spreadsheets for reporting, stock, or financial tasks → Eliminate. Manual data exports between systems → Eliminate. Multi-currency, VAT, entity reporting, international operations → Native.
+System quick reference -- Shopify, WooCommerce, BigCommerce, Adobe Commerce → Integrate. Amazon, eBay, Walmart → Integrate. ShipStation, 3PL platforms → Integrate. POS like Shopify POS or Square → Integrate. Salesforce, Outlook → Integrate. Xero, Sage, QuickBooks, Microsoft Dynamics → Replace. Excel and spreadsheets for reporting, stock, or financial tasks → Eliminate. Manual data exports between systems → Eliminate. Multi-currency, VAT, entity reporting, international operations → Native.
 
 Do not invent facts. Infer from evidence. "It is likely that..." is acceptable. "You currently..." is not.
 
@@ -168,7 +168,7 @@ export function buildUserMessage(args: UserMessageArgs): string {
 
   let erpSection = ''
   if (erpDetection?.isNetSuite) {
-    erpSection = `ERP: Already on NetSuite (${erpDetection.confidence}). Pitch health check/optimisation — NOT "switch."`
+    erpSection = `ERP: Already on NetSuite (${erpDetection.confidence}). Pitch health check/optimisation -- NOT "switch."`
   } else if (erpDetection?.hasErp && erpDetection.erpName) {
     erpSection = `ERP: ${erpDetection.erpName} (${erpDetection.confidence}). Pitch migration. Reference Ric's experience.`
   }
@@ -181,7 +181,7 @@ Company: ${company}
 Website: ${url}
 Name: ${recipientName}
 ${hasRealName
-    ? `First name: ${firstName} — salutation "Dear ${firstName},"`
+    ? `First name: ${firstName} -- salutation "Dear ${firstName},"`
     : `WARNING: No real first name. Salutation "Dear ${jobTitle}," (e.g. "Dear Chief Growth Officer,"). NEVER "Hello,".`}
 Job title: ${jobTitle}
 ${sizeSection}
@@ -190,9 +190,9 @@ ${revenueSection}
 DO THIS:
 1. ${hasRealName ? `Salutation: "Dear ${firstName},"` : `Salutation: "Dear ${jobTitle},"`}
 2. Taskmaster line exactly.
-3. One specific observation about the company — real, not flattery.
-4. One suspected challenge — "I suspect..." or "my guess is..."
-5. Short paragraph on what NetSuite changes for them — outcomes, not features.
+3. One specific observation about the company -- real, not flattery.
+4. One suspected challenge -- "I suspect..." or "my guess is..."
+5. Short paragraph on what NetSuite changes for them -- outcomes, not features.
 6. Close: "I would welcome a brief call." Sign off: "Yours, Ric Wilson, Managing Director, ERP Experts"
 7. ALL THREE parts with delimiters:
    ---PART1--- cover letter
@@ -223,7 +223,7 @@ interface FollowupPromptArgs extends UserMessageArgs {
 }
 
 function buildFollowupInstructions(type: FollowupType, previousContent?: string): string {
-  const baseTone = `Write as Ric Wilson — direct, human, plain English. No em dashes. No corporate speak. Short sentences. NO phone numbers or contact details.`
+  const baseTone = `Write as Ric Wilson -- direct, human, plain English. No em dashes. No corporate speak. Short sentences. NO phone numbers or contact details.`
 
   switch (type) {
     case 'initial':
@@ -266,7 +266,7 @@ ${previousContent?.slice(0, 2000) ?? 'No previous content available'}
 
 Write a concise email (60-100 words):
 1. Acknowledge they may be busy
-2. One concrete insight — what similar companies experience at this stage
+2. One concrete insight -- what similar companies experience at this stage
 3. "Still worth a brief conversation?"
 4. Say you'll assume timing isn't right if no response
 
@@ -330,8 +330,8 @@ Company: ${company}
 Website: ${url}
 Name: ${recipientName}
 ${hasRealName
-    ? `First name: ${firstName} — salutation "Dear ${firstName},"`
-    : `WARNING: No real first name — salutation "Dear ${jobTitle}," (e.g. "Dear Chief Growth Officer,").`}
+    ? `First name: ${firstName} -- salutation "Dear ${firstName},"`
+    : `WARNING: No real first name -- salutation "Dear ${jobTitle}," (e.g. "Dear Chief Growth Officer,").`}
 Job title: ${jobTitle}
 
 ${notes ? `\nNotes:\n${notes}` : ''}

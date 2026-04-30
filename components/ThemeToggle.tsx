@@ -31,7 +31,7 @@ export default function ThemeToggle() {
     }
   }
 
-  // Prevent hydration mismatch — reserve space until mounted
+  // Prevent hydration mismatch -- reserve space until mounted
   if (!mounted) {
     return <div style={{ width: 52, height: 28 }} />
   }

@@ -400,7 +400,7 @@ export default function LeadReview({ leads: allLeads, totalSearched, onGenerate,
         )}
       </div>
 
-      {/* Active deck — best ERP fit first, contact completeness as tiebreaker */}
+      {/* Active deck -- best ERP fit first, contact completeness as tiebreaker */}
       <div className="space-y-2 mb-6">
         <AnimatePresence mode="popLayout" initial={false}>
           {[...active].sort((a, b) => b.erpScore - a.erpScore || b.dataScore - a.dataScore || a.rank - b.rank).map((lead, i) => (

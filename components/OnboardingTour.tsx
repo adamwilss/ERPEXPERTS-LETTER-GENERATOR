@@ -12,7 +12,7 @@ const tourSteps = [
     popover: {
       title: 'Welcome to the Letter Portal',
       description:
-        'This tool generates personalised three-part outreach packs for NetSuite prospects. Research, drafting, and formatting — all automated.',
+        'This tool generates personalised three-part outreach packs for NetSuite prospects. Research, drafting, and formatting -- all automated.',
       side: 'bottom' as const,
       align: 'start' as const,
     },
@@ -52,7 +52,7 @@ const tourSteps = [
     popover: {
       title: 'Saved Searches',
       description:
-        'All your Apollo searches are preserved here with full lead data — rationale, tech stack, scores, and contact details. Revisit and generate at any time.',
+        'All your Apollo searches are preserved here with full lead data -- rationale, tech stack, scores, and contact details. Revisit and generate at any time.',
       side: 'bottom' as const,
       align: 'center' as const,
     },
@@ -72,7 +72,7 @@ const tourSteps = [
     popover: {
       title: 'Make It Yours',
       description:
-        'Toggle dark mode, view analytics, or access your template library. You are ready — generate your first letter.',
+        'Toggle dark mode, view analytics, or access your template library. You are ready -- generate your first letter.',
       side: 'bottom' as const,
       align: 'end' as const,
     },

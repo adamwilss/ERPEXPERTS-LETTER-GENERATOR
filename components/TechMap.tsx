@@ -79,7 +79,7 @@ function SummaryCards({ rows }: { rows: TableRow[] }) {
   )
 }
 
-// ── Single system row — editorial card style ────────────────────────────────────
+// ── Single system row -- editorial card style ────────────────────────────────────
 
 function SystemCard({ row }: { row: TableRow }) {
   const rel = normalizeRelationship(row.relationship)
@@ -143,7 +143,7 @@ export default function TechMap({ content }: { content: string }) {
 
   return (
     <div>
-      {/* Letterhead — logo only */}
+      {/* Letterhead -- logo only */}
       <div className="mb-10">
         <Image
           src="/erpexperts-logo.png"

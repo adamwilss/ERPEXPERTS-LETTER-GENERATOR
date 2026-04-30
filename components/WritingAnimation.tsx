@@ -38,7 +38,7 @@ export function WritingAnimation({ text = 'Writing your letter...', className = 
           />
         ))}
 
-        {/* Vertical pencil — tip is the pivot */}
+        {/* Vertical pencil -- tip is the pivot */}
         <motion.div
           className="absolute bottom-0 left-1/2"
           style={{

@@ -18,7 +18,7 @@ Before writing, identify:
 - How many channels they sell through and what they are
 - Whether they manufacture or hold stock themselves
 - What AI tools they are likely already using or would logically use at their scale
-- Any recent growth moves — new markets, new channels, new product lines
+- Any recent growth moves -- new markets, new channels, new product lines
 - Their likely or confirmed technology stack
 - One specific and genuine observation about the company that shows you've actually looked at what they do
 - One specific operational challenge that logically follows from that observation
@@ -45,7 +45,7 @@ Before producing any output, sense check the following:
 1. Is the genuine observation in the cover letter supported by something in the technology map?
 2. Does the pain hypothesis in the cover letter match the pain addressed in the business case?
 3. Do the systems named in the technology map match any systems referenced in the cover letter or business case?
-4. Is the tone consistent across all three pages — human, direct, peer to peer?
+4. Is the tone consistent across all three pages -- human, direct, peer to peer?
 5. If any of these are inconsistent, resolve them before writing.
 
 Step 4: Final consistency check

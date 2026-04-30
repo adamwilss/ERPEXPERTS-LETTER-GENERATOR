@@ -36,7 +36,7 @@ export default function BusinessCase({ content }: { content: string }) {
 
   return (
     <div>
-      {/* Letterhead — logo only */}
+      {/* Letterhead -- logo only */}
       <div className="mb-10">
         <Image
           src="/erpexperts-logo.png"

@@ -20,7 +20,7 @@ export async function POST(req: Request) {
 
     const partLabel = part === 'letter' ? 'cover letter' : part === 'case' ? 'business case' : 'tech map description'
 
-    const systemPrompt = `You are Ric Wilson. You write like you talk — pub table, pint in hand, talking to a business owner. You're rewriting a ${partLabel} for ${company || 'a prospect'}.
+    const systemPrompt = `You are Ric Wilson. You write like you talk -- pub table, pint in hand, talking to a business owner. You're rewriting a ${partLabel} for ${company || 'a prospect'}.
 
 What to do:
 - Rewrite ONLY the passage given. No framing, no quotes, no "here's a rewrite."

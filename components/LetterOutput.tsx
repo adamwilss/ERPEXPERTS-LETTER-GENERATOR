@@ -37,7 +37,7 @@ function CoverLetterView({ content, savedPackId }: { content: string; savedPackI
 
   return (
     <div>
-      {/* Letterhead — logo only */}
+      {/* Letterhead -- logo only */}
       <div className="mb-10">
         <Image
           src="/erpexperts-logo.png"
@@ -71,7 +71,7 @@ function CoverLetterView({ content, savedPackId }: { content: string; savedPackI
         </div>
       </InlineRewrite>
 
-      {/* Sign-off — whitespace only, no lines */}
+      {/* Sign-off -- whitespace only, no lines */}
       {signoff && (
         <div className="mt-16 mb-4 font-sans text-[14px] text-gray-700 leading-[1.7]">
           {signoff.split('\n').map((line, i) => {
@@ -92,7 +92,7 @@ function CoverLetterView({ content, savedPackId }: { content: string; savedPackI
         </div>
       )}
 
-      {/* QR Code footer — no top border */}
+      {/* QR Code footer -- no top border */}
       {savedPackId && (
         <div className="mt-8 flex items-center gap-4 opacity-40">
           <div className="w-16 h-16 rounded-md border border-gray-200 bg-gray-50 flex items-center justify-center">
